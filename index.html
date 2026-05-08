@@ -20,7 +20,7 @@
 <link rel="icon" type="image/svg+xml" sizes="64x64" href="/assets/brand/icon-64.svg"/>
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/icon-180.svg"/>
 <link rel="manifest" href="/site.webmanifest"/>
-<meta name="theme-color" content="#0f172a"/>
+<meta name="theme-color" content="#0f172a" id="themeColorMeta"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
@@ -87,6 +87,28 @@
   --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
   --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
 }
+[data-theme="milki"] {
+  --ink:    #0f0e0c;
+  --paper:  #f8f3e5;
+  --card:   #fffdf6;
+  --card2:  #f3eddc;
+  --line:   #c9bea5;
+  --line2:  #b9ad92;
+  --dim:    #756d5d;
+  --mid:    #4f4738;
+  --text:   #201d16;
+  --bright: #0b0907;
+  --accent:    #2fb860;
+  --accent-d:  #1f8f49;
+  --accent-gl: rgba(47,184,96,.10);
+  --accent-gm: rgba(47,184,96,.20);
+  --green:     #2fb860;
+  --green-gl:  rgba(47,184,96,.08);
+  --red-gl:    rgba(232,85,85,.08);
+  --yellow-gl: rgba(245,166,35,.08);
+  --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
+  --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
+}
 
 /* ══════════════════════════════════════════════
    RESET
@@ -119,10 +141,16 @@ a { color:inherit; text-decoration:none }
   background: rgba(17,19,24,.88);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
-  transition: background .3s;
+  box-shadow: 0 6px 18px rgba(0,0,0,.16);
+  transition: background .3s, border-color .3s, box-shadow .3s;
 }
 [data-theme="light"] .hdr {
-  background: rgba(237,240,249,.88);
+  background: rgba(241,245,253,.9);
+  box-shadow: 0 6px 16px rgba(16,38,72,.08);
+}
+[data-theme="milki"] .hdr {
+  background: rgba(247,241,226,.92);
+  box-shadow: 0 6px 16px rgba(32,28,20,.08);
 }
 .hdr-inner {
   max-width: 1100px; margin: 0 auto;
@@ -139,8 +167,11 @@ a { color:inherit; text-decoration:none }
   border-radius:10px;
   display:flex; align-items:center; justify-content:center;
   border: 1px solid var(--line2);
-  box-shadow: 0 4px 14px rgba(59,130,246,.22);
+  box-shadow: 0 4px 14px var(--accent-gm);
   flex-shrink:0;
+}
+[data-theme="milki"] .logo-mark {
+  background: linear-gradient(145deg, #18140f, #214428);
 }
 .logo-mark img {
   width: 100%;
@@ -167,7 +198,7 @@ a { color:inherit; text-decoration:none }
 }
 .chip-free { background:var(--green-gl); color:var(--green); border:1px solid currentColor }
 .chip-lens { 
-  background: linear-gradient(90deg, rgba(59,130,246,.08), rgba(59,130,246,.18));
+  background: linear-gradient(90deg, var(--accent-gl), var(--accent-gm));
   border:1px solid var(--line2); color:var(--mid);
 }
 .btn-icon {
@@ -179,6 +210,13 @@ a { color:inherit; text-decoration:none }
   transition:all .2s;
 }
 .btn-icon:hover { background:var(--accent-gl); border-color:var(--accent); color:var(--accent) }
+#langBtn {
+  min-width: 42px;
+  padding: 0 .45rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
 
 /* ══════════════════════════════════════════════
    MAIN LAYOUT
@@ -202,7 +240,7 @@ a { color:inherit; text-decoration:none }
 .upload-area::before {
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(59,130,246,.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 120%, var(--accent-gl) 0%, transparent 70%);
   pointer-events:none;
 }
 .upload-area:hover, .upload-area.over {
@@ -215,7 +253,7 @@ a { color:inherit; text-decoration:none }
 }
 .upload-icon {
   width:72px; height:72px; margin:0 auto 1.25rem;
-  background: linear-gradient(135deg, var(--accent-gl), rgba(29,78,216,.2));
+  background: linear-gradient(135deg, var(--accent-gl), var(--accent-gm));
   border:1px solid var(--line2);
   border-radius:20px;
   display:flex; align-items:center; justify-content:center; font-size:30px;
@@ -313,11 +351,11 @@ a { color:inherit; text-decoration:none }
 .btn:disabled { opacity:.45; cursor:not-allowed }
 .btn-primary {
   background:var(--accent); color:#fff;
-  box-shadow:0 2px 10px rgba(59,130,246,.30);
+  box-shadow:0 2px 10px var(--accent-gm);
 }
 .btn-primary:hover:not(:disabled) {
   background:var(--accent-d);
-  box-shadow:0 4px 18px rgba(59,130,246,.42);
+  box-shadow:0 4px 18px var(--accent-gm);
   transform:translateY(-1px);
 }
 .btn-secondary {
@@ -601,35 +639,63 @@ a { color:inherit; text-decoration:none }
 .ftr {
   margin-top: 1.5rem;
   border-top: 1px solid var(--line);
-  background: var(--card);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.015), transparent 34%),
+    linear-gradient(180deg, var(--card), var(--card2));
+  position: relative;
+}
+.ftr::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: .8;
 }
 .ftr-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 1.25rem;
+  padding: 1.35rem 1.25rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .95rem;
+}
+.ftr-col {
+  border: 1px solid var(--line);
+  background: var(--card2);
+  border-radius: var(--r);
+  padding: .9rem .95rem;
+  min-height: 170px;
+}
+.ftr-kicker {
+  font-size: .64rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .28rem;
 }
 .ftr-title {
   font-family:var(--font-display);
-  font-size: .9rem;
+  font-size: .92rem;
   color: var(--bright);
   font-weight: 700;
-  margin-bottom: .4rem;
+  margin-bottom: .45rem;
 }
 .ftr-brand {
   display: flex;
   align-items: center;
   gap: .55rem;
-  margin-bottom: .2rem;
+  margin-bottom: .45rem;
 }
 .ftr-a3km-logo {
   width: 34px;
   height: 34px;
   border-radius: 8px;
   object-fit: contain;
-  background: #1b0f14;
+  background: var(--ink);
   border: 1px solid var(--line2);
 }
 .ftr-wordmark {
@@ -640,34 +706,69 @@ a { color:inherit; text-decoration:none }
 .ftr-text {
   font-size: .8rem;
   color: var(--dim);
-  line-height: 1.55;
+  line-height: 1.62;
+}
+.ftr-meta {
+  margin-top: .5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+.ftr-badge {
+  font-size: .66rem;
+  padding: .2rem .45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line2);
+  color: var(--mid);
+  background: var(--accent-gl);
 }
 .ftr-links {
-  margin-top: .45rem;
+  margin-top: .55rem;
   display: flex;
   flex-wrap: wrap;
   gap: .45rem;
 }
 .ftr-links a {
-  font-size: .75rem;
-  color: var(--accent);
+  font-size: .73rem;
+  color: var(--mid);
   border: 1px solid var(--line);
-  padding: .2rem .42rem;
+  background: var(--card);
+  padding: .26rem .5rem;
   border-radius: 999px;
+  transition: all .2s;
+}
+.ftr-links a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-gl);
 }
 .ftr-bottom {
   max-width: 1100px;
   margin: 0 auto;
-  padding: .8rem 1.25rem 1.1rem;
+  padding: .75rem 1.25rem 1.05rem;
   border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  flex-wrap: wrap;
   font-size: .75rem;
   color: var(--dim);
+}
+.ftr-bottom-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
 }
 .ftr-bottom a {
   color: var(--accent);
 }
 [data-theme="light"] .ftr-text { color: #4f6285; }
 [data-theme="light"] .ftr-bottom { color: #4f6285; }
+[data-theme="milki"] .ftr-text { color: #5f5748; }
+[data-theme="milki"] .ftr-bottom { color: #5f5748; }
+[data-theme="light"] .ftr-col { background: rgba(255,255,255,.9); }
+[data-theme="milki"] .ftr-col { background: rgba(255,253,246,.9); }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE (MOBILE FIRST POLISH)
@@ -752,7 +853,12 @@ a { color:inherit; text-decoration:none }
     gap: .8rem;
     padding: 1rem .8rem;
   }
+  .ftr-col {
+    min-height: 0;
+  }
   .ftr-bottom {
+    flex-direction: column;
+    align-items: flex-start;
     padding: .75rem .8rem calc(1rem + env(safe-area-inset-bottom));
   }
   .toasts {
@@ -789,10 +895,11 @@ a { color:inherit; text-decoration:none }
       </div>
     </div>
     <div class="hdr-right">
-      <span class="chip chip-free">Free</span>
-      <span class="chip chip-lens">No API</span>
+      <span class="chip chip-free" id="chipFree">Free</span>
+      <span class="chip chip-lens" id="chipNoApi">No API</span>
       <div id="statsChip" class="chip chip-lens hidden"></div>
       <button class="btn-icon" id="themeBtn" title="Toggle theme">☀️</button>
+      <button class="btn-icon" id="langBtn" title="Language mode">EB</button>
       <button class="btn-icon" id="helpBtn" title="How it works">❓</button>
     </div>
   </div>
@@ -806,29 +913,29 @@ a { color:inherit; text-decoration:none }
     <div class="how-card">
       <div class="how-num">1</div>
       <div class="how-txt">
-        <p>Upload করুন</p>
-        <small>Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small>
+        <p id="how1Title">Upload করুন</p>
+        <small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small>
       </div>
     </div>
     <div class="how-card">
       <div class="how-num">2</div>
       <div class="how-txt">
-        <p>Auto-Upload</p>
-        <small>প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small>
+        <p id="how2Title">Auto-Upload</p>
+        <small id="how2Text">প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small>
       </div>
     </div>
     <div class="how-card">
       <div class="how-num">3</div>
       <div class="how-txt">
-        <p>Google Lens</p>
-        <small>সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small>
+        <p id="how3Title">Google Lens</p>
+        <small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small>
       </div>
     </div>
     <div class="how-card">
       <div class="how-num">4</div>
       <div class="how-txt">
-        <p>Copy & Paste</p>
-        <small>Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small>
+        <p id="how4Title">Copy & Paste</p>
+        <small id="how4Text">Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small>
       </div>
     </div>
   </div>
@@ -837,23 +944,23 @@ a { color:inherit; text-decoration:none }
   <div class="upload-area" id="uploadArea" style="margin-top:1.25rem">
     <input type="file" id="fileInput" accept="image/*,.pdf" multiple/>
     <div class="upload-icon">📂</div>
-    <div class="upload-title">ছবি বা PDF drag করুন / click করুন</div>
+    <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
       <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
-      PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages
+      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages</span>
     </div>
   </div>
 
   <!-- PAGE STRIP -->
   <div id="stripWrap" class="strip-wrap hidden">
     <div class="strip-hdr">
-      <div class="strip-label">পেজ: <b id="pageCount">0</b> টি লোড হয়েছে</div>
+      <div class="strip-label"><span id="stripLabelPrefix">পেজ:</span> <b id="pageCount">0</b> <span id="stripLabelSuffix">টি লোড হয়েছে</span></div>
       <div class="strip-actions">
         <button class="btn btn-secondary" id="uploadAllBtn" style="font-size:.75rem;padding:.4rem .8rem">
-          ☁️ সব Upload করুন
+          ☁️ <span id="uploadAllBtnTxt">সব Upload করুন</span>
         </button>
         <button class="btn btn-danger" id="clearBtn" style="font-size:.75rem;padding:.4rem .8rem">
-          ✕ মুছুন
+          ✕ <span id="clearBtnTxt">মুছুন</span>
         </button>
       </div>
     </div>
@@ -871,9 +978,9 @@ a { color:inherit; text-decoration:none }
   <div class="action-row hidden" id="actionRow">
     <button class="btn btn-primary" id="openAllLensBtn">
       <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
-      &nbsp;Lens-এ সব খুলুন (page by page)
+      <span id="openAllLensBtnTxt">&nbsp;Lens-এ সব খুলুন (page by page)</span>
     </button>
-    <button class="btn btn-secondary hidden" id="copyAllBtn">📋 সব Text Copy</button>
+    <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
     <button class="btn btn-secondary hidden" id="downloadBtn">💾 .txt Download</button>
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 Merged Copy</button>
   </div>
@@ -883,7 +990,7 @@ a { color:inherit; text-decoration:none }
     <!-- Preview -->
     <div class="preview-panel">
       <div class="panel-hdr">
-        <div class="panel-title">👁 Preview — পেজ <b id="previewPageNum">1</b></div>
+        <div class="panel-title"><span id="previewTitleTxt">👁 Preview — পেজ</span> <b id="previewPageNum">1</b></div>
         <div style="display:flex;gap:.4rem">
           <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
           <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
@@ -892,7 +999,7 @@ a { color:inherit; text-decoration:none }
       <div class="preview-img-wrap" id="previewImgWrap">
         <div class="preview-empty">
           <div class="big">🖼</div>
-          <p>কোনো পেজ select করুন</p>
+          <p id="previewEmptyTxt">কোনো পেজ select করুন</p>
         </div>
       </div>
     </div>
@@ -900,7 +1007,7 @@ a { color:inherit; text-decoration:none }
     <!-- Text Editor -->
     <div class="text-panel">
       <div class="panel-hdr">
-        <div class="panel-title">✏️ Text — পেজ <b id="textPageNum">1</b></div>
+        <div class="panel-title"><span id="textTitleTxt">✏️ Text — পেজ</span> <b id="textPageNum">1</b></div>
         <div style="display:flex;gap:.4rem;align-items:center">
           <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📋 Paste</button>
           <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">🔍 Lens</button>
@@ -923,11 +1030,11 @@ a { color:inherit; text-decoration:none }
       <div>
         <div class="ll-title">
           <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
-          &nbsp;Lens — সব পেজ
+          <span id="lensSectionTitleTxt">&nbsp;Lens — সব পেজ</span>
         </div>
-        <div class="ll-sub">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।</div>
+        <div class="ll-sub" id="lensSectionSubTxt">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।</div>
       </div>
-      <button class="btn btn-primary" id="lensAllGridBtn">🚀 সব Lens খুলুন</button>
+      <button class="btn btn-primary" id="lensAllGridBtn">🚀 <span id="lensAllGridBtnTxt">সব Lens খুলুন</span></button>
     </div>
     <div class="lens-pages-grid" id="lensGrid"></div>
   </div>
@@ -936,12 +1043,12 @@ a { color:inherit; text-decoration:none }
   <div class="results-section hidden" id="resultsSection">
     <div class="results-hdr">
       <div>
-        <div style="font-size:.85rem;font-weight:700;color:var(--bright)">📋 All Extracted Text</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--bright)" id="allExtractedTitleTxt">📋 All Extracted Text</div>
         <div class="results-meta" id="allMeta">0 pages · 0 chars · 0 words</div>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn btn-secondary" id="allCopyBtn" style="font-size:.75rem;padding:.4rem .8rem">📋 Copy All</button>
-        <button class="btn btn-secondary" id="allDlBtn" style="font-size:.75rem;padding:.4rem .8rem">💾 Download</button>
+        <button class="btn btn-secondary" id="allCopyBtn" style="font-size:.75rem;padding:.4rem .8rem">📋 <span id="allCopyBtnTxt">Copy All</span></button>
+        <button class="btn btn-secondary" id="allDlBtn" style="font-size:.75rem;padding:.4rem .8rem">💾 <span id="allDlBtnTxt">Download</span></button>
       </div>
     </div>
     <div class="results-body">
@@ -954,67 +1061,83 @@ a { color:inherit; text-decoration:none }
 <!-- ═══════════ FOOTER ═══════════ -->
 <footer class="ftr">
   <div class="ftr-inner">
-    <div>
+    <div class="ftr-col">
+      <div class="ftr-kicker">Textriva OCR Studio</div>
       <div class="ftr-brand">
         <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
         <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="ftr-wordmark"/>
       </div>
-      <div class="ftr-text">Textriva by A3KM Studio. Upload → Google Lens → copy text. Fast page-by-page OCR workflow.</div>
+      <div class="ftr-text">Textriva streamlines OCR workflow: Upload → Google Lens → Copy text. Fast, free, and practical for multi-page extraction.</div>
+      <div class="ftr-meta">
+        <span class="ftr-badge">No Paid API</span>
+        <span class="ftr-badge">Image + PDF</span>
+        <span class="ftr-badge">Page-wise Control</span>
+      </div>
       <div class="ftr-links">
+        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">View Portfolio</a>
         <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
-        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
       </div>
     </div>
-    <div>
+    <div class="ftr-col">
+      <div class="ftr-kicker">Portfolio Owner</div>
       <div class="ftr-title">Md Akhinoor Islam</div>
       <div class="ftr-text">Energy Science &amp; Engineering Student<br/>KUET • Batch 2K23<br/>Available for opportunities.</div>
       <div class="ftr-links">
         <a href="mailto:mdakhinoorislam.official.2005@gmail.com">Email</a>
         <a href="https://wa.me/8801724812042" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
       </div>
     </div>
-    <div>
-      <div class="ftr-title">Connect</div>
-      <div class="ftr-text">Whether it's a project, collaboration, or a conversation about engineering — I'm all ears.</div>
+    <div class="ftr-col">
+      <div class="ftr-kicker">Professional Network</div>
+      <div class="ftr-title">Connect & Collaborate</div>
+      <div class="ftr-text">For project discussions, internships, freelance opportunities, or collaborations, connect through the channels below.</div>
       <div class="ftr-links">
         <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener">Facebook</a>
         <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener">Facebook</a>
       </div>
     </div>
   </div>
-  <div class="ftr-bottom">© Textriva by <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a></div>
+  <div class="ftr-bottom">
+    <span>© Textriva • Portfolio of Md Akhinoor Islam</span>
+    <span class="ftr-bottom-links">
+      <a href="mailto:mdakhinoorislam.official.2005@gmail.com">Contact</a>
+      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
+      <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
+    </span>
+  </div>
 </footer>
 
 <!-- HELP MODAL -->
 <div class="modal-bg" id="helpModal">
   <div class="modal">
     <div class="modal-hdr">
-      <div class="modal-title">🔍 কীভাবে ব্যবহার করবেন</div>
+      <div class="modal-title" id="helpModalTitle">🔍 কীভাবে ব্যবহার করবেন</div>
       <button class="btn-icon" id="helpClose">✕</button>
     </div>
     <div class="modal-body">
       <div class="step-row">
         <div class="step-n">1</div>
-        <div class="step-t"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div>
+        <div class="step-t" id="helpStep1"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div>
       </div>
       <div class="step-row">
         <div class="step-n">2</div>
-        <div class="step-t"><strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।</div>
+        <div class="step-t" id="helpStep2"><strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।</div>
       </div>
       <div class="step-row">
         <div class="step-n">3</div>
-        <div class="step-t"><strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div>
+        <div class="step-t" id="helpStep3"><strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div>
       </div>
       <div class="step-row">
         <div class="step-n">4</div>
-        <div class="step-t"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div>
+        <div class="step-t" id="helpStep4"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div>
       </div>
       <div class="step-row">
         <div class="step-n">5</div>
-        <div class="step-t"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div>
+        <div class="step-t" id="helpStep5"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div>
       </div>
-      <div style="background:var(--yellow-gl);border:1px solid var(--yellow);border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.75rem;color:var(--mid);margin-top:.5rem">
+      <div id="helpTip" style="background:var(--yellow-gl);border:1px solid var(--yellow);border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.75rem;color:var(--mid);margin-top:.5rem">
         💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।
       </div>
     </div>
@@ -1067,21 +1190,277 @@ const textArea     = $('textArea');
 const allTextarea  = $('allTextarea');
 
 // ══════════════════════════════════════════
-// THEME
+// THEME + LANGUAGE
 // ══════════════════════════════════════════
 const html = document.documentElement;
 const themeBtn = $('themeBtn');
+const langBtn = $('langBtn');
+const themeColorMeta = $('themeColorMeta');
+const themeOrder = ['dark', 'light', 'milki'];
+const langOrder = ['eb', 'en'];
+const themeUi = {
+  dark:  { icon: '🌙', title: 'Dark theme active',  color: '#0f172a' },
+  light: { icon: '☀️', title: 'Light theme active', color: '#eef3fb' },
+  milki: { icon: '🥛', title: 'Milki theme active', color: '#f8f3e5' },
+};
+const langUi = {
+  eb: { btn: 'EB', title: 'Language: English + Bangla mixed' },
+  en: { btn: 'EN', title: 'Language: Full English' },
+};
+const i18n = {
+  eb: {
+    chipFree: 'Free',
+    chipNoApi: 'No API',
+    how1Title: 'Upload করুন',
+    how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
+    how2Title: 'Auto-Upload',
+    how2Text: 'প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে',
+    how3Title: 'Google Lens',
+    how3Text: 'সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে',
+    how4Title: 'Copy & Paste',
+    how4Text: 'Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন',
+    uploadTitle: 'ছবি বা PDF drag করুন / click করুন',
+    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages',
+    stripLabelPrefix: 'পেজ:',
+    stripLabelSuffix: 'টি লোড হয়েছে',
+    uploadAllBtnTxt: 'সব Upload করুন',
+    clearBtnTxt: 'মুছুন',
+    openAllLensBtnTxt: 'Lens-এ সব খুলুন (page by page)',
+    copyAllBtnTxt: 'সব Text Copy',
+    previewTitleTxt: '👁 Preview — পেজ',
+    prevPageTitle: 'আগের পেজ',
+    nextPageTitle: 'পরের পেজ',
+    previewEmptyTxt: 'কোনো পেজ select করুন',
+    textTitleTxt: '✏️ Text — পেজ',
+    textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।',
+    lensSectionTitleTxt: 'Lens — সব পেজ',
+    lensSectionSubTxt: 'প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।',
+    lensAllGridBtnTxt: 'সব Lens খুলুন',
+    allExtractedTitleTxt: '📋 All Extracted Text',
+    allCopyBtnTxt: 'Copy All',
+    allDlBtnTxt: 'Download',
+    allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
+    helpModalTitle: '🔍 কীভাবে ব্যবহার করবেন',
+    helpStep1: '<strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।',
+    helpStep2: '<strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।',
+    helpStep3: '<strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।',
+    helpStep4: '<strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।',
+    helpStep5: '<strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।',
+    helpOk: 'বুঝেছি ✓',
+    pageWord: 'পেজ',
+    doneWord: 'done',
+    txtStats: '{chars} chars · {words} words',
+    allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
+    pageBlock: '=== পেজ {num} — {name} ===',
+    statusPending: '⏳ Pending',
+    statusUploading: '⬆️ Upload',
+    statusReady: '✅ Ready',
+    statusDone: '✓ Done',
+    statusError: '❌ Error',
+    lpcDone: '✓ Done',
+    lpcOpen: '🔍 Open Lens',
+    pdfLoading: '📄 PDF loading: {name}',
+    pdfLoaded: '✅ {total} pages loaded from PDF',
+    pdfError: 'PDF load error: {error}',
+    pageUploaded: '✅ পেজ {num} uploaded!',
+    pageUploadFailed: '❌ পেজ {num} upload failed: {error}',
+    allUploadedAlready: 'সব pages already uploaded! Lens বাটন চাপুন।',
+    uploadingPage: 'Uploading পেজ {num} / {total}...',
+    uploadingIdle: 'Uploading...',
+    allUploadComplete: '✅ সব pages upload complete!',
+    uploadFirst: '⬆️ আগে "সব Upload করুন" চাপুন!',
+    popupBlocked: '🚫 Popup blocked! Browser এ popup allow করুন তারপর আবার চেষ্টা করুন।',
+    lensOpened: '🔍 পেজ {num} Google Lens এ খুলেছে! Text copy করে এখানে paste করুন।',
+    mobileLensNote: '📱 Mobile mode: একবারে ১টা Lens tab খুলবে। পরেরগুলো grid এর Lens button থেকে খুলুন।',
+    lensOpeningAll: '🚀 {count}টি পেজ Lens এ খুলছে!',
+    pastedOk: '✓ Paste হয়েছে!',
+    pasteManual: 'Ctrl+V দিয়ে manually paste করুন',
+    pageSaved: '✅ পেজ {num} saved!',
+    allPagesDone: '🎉 সব pages complete!',
+    noText: 'কোনো text নেই!',
+    copiedAllText: '✓ সব text copied!',
+    copied: '✓ Copied!',
+    clearConfirm: 'সব pages মুছে ফেলবেন?',
+    pasteReminder: '💡 Text paste হয়েছে — "Save & Next" চাপুন',
+  },
+  en: {
+    chipFree: 'Free',
+    chipNoApi: 'No API',
+    how1Title: 'Upload',
+    how1Text: 'Upload image (JPG/PNG/WEBP) or PDF — PDFs are split page by page.',
+    how2Title: 'Auto-Upload',
+    how2Text: 'Each page uploads to imgbb.com and gets a free shareable link.',
+    how3Title: 'Google Lens',
+    how3Text: 'The link opens in Google Lens, which extracts text automatically.',
+    how4Title: 'Copy & Paste',
+    how4Text: 'Copy text from Lens and paste it here — collect all pages together.',
+    uploadTitle: 'Drag image or PDF here / click to browse',
+    uploadSubNote: 'PDF pages are processed separately · maximum 30 pages',
+    stripLabelPrefix: 'Pages:',
+    stripLabelSuffix: 'loaded',
+    uploadAllBtnTxt: 'Upload All',
+    clearBtnTxt: 'Clear',
+    openAllLensBtnTxt: 'Open all in Lens (page by page)',
+    copyAllBtnTxt: 'Copy All Text',
+    previewTitleTxt: '👁 Preview — Page',
+    prevPageTitle: 'Previous page',
+    nextPageTitle: 'Next page',
+    previewEmptyTxt: 'Select a page to preview',
+    textTitleTxt: '✏️ Text — Page',
+    textPlaceholder: 'Copy text from Google Lens and paste it here (Ctrl+V)...\n\nOr click the "Lens" button above, open Google Lens, copy selected text, then paste here.',
+    lensSectionTitleTxt: 'Lens — All Pages',
+    lensSectionSubTxt: 'Each page has its own Lens button. On mobile, opening one tab at a time usually works best.',
+    lensAllGridBtnTxt: 'Open all Lens tabs',
+    allExtractedTitleTxt: '📋 All Extracted Text',
+    allCopyBtnTxt: 'Copy All',
+    allDlBtnTxt: 'Download',
+    allTextareaPlaceholder: 'All extracted text across pages will appear here...',
+    helpModalTitle: '🔍 How to use',
+    helpStep1: '<strong>Upload an image or PDF.</strong> PDF files will be split into pages.',
+    helpStep2: '<strong>Click "Upload All".</strong> Each page is uploaded to imgbb.com and a public link is generated.',
+    helpStep3: '<strong>Click "Open all in Lens".</strong> Google Lens opens each page in a new tab.',
+    helpStep4: '<strong>In Lens tab,</strong> select text → copy → return to this app and paste.',
+    helpStep5: '<strong>Click "Save & Next".</strong> It moves to the next page; finally all text is merged.',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Keep Lens tabs open after launching. Lens highlights text automatically — just use "Copy text".',
+    helpOk: 'Got it ✓',
+    pageWord: 'page',
+    doneWord: 'done',
+    txtStats: '{chars} chars · {words} words',
+    allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
+    pageBlock: '=== Page {num} — {name} ===',
+    statusPending: '⏳ Pending',
+    statusUploading: '⬆️ Uploading',
+    statusReady: '✅ Ready',
+    statusDone: '✓ Done',
+    statusError: '❌ Error',
+    lpcDone: '✓ Done',
+    lpcOpen: '🔍 Open Lens',
+    pdfLoading: '📄 PDF loading: {name}',
+    pdfLoaded: '✅ {total} pages loaded from PDF',
+    pdfError: 'PDF load error: {error}',
+    pageUploaded: '✅ Page {num} uploaded!',
+    pageUploadFailed: '❌ Page {num} upload failed: {error}',
+    allUploadedAlready: 'All pages are already uploaded. Click Lens.',
+    uploadingPage: 'Uploading page {num} / {total}...',
+    uploadingIdle: 'Uploading...',
+    allUploadComplete: '✅ All pages uploaded successfully!',
+    uploadFirst: '⬆️ Click "Upload All" first!',
+    popupBlocked: '🚫 Popup blocked! Allow popups in your browser and try again.',
+    lensOpened: '🔍 Page {num} opened in Google Lens! Copy text and paste it here.',
+    mobileLensNote: '📱 Mobile mode: one Lens tab opens at a time. Open the rest from the grid.',
+    lensOpeningAll: '🚀 Opening {count} pages in Lens!',
+    pastedOk: '✓ Pasted!',
+    pasteManual: 'Use Ctrl+V to paste manually',
+    pageSaved: '✅ Page {num} saved!',
+    allPagesDone: '🎉 All pages completed!',
+    noText: 'No text available!',
+    copiedAllText: '✓ All text copied!',
+    copied: '✓ Copied!',
+    clearConfirm: 'Do you want to clear all pages?',
+    pasteReminder: '💡 Text pasted — click "Save & Next"',
+  },
+};
+let currentLang = 'eb';
+
+function t(key, vars = {}) {
+  const dict = i18n[currentLang] || i18n.eb;
+  const base = dict[key] ?? i18n.eb[key] ?? key;
+  return Object.entries(vars).reduce((out, [k, v]) => out.replaceAll(`{${k}}`, String(v)), base);
+}
+
+function readSaved(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function saveSetting(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore storage errors
+  }
+}
+
 function syncThemeButton() {
-  const isDark = html.dataset.theme === 'dark';
-  themeBtn.textContent = isDark ? '🌙' : '☀️';
-  themeBtn.title = isDark ? 'Dark theme active' : 'Light theme active';
+  const theme = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
+  html.dataset.theme = theme;
+  themeBtn.textContent = themeUi[theme].icon;
+  themeBtn.title = themeUi[theme].title;
+  themeColorMeta?.setAttribute('content', themeUi[theme].color);
+}
+function syncLangButton() {
+  currentLang = langUi[currentLang] ? currentLang : 'eb';
+  langBtn.textContent = langUi[currentLang].btn;
+  langBtn.title = langUi[currentLang].title;
+}
+function applyLanguage() {
+  html.lang = currentLang === 'en' ? 'en' : 'bn';
+  $('chipFree').textContent = t('chipFree');
+  $('chipNoApi').textContent = t('chipNoApi');
+  $('how1Title').textContent = t('how1Title');
+  $('how1Text').textContent = t('how1Text');
+  $('how2Title').textContent = t('how2Title');
+  $('how2Text').textContent = t('how2Text');
+  $('how3Title').textContent = t('how3Title');
+  $('how3Text').textContent = t('how3Text');
+  $('how4Title').textContent = t('how4Title');
+  $('how4Text').textContent = t('how4Text');
+  $('uploadTitle').textContent = t('uploadTitle');
+  $('uploadSubNote').textContent = t('uploadSubNote');
+  $('stripLabelPrefix').textContent = t('stripLabelPrefix');
+  $('stripLabelSuffix').textContent = t('stripLabelSuffix');
+  $('uploadAllBtnTxt').textContent = t('uploadAllBtnTxt');
+  $('clearBtnTxt').textContent = t('clearBtnTxt');
+  $('openAllLensBtnTxt').textContent = t('openAllLensBtnTxt');
+  $('copyAllBtnTxt').textContent = t('copyAllBtnTxt');
+  $('previewTitleTxt').textContent = t('previewTitleTxt');
+  $('prevPage').title = t('prevPageTitle');
+  $('nextPage').title = t('nextPageTitle');
+  $('previewEmptyTxt').textContent = t('previewEmptyTxt');
+  $('textTitleTxt').textContent = t('textTitleTxt');
+  textArea.placeholder = t('textPlaceholder');
+  $('lensSectionTitleTxt').textContent = ` ${t('lensSectionTitleTxt')}`;
+  $('lensSectionSubTxt').textContent = t('lensSectionSubTxt');
+  $('lensAllGridBtnTxt').textContent = t('lensAllGridBtnTxt');
+  $('allExtractedTitleTxt').textContent = t('allExtractedTitleTxt');
+  $('allCopyBtnTxt').textContent = t('allCopyBtnTxt');
+  $('allDlBtnTxt').textContent = t('allDlBtnTxt');
+  allTextarea.placeholder = t('allTextareaPlaceholder');
+  $('helpModalTitle').textContent = t('helpModalTitle');
+  $('helpStep1').innerHTML = t('helpStep1');
+  $('helpStep2').innerHTML = t('helpStep2');
+  $('helpStep3').innerHTML = t('helpStep3');
+  $('helpStep4').innerHTML = t('helpStep4');
+  $('helpStep5').innerHTML = t('helpStep5');
+  $('helpTip').innerHTML = t('helpTip');
+  $('helpOk').textContent = t('helpOk');
+  uplLabel.textContent = t('uploadingIdle');
+  updateTxtStats();
+  renderAll();
 }
 themeBtn.onclick = () => {
-  const isDark = html.dataset.theme === 'dark';
-  html.dataset.theme = isDark ? 'light' : 'dark';
+  const current = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
+  const next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
+  html.dataset.theme = next;
+  saveSetting('textriva-theme', next);
   syncThemeButton();
 };
+langBtn.onclick = () => {
+  const next = langOrder[(langOrder.indexOf(currentLang) + 1) % langOrder.length];
+  currentLang = next;
+  saveSetting('textriva-lang', next);
+  syncLangButton();
+  applyLanguage();
+};
+html.dataset.theme = themeUi[readSaved('textriva-theme')] ? readSaved('textriva-theme') : html.dataset.theme;
+currentLang = langUi[readSaved('textriva-lang')] ? readSaved('textriva-lang') : 'eb';
 syncThemeButton();
+syncLangButton();
+applyLanguage();
 
 // ══════════════════════════════════════════
 // HELP MODAL
@@ -1124,7 +1503,7 @@ async function handleFiles(files) {
 }
 
 async function loadPdf(file) {
-  toast(`📄 PDF loading: ${file.name}`, '', 2000);
+  toast(t('pdfLoading', { name: file.name }), '', 2000);
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: buf }).promise;
@@ -1136,11 +1515,11 @@ async function loadPdf(file) {
       canvas.width = vp.width; canvas.height = vp.height;
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
-      addPage(`${file.name} — পেজ ${i}`, blob, URL.createObjectURL(blob));
+      addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob));
     }
-    toast(`✅ ${total} pages loaded from PDF`, 'ok');
+    toast(t('pdfLoaded', { total }), 'ok');
   } catch(e) {
-    toast('PDF load error: ' + e.message, 'err');
+    toast(t('pdfError', { error: e.message }), 'err');
   }
 }
 
@@ -1213,7 +1592,7 @@ function renderLensGrid() {
       <div class="lpc-name" title="${pg.name}">${pg.name}</div>
       <div class="lpc-status ${pg.status}">${statusLabel(pg.status)}</div>
       <button class="lpc-btn ${btnClass}" data-i="${i}" ${!canLens ? 'disabled' : ''}>
-        ${pg.status === 'done' ? '✓ Done' : '🔍 Open Lens'}
+        ${pg.status === 'done' ? t('lpcDone') : t('lpcOpen')}
       </button>
     `;
     el.querySelector('.lpc-btn').addEventListener('click', () => openLens(i));
@@ -1236,13 +1615,19 @@ function renderWorkspace() {
 }
 
 function updateTxtStats() {
-  const t = textArea.value;
-  const words = t.trim() ? t.trim().split(/\s+/).length : 0;
-  $('txtStats').textContent = `${t.length} chars · ${words} words`;
+  const textVal = textArea.value;
+  const words = textVal.trim() ? textVal.trim().split(/\s+/).length : 0;
+  $('txtStats').textContent = t('txtStats', { chars: textVal.length, words });
 }
 
 function statusLabel(s) {
-  return { pending:'⏳ Pending', uploading:'⬆️ Upload', ready:'✅ Ready', done:'✓ Done', error:'❌ Error' }[s] || s;
+  return {
+    pending: t('statusPending'),
+    uploading: t('statusUploading'),
+    ready: t('statusReady'),
+    done: t('statusDone'),
+    error: t('statusError'),
+  }[s] || s;
 }
 
 function updateStats() {
@@ -1250,16 +1635,16 @@ function updateStats() {
   const ready = state.pages.filter(p => p.status === 'ready').length;
   const chip = $('statsChip');
   chip.classList.remove('hidden');
-  chip.textContent = `${done}/${state.pages.length} done`;
+  chip.textContent = `${done}/${state.pages.length} ${t('doneWord')}`;
 
   // results section
-  const texts = state.pages.map((p,i)=>p.text ? `=== পেজ ${i+1} — ${p.name} ===\n${p.text}` : null).filter(Boolean);
+  const texts = state.pages.map((p,i)=>p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean);
   if (texts.length) {
     resultsSection.classList.remove('hidden');
     const full = texts.join('\n\n');
     allTextarea.value = full;
     const words = full.trim() ? full.trim().split(/\s+/).length : 0;
-    $('allMeta').innerHTML = `<b>${texts.length}</b> pages · ${full.length} chars · ${words} words`;
+    $('allMeta').innerHTML = t('allMeta', { pages: texts.length, chars: full.length, words });
     $('copyAllBtn').classList.remove('hidden');
     $('downloadBtn').classList.remove('hidden');
   }
@@ -1325,11 +1710,11 @@ async function uploadPage(i) {
     const url = await uploadImage(pg.blob);
     pg.remoteUrl = url;
     pg.status = 'ready';
-    toast(`✅ পেজ ${i+1} uploaded!`, 'ok', 2000);
+    toast(t('pageUploaded', { num: i+1 }), 'ok', 2000);
   } catch(e) {
     pg.status = 'error';
     pg.remoteUrl = '';
-    toast(`❌ পেজ ${i+1} upload failed: ${e.message}`, 'err', 4000);
+    toast(t('pageUploadFailed', { num: i+1, error: e.message }), 'err', 4000);
     console.error('Upload error page', i+1, e);
   }
   renderStrip();
@@ -1339,13 +1724,13 @@ async function uploadPage(i) {
 
 $('uploadAllBtn').onclick = async () => {
   const pending = state.pages.filter(p => p.status === 'pending' || p.status === 'error');
-  if (!pending.length) { toast('সব pages already uploaded! Lens বাটন চাপুন।', 'ok'); return }
+  if (!pending.length) { toast(t('allUploadedAlready'), 'ok'); return }
   uplProgress.classList.add('show');
   let done = 0;
   for (let i = 0; i < state.pages.length; i++) {
     const pg = state.pages[i];
     if (pg.status !== 'pending' && pg.status !== 'error') { done++; continue; }
-    uplLabel.textContent = `Uploading পেজ ${i+1} / ${state.pages.length}...`;
+    uplLabel.textContent = t('uploadingPage', { num: i+1, total: state.pages.length });
     const pct = Math.round((done/state.pages.length)*100);
     uplBar.style.width = pct + '%';
     uplPct.textContent = pct + '%';
@@ -1355,10 +1740,10 @@ $('uploadAllBtn').onclick = async () => {
     uplPct.textContent = Math.round((done/state.pages.length)*100) + '%';
   }
   uplProgress.classList.remove('show');
-  uplLabel.textContent = 'Uploading...';
+  uplLabel.textContent = t('uploadingIdle');
   uplBar.style.width = '0%';
   uplPct.textContent = '0%';
-  toast('✅ সব pages upload complete!', 'ok');
+  toast(t('allUploadComplete'), 'ok');
 };
 
 // ══════════════════════════════════════════
@@ -1368,7 +1753,7 @@ function openLens(i) {
   const pg = state.pages[i];
   if (!pg) return;
   if (!pg.remoteUrl) {
-    toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err', 3000);
+    toast(t('uploadFirst'), 'err', 3000);
     return;
   }
   // Google Lens URL with image URL parameter — direct URL load
@@ -1378,24 +1763,24 @@ function openLens(i) {
     : window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
   if (!win) {
     // Popup blocked fallback
-    toast('🚫 Popup blocked! Browser এ popup allow করুন তারপর আবার চেষ্টা করুন।', 'err', 5000);
+    toast(t('popupBlocked'), 'err', 5000);
     return;
   }
   state.current = i;
   renderAll();
-  toast(`🔍 পেজ ${i+1} Google Lens এ খুলেছে! Text copy করে এখানে paste করুন।`, 'ok', 4000);
+  toast(t('lensOpened', { num: i+1 }), 'ok', 4000);
 }
 
 $('openAllLensBtn').onclick = async () => {
   const readyPages = state.pages.filter(p => p.status === 'ready' || p.status === 'done');
   if (!readyPages.length) {
-    toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err');
+    toast(t('uploadFirst'), 'err');
     return;
   }
   if (isMobileDevice()) {
     const firstIdx = state.pages.findIndex(p => p.remoteUrl);
     if (firstIdx >= 0) openLens(firstIdx);
-    toast('📱 Mobile mode: একবারে ১টা Lens tab খুলবে। পরেরগুলো grid এর Lens button থেকে খুলুন।', 'ok', 5500);
+    toast(t('mobileLensNote'), 'ok', 5500);
     return;
   }
   // Open pages with a small delay to avoid popup blocker
@@ -1407,7 +1792,7 @@ $('openAllLensBtn').onclick = async () => {
       window.open(lensUrl, `lens_page_${i+1}`, 'width=1100,height=750,noopener');
     }
   }
-  toast(`🚀 ${readyPages.length}টি পেজ Lens এ খুলছে!`, 'ok', 4000);
+  toast(t('lensOpeningAll', { count: readyPages.length }), 'ok', 4000);
 };
 
 $('lensAllGridBtn').onclick = () => $('openAllLensBtn').click();
@@ -1431,12 +1816,12 @@ textArea.addEventListener('input', () => {
 
 $('pasteClipBtn').onclick = async () => {
   try {
-    const t = await navigator.clipboard.readText();
-    textArea.value = t;
+    const clipText = await navigator.clipboard.readText();
+    textArea.value = clipText;
     textArea.dispatchEvent(new Event('input'));
-    toast('✓ Paste হয়েছে!', 'ok', 2000);
+    toast(t('pastedOk'), 'ok', 2000);
   } catch {
-    toast('Ctrl+V দিয়ে manually paste করুন', '', 2000);
+    toast(t('pasteManual'), '', 2000);
   }
 };
 
@@ -1452,13 +1837,13 @@ $('saveTxtBtn').onclick = () => {
   if (!pg) return;
   pg.text = textArea.value.trim();
   pg.status = pg.text ? 'done' : pg.status;
-  toast(`✅ পেজ ${state.current+1} saved!`, 'ok', 2000);
+  toast(t('pageSaved', { num: state.current+1 }), 'ok', 2000);
   if (state.current < state.pages.length-1) {
     state.current++;
     renderAll();
   } else {
     renderAll();
-    toast('🎉 সব pages complete!', 'ok', 3000);
+    toast(t('allPagesDone'), 'ok', 3000);
   }
 };
 
@@ -1483,30 +1868,30 @@ async function copyText(txt) {
 
 function buildAllText() {
   return state.pages
-    .map((p,i)=> p.text ? `=== পেজ ${i+1} — ${p.name} ===\n${p.text}` : null)
+    .map((p,i)=> p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null)
     .filter(Boolean)
     .join('\n\n');
 }
 
 $('copyAllBtn').onclick = async () => {
-  const t = buildAllText();
-  if (!t) { toast('কোনো text নেই!', 'err'); return }
-  await copyText(t);
-  toast('✓ সব text copied!', 'ok');
+  const fullText = buildAllText();
+  if (!fullText) { toast(t('noText'), 'err'); return }
+  await copyText(fullText);
+  toast(t('copiedAllText'), 'ok');
 };
 
 $('downloadBtn').onclick = () => {
-  const t = buildAllText();
-  if (!t) { toast('কোনো text নেই!', 'err'); return }
+  const fullText = buildAllText();
+  if (!fullText) { toast(t('noText'), 'err'); return }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([t], {type:'text/plain;charset=utf-8'}));
+  a.href = URL.createObjectURL(new Blob([fullText], {type:'text/plain;charset=utf-8'}));
   a.download = `textriva_${Date.now()}.txt`;
   a.click();
 };
 
 $('allCopyBtn').onclick = async () => {
   await copyText(allTextarea.value);
-  toast('✓ Copied!', 'ok');
+  toast(t('copied'), 'ok');
 };
 
 $('allDlBtn').onclick = () => {
@@ -1517,7 +1902,7 @@ $('allDlBtn').onclick = () => {
 };
 
 $('clearBtn').onclick = () => {
-  if (confirm('সব pages মুছে ফেলবেন?')) {
+  if (confirm(t('clearConfirm'))) {
     state.pages = [];
     state.current = 0;
     resultsSection.classList.add('hidden');
@@ -1536,7 +1921,7 @@ document.addEventListener('keydown', e => {
 // Paste on textarea auto-save reminder
 textArea.addEventListener('paste', () => {
   setTimeout(() => {
-    toast('💡 Text paste হয়েছে — "Save & Next" চাপুন', '', 3000);
+    toast(t('pasteReminder'), '', 3000);
   }, 100);
 });
 </script>
