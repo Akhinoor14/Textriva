@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LensFlow — Google Lens OCR Studio</title>
-<meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free, no API needed."/>
+<title>LensFlow by A3KM Studio — Google Lens OCR Tool</title>
+<meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
@@ -572,6 +572,71 @@ a { color:inherit; text-decoration:none }
 @keyframes rot { to{transform:rotate(360deg)} }
 
 /* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+.ftr {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+.ftr-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.ftr-title {
+  font-size: .82rem;
+  color: var(--bright);
+  font-weight: 700;
+  margin-bottom: .4rem;
+}
+.ftr-brand {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-bottom: .2rem;
+}
+.ftr-a3km-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line2);
+}
+.ftr-text {
+  font-size: .75rem;
+  color: var(--dim);
+  line-height: 1.55;
+}
+.ftr-links {
+  margin-top: .45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+.ftr-links a {
+  font-size: .72rem;
+  color: var(--accent);
+  border: 1px solid var(--line);
+  padding: .2rem .42rem;
+  border-radius: 999px;
+}
+.ftr-bottom {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: .8rem 1.25rem 1.1rem;
+  border-top: 1px solid var(--line);
+  font-size: .68rem;
+  color: var(--dim);
+}
+.ftr-bottom a {
+  color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════
    UTILITY
 ══════════════════════════════════════════════ */
 .hidden { display:none !important }
@@ -590,7 +655,7 @@ a { color:inherit; text-decoration:none }
       <div class="logo-mark">🔍</div>
       <div>
         <div class="logo-name">Lens<span>Flow</span></div>
-        <div class="logo-tag">Google Lens OCR Studio</div>
+        <div class="logo-tag">by A3KM Studio</div>
       </div>
     </div>
     <div class="hdr-right">
@@ -755,6 +820,41 @@ a { color:inherit; text-decoration:none }
   </div>
 
 </main>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="ftr">
+  <div class="ftr-inner">
+    <div>
+      <div class="ftr-brand">
+        <img src="a3kmstudiologo.png" alt="A3KM Studio Logo" class="ftr-a3km-logo"/>
+        <div class="ftr-title">LensFlow by A3KM Studio</div>
+      </div>
+      <div class="ftr-text">Upload → Google Lens → copy text. Fast page-by-page OCR workflow.</div>
+      <div class="ftr-links">
+        <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
+        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
+      </div>
+    </div>
+    <div>
+      <div class="ftr-title">Md Akhinoor Islam</div>
+      <div class="ftr-text">Energy Science &amp; Engineering Student<br/>KUET • Batch 2K23<br/>Available for opportunities.</div>
+      <div class="ftr-links">
+        <a href="mailto:mdakhinoorislam.official.2005@gmail.com">Email</a>
+        <a href="https://wa.me/8801724812042" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+    <div>
+      <div class="ftr-title">Connect</div>
+      <div class="ftr-text">Whether it's a project, collaboration, or a conversation about engineering — I'm all ears.</div>
+      <div class="ftr-links">
+        <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-bottom">© LensFlow by <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a></div>
+</footer>
 
 <!-- HELP MODAL -->
 <div class="modal-bg" id="helpModal">
