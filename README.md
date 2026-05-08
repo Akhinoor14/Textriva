@@ -1,4 +1,4 @@
-# 🔍 LensFlow — Google Lens OCR Studio
+# 🔍 Textriva — Google Lens OCR Studio
 
 **Image/PDF → imgbb upload → Google Lens → Text Extract | Free | No Monthly Cost**
 
@@ -34,7 +34,7 @@ vercel --prod
 2. Click "সব Upload করুন" → pages get public URLs (imgbb)
 3. Click "Google Lens এ সব খুলুন" → Lens opens per page
 4. In Lens: text auto-highlighted → copy it
-5. Paste back in LensFlow → "Save & Next"
+5. Paste back in Textriva → "Save & Next"
 6. Download or copy all text at the end
 
 ---
@@ -42,7 +42,7 @@ vercel --prod
 ## 📁 Files
 
 ```
-lensflow/
+textriva/
 ├── index.html        ← Main app
 ├── api/upload.js     ← Vercel serverless proxy (fixes CORS)
 ├── vercel.json       ← Deploy config

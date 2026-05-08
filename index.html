@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LensFlow by A3KM Studio — Google Lens OCR Tool</title>
+<title>Textriva by A3KM Studio — Google Lens OCR Tool</title>
 <meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -654,7 +654,7 @@ a { color:inherit; text-decoration:none }
     <div class="logo">
       <div class="logo-mark">🔍</div>
       <div>
-        <div class="logo-name">Lens<span>Flow</span></div>
+        <div class="logo-name">Text<span>riva</span></div>
         <div class="logo-tag">by A3KM Studio</div>
       </div>
     </div>
@@ -827,7 +827,7 @@ a { color:inherit; text-decoration:none }
     <div>
       <div class="ftr-brand">
         <img src="a3kmstudiologo.png" alt="A3KM Studio Logo" class="ftr-a3km-logo"/>
-        <div class="ftr-title">LensFlow by A3KM Studio</div>
+        <div class="ftr-title">Textriva by A3KM Studio</div>
       </div>
       <div class="ftr-text">Upload → Google Lens → copy text. Fast page-by-page OCR workflow.</div>
       <div class="ftr-links">
@@ -853,7 +853,7 @@ a { color:inherit; text-decoration:none }
       </div>
     </div>
   </div>
-  <div class="ftr-bottom">© LensFlow by <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a></div>
+  <div class="ftr-bottom">© Textriva by <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a></div>
 </footer>
 
 <!-- HELP MODAL -->
@@ -1352,7 +1352,7 @@ $('downloadBtn').onclick = () => {
   if (!t) { toast('কোনো text নেই!', 'err'); return }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([t], {type:'text/plain;charset=utf-8'}));
-  a.download = `lensflow_${Date.now()}.txt`;
+  a.download = `textriva_${Date.now()}.txt`;
   a.click();
 };
 
@@ -1364,7 +1364,7 @@ $('allCopyBtn').onclick = async () => {
 $('allDlBtn').onclick = () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([allTextarea.value], {type:'text/plain;charset=utf-8'}));
-  a.download = `lensflow_all_${Date.now()}.txt`;
+  a.download = `textriva_all_${Date.now()}.txt`;
   a.click();
 };
 
