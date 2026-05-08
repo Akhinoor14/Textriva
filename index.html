@@ -1,865 +1,1263 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="light">
+<html lang="bn" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LensOCR — ছবি থেকে Text Extract</title>
-<meta name="description" content="100% Free OCR tool. ছবি থেকে text extract করুন। No API, No cost, No signup." />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232f80ff'/><path d='M8 10h16M8 16h12M8 22h8' stroke='white' stroke-width='2.5' stroke-linecap='round'/></svg>" />
-
-<!-- Tesseract.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LensFlow — Google Lens OCR Studio</title>
+<meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free, no API needed."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
 <style>
-/* ─── Design Tokens ─── */
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════ */
 :root {
-  --bg:        #f0f4ff;
-  --surface:   #ffffff;
-  --surface2:  #f8faff;
-  --border:    #dde3f0;
-  --border2:   #c8d0e8;
-  --text:      #0f1729;
-  --text2:     #4a5578;
-  --text3:     #8896b8;
-  --brand:     #2f80ff;
-  --brand-d:   #1a5fcc;
-  --brand-l:   #eef4ff;
-  --green:     #16a34a;
-  --green-l:   #f0fdf4;
-  --red:       #dc2626;
-  --red-l:     #fff1f1;
-  --yellow:    #d97706;
-  --yellow-l:  #fffbeb;
-  --radius:    14px;
-  --radius-sm: 8px;
-  --shadow:    0 2px 8px rgba(47,128,255,.10), 0 1px 3px rgba(0,0,0,.06);
-  --shadow-lg: 0 8px 32px rgba(47,128,255,.15), 0 2px 8px rgba(0,0,0,.08);
+  --ink:       #0a0b0f;
+  --paper:     #111318;
+  --card:      #181c24;
+  --card2:     #1e2330;
+  --line:      #2a3045;
+  --line2:     #3a4560;
+  --dim:       #5a6a8a;
+  --mid:       #8899bb;
+  --text:      #d8e2f5;
+  --bright:    #f0f4ff;
+
+  --lens-b:    #4a90f0;
+  --lens-r:    #e85555;
+  --lens-y:    #f5a623;
+  --lens-g:    #2fb860;
+
+  --accent:    #4a90f0;
+  --accent-d:  #2a6abf;
+  --accent-gl: rgba(74,144,240,.12);
+  --accent-gm: rgba(74,144,240,.25);
+
+  --green:     #2fb860;
+  --green-gl:  rgba(47,184,96,.12);
+  --red:       #e85555;
+  --red-gl:    rgba(232,85,85,.12);
+  --yellow:    #f5a623;
+  --yellow-gl: rgba(245,166,35,.12);
+
+  --r:         12px;
+  --r-sm:      8px;
+  --r-lg:      18px;
+  --shadow:    0 2px 12px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
+
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
 }
-[data-theme="dark"] {
-  --bg:        #0d1117;
-  --surface:   #161b22;
-  --surface2:  #1c2128;
-  --border:    #30363d;
-  --border2:   #484f58;
-  --text:      #e6edf3;
-  --text2:     #8b949e;
-  --text3:     #484f58;
-  --brand:     #4f9aff;
-  --brand-d:   #79b4ff;
-  --brand-l:   #0d1f3a;
-  --green:     #3fb950;
-  --green-l:   #0a1f14;
-  --red:       #f85149;
-  --red-l:     #1f0a0a;
-  --yellow:    #e3b341;
-  --yellow-l:  #1f1600;
+[data-theme="light"] {
+  --ink:    #f5f7ff;
+  --paper:  #edf0f9;
+  --card:   #ffffff;
+  --card2:  #f2f4fb;
+  --line:   #dde2f0;
+  --line2:  #c5ccdd;
+  --dim:    #8896b8;
+  --mid:    #5a6a8a;
+  --text:   #1e2840;
+  --bright: #0a0f20;
+  --accent-gl: rgba(74,144,240,.08);
+  --accent-gm: rgba(74,144,240,.18);
+  --green-gl:  rgba(47,184,96,.08);
+  --red-gl:    rgba(232,85,85,.08);
+  --yellow-gl: rgba(245,166,35,.08);
+  --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
+  --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
 }
 
-/* ─── Reset ─── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;transition:background .25s,color .25s}
-button{cursor:pointer;font-family:inherit;border:none;outline:none}
-button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-pre,textarea{font-family:'Courier New',monospace}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+/* ══════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased }
+body { 
+  background: var(--paper); 
+  color: var(--text); 
+  font-family: var(--font-body);
+  min-height: 100vh;
+  transition: background .3s, color .3s;
+  overflow-x: hidden;
+}
+button { cursor:pointer; font-family:inherit; border:none; outline:none }
+button:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
+textarea, pre, code { font-family: var(--font-mono) }
+::-webkit-scrollbar { width:5px; height:5px }
+::-webkit-scrollbar-track { background:transparent }
+::-webkit-scrollbar-thumb { background:var(--line2); border-radius:3px }
+a { color:inherit; text-decoration:none }
 
-/* ─── Layout ─── */
-.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);transition:background .25s}
-[data-theme="dark"] .header{background:rgba(22,27,34,.85)}
-.header-inner{max-width:860px;margin:0 auto;padding:0 1rem;height:56px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:34px;height:34px;background:var(--brand);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.logo-text{font-weight:700;font-size:.95rem;color:var(--text);letter-spacing:-.02em}
-.logo-sub{font-size:.7rem;color:var(--text3);display:none}
-@media(min-width:480px){.logo-sub{display:block}}
-.header-right{display:flex;align-items:center;gap:8px}
-.badge-free{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--green-l);color:var(--green);border:1px solid currentColor;letter-spacing:.03em}
-.btn-icon{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s}
-.btn-icon:hover{background:var(--brand-l);border-color:var(--brand);color:var(--brand)}
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.hdr {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(17,19,24,.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  transition: background .3s;
+}
+[data-theme="light"] .hdr {
+  background: rgba(237,240,249,.88);
+}
+.hdr-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: 0 1.25rem;
+  height: 58px;
+  display: flex; align-items:center; justify-content:space-between; gap:1rem;
+}
+.logo {
+  display:flex; align-items:center; gap:10px;
+}
+.logo-mark {
+  width:36px; height:36px;
+  background: linear-gradient(135deg, var(--lens-b), var(--lens-g));
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+  box-shadow: 0 2px 10px rgba(74,144,240,.4);
+  flex-shrink:0;
+}
+.logo-name {
+  font-weight:700; font-size:1.1rem;
+  color: var(--bright);
+  letter-spacing:-.03em;
+}
+.logo-name span { color: var(--accent) }
+.logo-tag {
+  font-size:.65rem; color:var(--dim);
+  font-family: var(--font-mono);
+  letter-spacing:.04em;
+}
+.hdr-right { display:flex; align-items:center; gap:.6rem }
+.chip {
+  font-size:.65rem; font-weight:700;
+  padding:3px 9px; border-radius:20px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.chip-free { background:var(--green-gl); color:var(--green); border:1px solid currentColor }
+.chip-lens { 
+  background: linear-gradient(90deg, rgba(74,144,240,.15), rgba(47,184,96,.15));
+  border:1px solid var(--line2); color:var(--mid);
+}
+.btn-icon {
+  width:36px; height:36px;
+  border-radius:var(--r-sm);
+  background:var(--card); border:1px solid var(--line);
+  color:var(--mid); font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.btn-icon:hover { background:var(--accent-gl); border-color:var(--accent); color:var(--accent) }
 
-.main{max-width:860px;margin:0 auto;padding:1.5rem 1rem 3rem}
+/* ══════════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════════ */
+.wrap { max-width:1100px; margin:0 auto; padding:1.5rem 1.25rem 4rem }
 
-/* ─── Drop Zone ─── */
-.drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);position:relative;user-select:none}
-.drop-zone:hover,.drop-zone.drag-over{border-color:var(--brand);background:var(--brand-l);transform:scale(1.005)}
-.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.drop-icon{width:60px;height:60px;margin:0 auto 1rem;background:var(--brand-l);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .2s}
-.drop-zone:hover .drop-icon,.drop-zone.drag-over .drop-icon{transform:scale(1.1) rotate(-3deg)}
-.drop-title{font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:.35rem}
-.drop-sub{font-size:.82rem;color:var(--text3)}
+/* ══════════════════════════════════════════════
+   HERO UPLOAD
+══════════════════════════════════════════════ */
+.upload-area {
+  position:relative;
+  border: 2px dashed var(--line2);
+  border-radius: var(--r-lg);
+  padding: 3.5rem 2rem;
+  text-align:center;
+  cursor:pointer;
+  transition:all .25s;
+  background: var(--card);
+  overflow:hidden;
+}
+.upload-area::before {
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(74,144,240,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.upload-area:hover, .upload-area.over {
+  border-color:var(--accent);
+  background:var(--accent-gl);
+  transform:scale(1.003);
+}
+.upload-area input {
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.upload-icon {
+  width:72px; height:72px; margin:0 auto 1.25rem;
+  background: linear-gradient(135deg, var(--accent-gl), var(--green-gl));
+  border:1px solid var(--line2);
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center; font-size:30px;
+  transition:transform .25s;
+}
+.upload-area:hover .upload-icon { transform:scale(1.1) rotate(-5deg) }
+.upload-title { font-size:1.15rem; font-weight:700; color:var(--bright); margin-bottom:.4rem }
+.upload-sub { font-size:.82rem; color:var(--dim); line-height:1.6 }
+.upload-sub strong { color:var(--mid) }
 
-/* ─── Thumbnails ─── */
-.thumb-section{margin-top:1.25rem}
-.thumb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
-.thumb-count{font-size:.82rem;color:var(--text2);font-weight:500}
-.thumb-count span{color:var(--text3);font-weight:400}
-.btn-clear-all{font-size:.75rem;color:var(--red);background:none;border:none;display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--radius-sm);transition:background .15s}
-.btn-clear-all:hover{background:var(--red-l)}
-.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
-.thumb-item{position:relative;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);background:var(--surface2);cursor:grab;transition:all .2s;animation:fadeIn .25s ease}
-.thumb-item:active{cursor:grabbing}
-.thumb-item.drag-src{opacity:.35;transform:scale(.93)}
-.thumb-item.drag-over-target{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-l);transform:scale(1.04)}
-.thumb-img-wrap{aspect-ratio:1;overflow:hidden;background:var(--bg)}
-.thumb-img-wrap img{width:100%;height:100%;object-fit:cover}
-.thumb-foot{padding:3px 5px;border-top:1px solid var(--border)}
-.thumb-num{font-size:9px;color:var(--text3)}
-.thumb-remove{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(220,38,38,.85);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;border:none}
-.thumb-item:hover .thumb-remove{opacity:1}
-.thumb-status{position:absolute;bottom:22px;left:3px;font-size:9px;padding:2px 5px;border-radius:4px;font-weight:600}
-.thumb-status.done{background:var(--green);color:#fff}
-.thumb-status.error{background:var(--red);color:#fff}
-.thumb-status.processing{background:var(--brand);color:#fff}
+/* ══════════════════════════════════════════════
+   PAGE STRIP (thumbnail row)
+══════════════════════════════════════════════ */
+.strip-wrap { margin-top:1.25rem }
+.strip-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:.75rem;
+}
+.strip-label { font-size:.78rem; color:var(--mid); font-family:var(--font-mono) }
+.strip-label b { color:var(--accent) }
+.strip-actions { display:flex; gap:.4rem }
 
-/* ─── Options / Settings ─── */
-.settings-panel{margin-top:1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.settings-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:none;color:var(--text2);font-size:.82rem;font-weight:500;transition:background .15s}
-.settings-toggle:hover{background:var(--surface2)}
-.settings-body{border-top:1px solid var(--border);padding:1rem;display:none;animation:fadeIn .2s ease}
-.settings-body.open{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media(max-width:520px){.settings-body.open{grid-template-columns:1fr}}
-.setting-group label.setting-label{display:block;font-size:.75rem;font-weight:600;color:var(--text3);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em}
-select.styled-select{width:100%;padding:.5rem .75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.82rem;cursor:pointer;transition:border-color .15s}
-select.styled-select:focus{border-color:var(--brand);outline:none}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.35rem 0}
-.toggle-info p{font-size:.82rem;color:var(--text);font-weight:500}
-.toggle-info small{font-size:.72rem;color:var(--text3)}
-.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0;position:absolute}
-.toggle-track{position:absolute;inset:0;background:var(--border2);border-radius:20px;cursor:pointer;transition:background .2s}
-.toggle input:checked+.toggle-track{background:var(--brand)}
-.toggle-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s;pointer-events:none}
-.toggle input:checked~.toggle-thumb{transform:translateX(16px)}
+.strip {
+  display:flex; gap:.5rem;
+  overflow-x:auto; padding-bottom:.5rem;
+  scrollbar-width:thin;
+}
+.page-thumb {
+  flex-shrink:0;
+  width:82px;
+  border-radius:var(--r-sm);
+  border:2px solid var(--line);
+  background:var(--card);
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+  overflow:hidden;
+}
+.page-thumb:hover { border-color:var(--accent); transform:translateY(-2px) }
+.page-thumb.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-gm) }
+.page-thumb.done { border-color:var(--green) }
+.page-thumb.uploading { border-color:var(--yellow) }
+.page-thumb .pt-img {
+  width:100%; aspect-ratio:.7;
+  object-fit:cover; display:block;
+  background:var(--card2);
+}
+.page-thumb .pt-foot {
+  padding:3px 5px;
+  border-top:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.page-thumb .pt-num { font-size:.6rem; color:var(--dim); font-family:var(--font-mono) }
+.page-thumb .pt-badge {
+  font-size:.55rem; font-weight:700; padding:1px 4px; border-radius:3px;
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.pt-badge.pending   { background:var(--yellow-gl); color:var(--yellow) }
+.pt-badge.uploading { background:var(--yellow-gl); color:var(--yellow) }
+.pt-badge.ready     { background:var(--accent-gl); color:var(--accent) }
+.pt-badge.done      { background:var(--green-gl);  color:var(--green) }
+.pt-badge.error     { background:var(--red-gl);    color:var(--red) }
+.page-thumb .pt-remove {
+  position:absolute; top:3px; right:3px;
+  width:16px; height:16px; border-radius:50%;
+  background:rgba(232,85,85,.85); color:#fff; font-size:9px;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .15s; border:none;
+}
+.page-thumb:hover .pt-remove { opacity:1 }
+.pt-progress {
+  position:absolute; bottom:0; left:0; right:0;
+  height:2px; background:var(--yellow);
+  animation: scan 1.2s ease-in-out infinite alternate;
+  transform-origin:left;
+}
+@keyframes scan { from{transform:scaleX(0.1)} to{transform:scaleX(1)} }
 
-/* ─── Action Bar ─── */
-.action-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:1rem}
-.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;transition:all .18s;border:1.5px solid transparent}
-.btn-primary{background:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(47,128,255,.25)}
-.btn-primary:hover:not(:disabled){background:var(--brand-d);box-shadow:0 4px 16px rgba(47,128,255,.35);transform:translateY(-1px)}
-.btn-primary:active:not(:disabled){transform:scale(.97)}
-.btn-primary:disabled{opacity:.55;cursor:not-allowed}
-.btn-secondary{background:var(--surface);color:var(--text2);border-color:var(--border)}
-.btn-secondary:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-l)}
-.btn-success{background:var(--green-l);color:var(--green);border-color:var(--green)}
-.btn-lens{background:#fff;color:#1a73e8;border:1.5px solid #4285f4;box-shadow:0 1px 4px rgba(66,133,244,.2)}
-.btn-lens:hover{background:#e8f0fe;box-shadow:0 2px 8px rgba(66,133,244,.3);transform:translateY(-1px)}
-.btn-lens img,.btn-lens .g-icon{margin-right:2px}
-.g-colors{font-weight:700;font-size:.85rem}
-.g-b{color:#4285f4}.g-r{color:#ea4335}.g-y{color:#fbbc04}.g-g{color:#34a853}
+/* ══════════════════════════════════════════════
+   ACTION ROW
+══════════════════════════════════════════════ */
+.action-row {
+  display:flex; flex-wrap:wrap; gap:.6rem; align-items:center;
+  margin-top:1rem;
+}
+.btn {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.55rem 1.1rem;
+  border-radius:var(--r-sm);
+  font-size:.82rem; font-weight:600;
+  border:1.5px solid transparent;
+  transition:all .2s;
+  letter-spacing:-.01em;
+}
+.btn:disabled { opacity:.45; cursor:not-allowed }
+.btn-primary {
+  background:var(--accent); color:#fff;
+  box-shadow:0 2px 10px rgba(74,144,240,.35);
+}
+.btn-primary:hover:not(:disabled) {
+  background:var(--accent-d);
+  box-shadow:0 4px 18px rgba(74,144,240,.5);
+  transform:translateY(-1px);
+}
+.btn-secondary {
+  background:var(--card); color:var(--mid);
+  border-color:var(--line);
+}
+.btn-secondary:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-gl) }
+.btn-success {
+  background:var(--green-gl); color:var(--green); border-color:var(--green);
+}
+.btn-danger {
+  background:var(--red-gl); color:var(--red); border-color:var(--red);
+}
 
-/* ─── Progress ─── */
-.progress-wrap{margin-top:.75rem;animation:slideUp .3s ease}
-.progress-info{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text2);margin-bottom:.35rem}
-.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;display:flex}
-.progress-done{height:100%;background:var(--green);transition:width .4s ease}
-.progress-err{height:100%;background:var(--red);transition:width .4s ease}
-.progress-proc{height:100%;background:var(--brand);transition:width .4s ease;animation:pulse 1.5s ease-in-out infinite}
-.progress-tags{display:flex;gap:.75rem;margin-top:.3rem}
-.ptag{font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:3px}
-.ptag::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%}
-.ptag.t-done::before{background:var(--green)}
-.ptag.t-err::before{background:var(--red)}
-.ptag.t-proc::before{background:var(--brand);animation:pulse 1.5s ease-in-out infinite}
+/* ══════════════════════════════════════════════
+   UPLOAD PROGRESS
+══════════════════════════════════════════════ */
+.upl-progress {
+  margin-top:.75rem;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:.7rem 1rem;
+  font-size:.75rem; color:var(--mid);
+  display:none;
+}
+.upl-progress.show { display:flex; align-items:center; gap:.7rem }
+.upl-bar-wrap { flex:1; height:4px; background:var(--line); border-radius:2px; overflow:hidden }
+.upl-bar { height:100%; background:var(--accent); border-radius:2px; transition:width .4s ease }
 
-/* ─── Results ─── */
-.results-section{margin-top:1.5rem}
-.tabs{display:flex;gap:3px;padding:4px;background:var(--surface2);border-radius:var(--radius-sm);width:fit-content;border:1px solid var(--border);margin-bottom:1rem}
-.tab{padding:.4rem 1rem;border-radius:6px;font-size:.78rem;font-weight:600;background:none;color:var(--text3);transition:all .18s;display:flex;align-items:center;gap:5px}
-.tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow);border:1px solid var(--border)}
-.tab-panel{display:none}
-.tab-panel.active{display:block;animation:fadeIn .2s ease}
+/* ══════════════════════════════════════════════
+   MAIN WORKSPACE
+══════════════════════════════════════════════ */
+.workspace {
+  margin-top:1.5rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+  min-height:420px;
+}
+@media (max-width:700px) {
+  .workspace { grid-template-columns:1fr }
+}
 
-/* ─── Result Card ─── */
-.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem;transition:box-shadow .2s;animation:slideUp .3s ease}
-.result-card:hover{box-shadow:var(--shadow)}
-.result-head{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;cursor:pointer;user-select:none;transition:background .15s}
-.result-head:hover{background:var(--surface2)}
-.rh-thumb{width:38px;height:38px;border-radius:8px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;background:var(--bg)}
-.rh-thumb img{width:100%;height:100%;object-fit:cover}
-.rh-info{flex:1;min-width:0}
-.rh-title{font-size:.82rem;font-weight:600;color:var(--text)}
-.rh-meta{font-size:.7rem;color:var(--text3);margin-top:2px;display:flex;gap:.5rem;flex-wrap:wrap}
-.status-pill{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.02em;white-space:nowrap}
-.sp-pending{background:var(--yellow-l);color:var(--yellow)}
-.sp-processing{background:var(--brand-l);color:var(--brand)}
-.sp-done{background:var(--green-l);color:var(--green)}
-.sp-error{background:var(--red-l);color:var(--red)}
-.rh-actions{display:flex;align-items:center;gap:6px}
-.btn-copy-card{font-size:.72rem;padding:4px 10px;gap:4px;display:flex;align-items:center;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);transition:all .15s}
-.btn-copy-card:hover{background:var(--brand-l);border-color:var(--brand);color:var(--brand)}
-.btn-copy-card.copied{background:var(--green-l);border-color:var(--green);color:var(--green)}
-.chevron{font-size:12px;color:var(--text3);transition:transform .2s;flex-shrink:0}
-.chevron.open{transform:rotate(180deg)}
-.result-body{border-top:1px solid var(--border);display:none;animation:fadeIn .18s ease}
-.result-body.open{display:block}
-.result-body pre{padding:1rem;font-size:.8rem;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:480px}
-.result-loading{padding:2.5rem;text-align:center;color:var(--text2);font-size:.82rem}
-.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto .75rem}
-.result-error{padding:1rem;font-size:.78rem;color:var(--red);background:var(--red-l);font-family:monospace}
+/* ── Preview Panel ── */
+.preview-panel {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.panel-hdr {
+  padding:.65rem 1rem;
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:.4rem;
+}
+.panel-title {
+  font-size:.78rem; font-weight:700; color:var(--mid);
+  font-family:var(--font-mono); letter-spacing:.04em; text-transform:uppercase;
+}
+.panel-title b { color:var(--accent) }
+.preview-img-wrap {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  background:var(--ink); position:relative; overflow:hidden;
+  min-height:240px;
+}
+.preview-img-wrap img {
+  max-width:100%; max-height:480px;
+  object-fit:contain; display:block;
+}
+.preview-empty {
+  color:var(--dim); text-align:center; padding:3rem 2rem;
+  font-size:.82rem;
+}
+.preview-empty .big { font-size:2.5rem; margin-bottom:.75rem }
 
-/* ─── All Text Panel ─── */
-.all-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.all-head{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap;gap:.5rem}
-.all-stats{font-size:.75rem;color:var(--text3);display:flex;gap:.75rem}
-.all-actions{display:flex;gap:.4rem}
-.all-body pre{padding:1rem;font-size:.78rem;line-height:1.8;color:var(--text);white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:600px}
-.all-empty{padding:3rem;text-align:center;color:var(--text3);font-size:.82rem}
+/* ── Text Panel ── */
+.text-panel {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.txt-body { flex:1; display:flex; flex-direction:column; padding:.8rem }
+.txt-body textarea {
+  flex:1;
+  width:100%; min-height:280px;
+  background:var(--card2);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-size:.78rem; line-height:1.8;
+  padding:.75rem;
+  resize:vertical;
+  transition:border-color .2s;
+}
+.txt-body textarea:focus { border-color:var(--accent); outline:none }
+.txt-body textarea::placeholder { color:var(--dim) }
+.txt-foot {
+  display:flex; align-items:center; gap:.5rem;
+  padding:.6rem 0 0; flex-wrap:wrap;
+}
+.txt-stats { font-size:.7rem; color:var(--dim); font-family:var(--font-mono); flex:1 }
 
-/* ─── Empty State ─── */
-.empty-state{text-align:center;padding:4rem 2rem;color:var(--text3)}
-.empty-state .emoji{font-size:3rem;margin-bottom:1rem}
-.empty-state p{font-size:.85rem;margin-bottom:.25rem}
-.empty-state small{font-size:.75rem}
+/* ══════════════════════════════════════════════
+   LENS LAUNCH SECTION
+══════════════════════════════════════════════ */
+.lens-launch {
+  margin-top:1rem;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); padding:1rem 1.25rem;
+}
+.lens-launch-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:.75rem; flex-wrap:wrap; gap:.5rem;
+}
+.ll-title {
+  font-size:.82rem; font-weight:700;
+  display:flex; align-items:center; gap:.5rem;
+}
+.g-logo { font-weight:800; font-size:.88rem; letter-spacing:-.02em }
+.g-b{color:#4a90f0}.g-r{color:#e85555}.g-y{color:#f5a623}.g-g{color:#2fb860}
+.ll-sub { font-size:.72rem; color:var(--dim); margin-top:.15rem }
 
-/* ─── Toast ─── */
-.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.4rem;pointer-events:none}
-.toast{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.78rem;font-weight:500;color:var(--text);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:.5rem;animation:slideRight .25s ease;pointer-events:all;min-width:200px}
-.toast.success{border-color:var(--green);color:var(--green)}
-.toast.error{border-color:var(--red);color:var(--red)}
-.toast.fade-out{animation:fadeOut .3s ease forwards}
+.lens-pages-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap:.6rem;
+}
+.lens-page-card {
+  background:var(--card2); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:.6rem .75rem;
+  display:flex; flex-direction:column; gap:.4rem;
+  transition:all .2s;
+}
+.lens-page-card.active-page { border-color:var(--accent); background:var(--accent-gl) }
+.lens-page-card.card-done { border-color:var(--green); background:var(--green-gl) }
+.lpc-num { font-size:.65rem; color:var(--dim); font-family:var(--font-mono) }
+.lpc-name { font-size:.72rem; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.lpc-status { font-size:.65rem; font-weight:700 }
+.lpc-status.pending   { color:var(--yellow) }
+.lpc-status.uploading { color:var(--yellow) }
+.lpc-status.ready     { color:var(--accent) }
+.lpc-status.done      { color:var(--green) }
+.lpc-status.error     { color:var(--red) }
+.lpc-btn {
+  padding:.3rem .6rem; border-radius:6px;
+  font-size:.68rem; font-weight:600;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; gap:3px;
+  justify-content:center;
+  transition:all .2s; border:none; cursor:pointer;
+}
+.lpc-btn:hover { background:var(--accent-d); transform:translateY(-1px) }
+.lpc-btn:disabled { opacity:.4; cursor:not-allowed }
+.lpc-btn.done-btn { background:var(--green-gl); color:var(--green); border:1px solid var(--green) }
 
-/* ─── Info Bar ─── */
-.info-bar{background:var(--brand-l);border:1px solid var(--brand);border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.75rem;color:var(--brand);display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+/* ══════════════════════════════════════════════
+   ALL RESULTS
+══════════════════════════════════════════════ */
+.results-section {
+  margin-top:1.5rem;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); overflow:hidden;
+}
+.results-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.75rem 1.25rem;
+  border-bottom:1px solid var(--line);
+  background:var(--card2); flex-wrap:wrap; gap:.5rem;
+}
+.results-meta { font-size:.75rem; color:var(--dim); font-family:var(--font-mono) }
+.results-meta b { color:var(--green) }
+.results-body {
+  padding:1rem 1.25rem;
+}
+.all-textarea {
+  width:100%; min-height:200px; max-height:500px;
+  background:var(--card2); border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  color:var(--text); font-size:.78rem; line-height:1.8;
+  padding:.75rem; resize:vertical;
+}
+.all-textarea:focus { border-color:var(--accent); outline:none }
 
-/* ─── Lens Modal ─── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:slideUp .3s ease}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
-.modal-title{font-size:.9rem;font-weight:700;color:var(--text)}
-.modal-body{padding:1.25rem}
-.modal-step{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.9rem}
-.step-num{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.step-text{font-size:.8rem;color:var(--text2);line-height:1.5}
-.step-text strong{color:var(--text)}
-.modal-foot{padding:.75rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end}
+/* ══════════════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════════════ */
+.how-strip {
+  margin-top:1.25rem;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.75rem;
+}
+.how-card {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r); padding:.85rem 1rem;
+  display:flex; gap:.75rem; align-items:flex-start;
+}
+.how-num {
+  width:28px; height:28px; flex-shrink:0;
+  background:var(--accent-gl); color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:50%;
+  font-family:var(--font-mono); font-size:.75rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+.how-txt p { font-size:.78rem; font-weight:600; color:var(--text); margin-bottom:.15rem }
+.how-txt small { font-size:.7rem; color:var(--dim); line-height:1.5 }
 
-/* ─── Animations ─── */
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes fadeOut{to{opacity:0;transform:translateX(20px)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+.toasts {
+  position:fixed; bottom:1.25rem; right:1.25rem;
+  z-index:9999; display:flex; flex-direction:column; gap:.4rem;
+  pointer-events:none;
+}
+.toast {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:.6rem 1rem;
+  font-size:.78rem; font-weight:500; color:var(--text);
+  box-shadow:var(--shadow-lg);
+  display:flex; align-items:center; gap:.5rem;
+  animation:slideRight .25s ease; pointer-events:all;
+  min-width:200px; max-width:320px;
+}
+.toast.ok  { border-color:var(--green); color:var(--green) }
+.toast.err { border-color:var(--red); color:var(--red) }
+.toast.out { animation:fadeOut .3s ease forwards }
+@keyframes slideRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
+@keyframes fadeOut    { to{opacity:0;transform:translateX(24px)} }
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+.modal-bg {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,.65); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+  padding:1rem; animation:fadeIn .2s;
+}
+.modal-bg.open { display:flex }
+.modal {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); max-width:480px; width:100%;
+  box-shadow:var(--shadow-lg); animation:slideUp .3s ease;
+}
+.modal-hdr {
+  padding:1rem 1.25rem; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.modal-title { font-size:.9rem; font-weight:700; color:var(--bright) }
+.modal-body { padding:1.25rem }
+.modal-ftr {
+  padding:.75rem 1.25rem; border-top:1px solid var(--line);
+  display:flex; gap:.5rem; justify-content:flex-end;
+}
+.step-row { display:flex; gap:.75rem; margin-bottom:.9rem; align-items:flex-start }
+.step-n {
+  width:22px; height:22px; flex-shrink:0;
+  background:var(--accent); color:#fff;
+  border-radius:50%; font-size:.7rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+.step-t { font-size:.8rem; color:var(--mid); line-height:1.55 }
+.step-t strong { color:var(--text) }
+
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════════════════════════════════════════════
+   SPINNER
+══════════════════════════════════════════════ */
+.spin {
+  display:inline-block; width:14px; height:14px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff; border-radius:50%;
+  animation:rot .7s linear infinite;
+}
+@keyframes rot { to{transform:rotate(360deg)} }
+
+/* ══════════════════════════════════════════════
+   UTILITY
+══════════════════════════════════════════════ */
+.hidden { display:none !important }
+.mt-sm  { margin-top:.5rem }
+.flex   { display:flex }
+.gap-sm { gap:.4rem }
+.flex-1 { flex:1 }
 </style>
 </head>
 <body>
 
-<!-- Header -->
-<header class="header">
-  <div class="header-inner">
-    <a class="logo" href="#">
-      <div class="logo-icon">🔍</div>
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">
+      <div class="logo-mark">🔍</div>
       <div>
-        <div class="logo-text">LensOCR</div>
-        <div class="logo-sub">ছবি থেকে Text Extract</div>
+        <div class="logo-name">Lens<span>Flow</span></div>
+        <div class="logo-tag">Google Lens OCR Studio</div>
       </div>
-    </a>
-    <div class="header-right">
-      <span class="badge-free">100% FREE</span>
-      <div id="statsBar" style="display:none;font-size:.72rem;color:var(--text3);padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px"></div>
-      <button class="btn-icon" id="themeBtn" title="Toggle theme">🌙</button>
+    </div>
+    <div class="hdr-right">
+      <span class="chip chip-free">Free</span>
+      <span class="chip chip-lens">No API</span>
+      <div id="statsChip" class="chip chip-lens hidden"></div>
+      <button class="btn-icon" id="themeBtn" title="Toggle theme">☀️</button>
+      <button class="btn-icon" id="helpBtn" title="How it works">❓</button>
     </div>
   </div>
 </header>
 
-<main class="main">
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="wrap">
 
-  <!-- Drop Zone -->
-  <div class="drop-zone" id="dropZone">
-    <input type="file" id="fileInput" accept="image/*" multiple />
-    <div class="drop-icon">📷</div>
-    <div class="drop-title">ছবি drag করুন বা click করুন</div>
-    <div class="drop-sub">JPG · PNG · WEBP · GIF · BMP &nbsp;|&nbsp; একসাথে ২০টি পর্যন্ত · সর্বোচ্চ ১৫MB</div>
-  </div>
-
-  <!-- Thumbnails -->
-  <div class="thumb-section" id="thumbSection" style="display:none">
-    <div class="thumb-header">
-      <div class="thumb-count" id="thumbCount"></div>
-      <button class="btn-clear-all" id="clearAllBtn">✕ সব মুছুন</button>
-    </div>
-    <div class="thumb-grid" id="thumbGrid"></div>
-  </div>
-
-  <!-- Settings -->
-  <div class="settings-panel" id="settingsPanel" style="display:none">
-    <button class="settings-toggle" id="settingsToggle">
-      <span>⚙️ &nbsp;অপশন ও সেটিংস</span>
-      <span id="settingsChevron">▾</span>
-    </button>
-    <div class="settings-body" id="settingsBody">
-      <div class="setting-group">
-        <label class="setting-label" for="langSelect">🌐 ভাষা</label>
-        <select class="styled-select" id="langSelect">
-          <option value="auto">Auto detect (সব ভাষা)</option>
-          <optgroup label="দক্ষিণ এশিয়া">
-            <option value="ben">বাংলা (Bengali)</option>
-            <option value="hin">হিন্দি (Hindi)</option>
-            <option value="urd">উর্দু (Urdu)</option>
-            <option value="tam">তামিল (Tamil)</option>
-          </optgroup>
-          <optgroup label="আন্তর্জাতিক">
-            <option value="eng" selected>English</option>
-            <option value="ara">Arabic</option>
-            <option value="chi_sim">Chinese (Simplified)</option>
-            <option value="jpn">Japanese</option>
-            <option value="kor">Korean</option>
-            <option value="fra">French</option>
-            <option value="deu">German</option>
-            <option value="spa">Spanish</option>
-            <option value="rus">Russian</option>
-            <option value="por">Portuguese</option>
-          </optgroup>
-        </select>
+  <!-- HOW IT WORKS (collapsible info) -->
+  <div class="how-strip" id="howStrip">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <div class="how-txt">
+        <p>Upload করুন</p>
+        <small>Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small>
       </div>
-      <div class="setting-group">
-        <label class="setting-label">🛠 অপশন</label>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <p>Formatting সংরক্ষণ</p>
-            <small>লাইন ব্রেক ধরে রাখো</small>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="toggleFormat" checked />
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <p>Auto-expand result</p>
-            <small>Extract শেষে auto-খুলুন</small>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="toggleExpand" checked />
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <p>Processing Mode</p>
-            <small>একসাথে না একটা একটা</small>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="toggleParallel" />
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
-        </div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <div class="how-txt">
+        <p>Auto-Upload</p>
+        <small>প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small>
+      </div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <div class="how-txt">
+        <p>Google Lens</p>
+        <small>সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small>
+      </div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">4</div>
+      <div class="how-txt">
+        <p>Copy & Paste</p>
+        <small>Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small>
       </div>
     </div>
   </div>
 
-  <!-- Action Bar -->
-  <div class="action-bar" id="actionBar" style="display:none">
-    <button class="btn btn-primary" id="extractBtn">
-      <span>🔍</span> Text Extract করুন (Tesseract)
-    </button>
-    <button class="btn btn-lens" id="lensBtn">
-      <span class="g-colors"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
-      Lens-এ খুলুন
-    </button>
-    <button class="btn btn-secondary" id="copyAllBtn" style="display:none">📋 সব Copy</button>
-    <button class="btn btn-secondary" id="downloadBtn" style="display:none">💾 .txt Download</button>
-  </div>
-
-  <!-- Progress -->
-  <div class="progress-wrap" id="progressWrap" style="display:none">
-    <div class="progress-info">
-      <span id="progressLabel">Processing…</span>
-      <span id="progressPct">0%</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-done" id="pDone" style="width:0%"></div>
-      <div class="progress-err" id="pErr" style="width:0%"></div>
-      <div class="progress-proc" id="pProc" style="width:0%"></div>
-    </div>
-    <div class="progress-tags">
-      <span class="ptag t-done" id="ptDone" style="display:none"></span>
-      <span class="ptag t-err" id="ptErr" style="display:none"></span>
-      <span class="ptag t-proc" id="ptProc" style="display:none"></span>
+  <!-- UPLOAD ZONE -->
+  <div class="upload-area" id="uploadArea" style="margin-top:1.25rem">
+    <input type="file" id="fileInput" accept="image/*,.pdf" multiple/>
+    <div class="upload-icon">📂</div>
+    <div class="upload-title">ছবি বা PDF drag করুন / click করুন</div>
+    <div class="upload-sub">
+      <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
+      PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages
     </div>
   </div>
 
-  <!-- Results -->
-  <div class="results-section" id="resultsSection" style="display:none">
-    <div class="tabs">
-      <button class="tab active" data-tab="pages">📄 পেজ অনুযায়ী</button>
-      <button class="tab" data-tab="all">📋 সব একসাথে</button>
+  <!-- PAGE STRIP -->
+  <div id="stripWrap" class="strip-wrap hidden">
+    <div class="strip-hdr">
+      <div class="strip-label">পেজ: <b id="pageCount">0</b> টি লোড হয়েছে</div>
+      <div class="strip-actions">
+        <button class="btn btn-secondary" id="uploadAllBtn" style="font-size:.75rem;padding:.4rem .8rem">
+          ☁️ সব Upload করুন
+        </button>
+        <button class="btn btn-danger" id="clearBtn" style="font-size:.75rem;padding:.4rem .8rem">
+          ✕ মুছুন
+        </button>
+      </div>
     </div>
-    <div class="tab-panel active" id="panel-pages"></div>
-    <div class="tab-panel" id="panel-all">
-      <div class="all-panel">
-        <div class="all-head">
-          <div class="all-stats" id="allStats"></div>
-          <div class="all-actions">
-            <button class="btn btn-secondary" style="font-size:.72rem;padding:5px 10px" id="downloadBtnAll">💾 Download</button>
-            <button class="btn btn-primary" style="font-size:.72rem;padding:5px 10px" id="copyBtnAll">📋 সব Copy</button>
-          </div>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <!-- UPLOAD PROGRESS -->
+  <div class="upl-progress" id="uplProgress">
+    <span id="uplLabel">Uploading...</span>
+    <div class="upl-bar-wrap"><div class="upl-bar" id="uplBar" style="width:0%"></div></div>
+    <span id="uplPct">0%</span>
+  </div>
+
+  <!-- ACTION ROW -->
+  <div class="action-row hidden" id="actionRow">
+    <button class="btn btn-primary" id="openAllLensBtn">
+      <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
+      &nbsp;Lens-এ সব খুলুন (page by page)
+    </button>
+    <button class="btn btn-secondary hidden" id="copyAllBtn">📋 সব Text Copy</button>
+    <button class="btn btn-secondary hidden" id="downloadBtn">💾 .txt Download</button>
+    <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 Merged Copy</button>
+  </div>
+
+  <!-- WORKSPACE (preview + text editor) -->
+  <div class="workspace hidden" id="workspace">
+    <!-- Preview -->
+    <div class="preview-panel">
+      <div class="panel-hdr">
+        <div class="panel-title">👁 Preview — পেজ <b id="previewPageNum">1</b></div>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
+          <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
         </div>
-        <div class="all-body"><pre id="allTextPre">Extract করার পরে এখানে সব text দেখাবে…</pre></div>
+      </div>
+      <div class="preview-img-wrap" id="previewImgWrap">
+        <div class="preview-empty">
+          <div class="big">🖼</div>
+          <p>কোনো পেজ select করুন</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text Editor -->
+    <div class="text-panel">
+      <div class="panel-hdr">
+        <div class="panel-title">✏️ Text — পেজ <b id="textPageNum">1</b></div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📋 Paste</button>
+          <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">🔍 Lens</button>
+        </div>
+      </div>
+      <div class="txt-body">
+        <textarea id="textArea" placeholder="Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...&#10;&#10;অথবা উপরের 'Lens' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।"></textarea>
+        <div class="txt-foot">
+          <span class="txt-stats" id="txtStats">0 chars · 0 words</span>
+          <button class="btn btn-secondary" id="clearTxtBtn" style="padding:.3rem .7rem;font-size:.72rem">✕ Clear</button>
+          <button class="btn btn-success" id="saveTxtBtn" style="padding:.3rem .9rem;font-size:.75rem">✓ Save & Next</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Empty state -->
-  <div class="empty-state" id="emptyState">
-    <div class="emoji">🖼️</div>
-    <p>ছবি আপলোড করুন — AI instantly text বের করে দেবে</p>
-    <small>বাংলা · English · Arabic · Hindi সহ ১৫+ ভাষা · কোনো signup বা payment নেই</small>
+  <!-- LENS GRID (all pages at once) -->
+  <div id="lensSection" class="lens-launch hidden">
+    <div class="lens-launch-hdr">
+      <div>
+        <div class="ll-title">
+          <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
+          &nbsp;Lens — সব পেজ
+        </div>
+        <div class="ll-sub">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Status দেখুন।</div>
+      </div>
+      <button class="btn btn-primary" id="lensAllGridBtn">🚀 সব Lens খুলুন</button>
+    </div>
+    <div class="lens-pages-grid" id="lensGrid"></div>
+  </div>
+
+  <!-- ALL RESULTS -->
+  <div class="results-section hidden" id="resultsSection">
+    <div class="results-hdr">
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--bright)">📋 All Extracted Text</div>
+        <div class="results-meta" id="allMeta">0 pages · 0 chars · 0 words</div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-secondary" id="allCopyBtn" style="font-size:.75rem;padding:.4rem .8rem">📋 Copy All</button>
+        <button class="btn btn-secondary" id="allDlBtn" style="font-size:.75rem;padding:.4rem .8rem">💾 Download</button>
+      </div>
+    </div>
+    <div class="results-body">
+      <textarea class="all-textarea" id="allTextarea" readonly placeholder="এখানে সব পেজের extracted text দেখাবে..."></textarea>
+    </div>
   </div>
 
 </main>
 
-<!-- Google Lens Modal -->
-<div class="modal-overlay" id="lensModal">
+<!-- HELP MODAL -->
+<div class="modal-bg" id="helpModal">
   <div class="modal">
-    <div class="modal-head">
-      <span class="modal-title">🔍 Google Lens-এ কীভাবে করবেন</span>
-      <button class="btn-icon" id="modalClose" style="width:28px;height:28px;font-size:14px">✕</button>
+    <div class="modal-hdr">
+      <div class="modal-title">🔍 কীভাবে ব্যবহার করবেন</div>
+      <button class="btn-icon" id="helpClose">✕</button>
     </div>
     <div class="modal-body">
-      <div class="info-bar">💡 Google Lens সরাসরি API দেয় না — তাই manually করতে হবে</div>
-      <div class="modal-step">
-        <div class="step-num">1</div>
-        <div class="step-text"><strong>নিচের "Google Lens খুলুন" বাটনে click করুন</strong> — Google Images খুলবে</div>
+      <div class="step-row">
+        <div class="step-n">1</div>
+        <div class="step-t"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div>
       </div>
-      <div class="modal-step">
-        <div class="step-num">2</div>
-        <div class="step-text"><strong>Camera icon-এ click করুন</strong> → "Upload a file" বেছে নিন</div>
+      <div class="step-row">
+        <div class="step-n">2</div>
+        <div class="step-t"><strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।</div>
       </div>
-      <div class="modal-step">
-        <div class="step-num">3</div>
-        <div class="step-text"><strong>আপনার ছবি upload করুন</strong> — Google Lens automatically text detect করবে</div>
+      <div class="step-row">
+        <div class="step-n">3</div>
+        <div class="step-t"><strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div>
       </div>
-      <div class="modal-step">
-        <div class="step-num">4</div>
-        <div class="step-text"><strong>"Text" tab-এ click করুন</strong> → সব text select করে copy করুন</div>
+      <div class="step-row">
+        <div class="step-n">4</div>
+        <div class="step-t"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div>
+      </div>
+      <div class="step-row">
+        <div class="step-n">5</div>
+        <div class="step-t"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div>
+      </div>
+      <div style="background:var(--yellow-gl);border:1px solid var(--yellow);border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.75rem;color:var(--mid);margin-top:.5rem">
+        💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn btn-secondary" id="modalClose2">বন্ধ করুন</button>
-      <a href="https://lens.google.com/search?ep=ccm&s=4" target="_blank" rel="noopener" class="btn btn-lens" style="text-decoration:none">
-        <span class="g-colors"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
-        Lens খুলুন →
-      </a>
+    <div class="modal-ftr">
+      <button class="btn btn-primary" id="helpOk">বুঝেছি ✓</button>
     </div>
   </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
 
-<script>
-// ─── State ───────────────────────────────────────────────
+<script type="module">
+// ══════════════════════════════════════════
+// PDF.js setup
+// ══════════════════════════════════════════
+import * as pdfjs from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
 const state = {
-  images: [],       // {id, file, url, name, size}
-  results: {},      // id → {status, text, error, duration}
-  running: false,
-  dragSrcId: null,
+  pages: [],     // { id, name, blob, url, status:'pending'|'uploading'|'ready'|'done'|'error', remoteUrl:'', text:'' }
+  current: 0,    // active page index
+};
+
+// ══════════════════════════════════════════
+// DOM REFS
+// ══════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const uploadArea   = $('uploadArea');
+const fileInput    = $('fileInput');
+const stripWrap    = $('stripWrap');
+const strip        = $('strip');
+const pageCount    = $('pageCount');
+const uplProgress  = $('uplProgress');
+const uplBar       = $('uplBar');
+const uplLabel     = $('uplLabel');
+const uplPct       = $('uplPct');
+const actionRow    = $('actionRow');
+const workspace    = $('workspace');
+const lensSection  = $('lensSection');
+const lensGrid     = $('lensGrid');
+const resultsSection = $('resultsSection');
+const textArea     = $('textArea');
+const allTextarea  = $('allTextarea');
+
+// ══════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════
+const html = document.documentElement;
+$('themeBtn').onclick = () => {
+  const isDark = html.dataset.theme === 'dark';
+  html.dataset.theme = isDark ? 'light' : 'dark';
+  $('themeBtn').textContent = isDark ? '🌙' : '☀️';
+};
+
+// ══════════════════════════════════════════
+// HELP MODAL
+// ══════════════════════════════════════════
+$('helpBtn').onclick = () => $('helpModal').classList.add('open');
+$('helpClose').onclick = () => $('helpModal').classList.remove('open');
+$('helpOk').onclick = () => $('helpModal').classList.remove('open');
+$('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open') };
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='', dur=3000) {
+  const el = document.createElement('div');
+  el.className = `toast${type ? ' '+type : ''}`;
+  el.textContent = msg;
+  $('toasts').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(()=>el.remove(), 400) }, dur);
 }
 
-// ─── DOM ─────────────────────────────────────────────────
-const $ = id => document.getElementById(id)
-const dropZone    = $('dropZone')
-const fileInput   = $('fileInput')
-const thumbSection= $('thumbSection')
-const thumbGrid   = $('thumbGrid')
-const thumbCount  = $('thumbCount')
-const settingsPanel=$('settingsPanel')
-const settingsBody= $('settingsBody')
-const settingsChev= $('settingsChevron')
-const actionBar   = $('actionBar')
-const extractBtn  = $('extractBtn')
-const lensBtn     = $('lensBtn')
-const copyAllBtn  = $('copyAllBtn')
-const downloadBtn = $('downloadBtn')
-const progressWrap= $('progressWrap')
-const resultsSection=$('resultsSection')
-const emptyState  = $('emptyState')
-const panelPages  = $('panel-pages')
-const allTextPre  = $('allTextPre')
-const allStats    = $('allStats')
-const lensModal   = $('lensModal')
-const statsBar    = $('statsBar')
+// ══════════════════════════════════════════
+// UPLOAD HANDLER
+// ══════════════════════════════════════════
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('over') });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('over'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('over'); handleFiles(e.dataTransfer.files) });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
-// ─── Theme ───────────────────────────────────────────────
-const themeBtn = $('themeBtn')
-let dark = localStorage.getItem('theme') === 'dark' ||
-  (!localStorage.getItem('theme') && matchMedia('(prefers-color-scheme:dark)').matches)
-function applyTheme() {
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-  themeBtn.textContent = dark ? '☀️' : '🌙'
-}
-applyTheme()
-themeBtn.onclick = () => { dark = !dark; localStorage.setItem('theme', dark?'dark':'light'); applyTheme() }
-
-// ─── Settings toggle ─────────────────────────────────────
-$('settingsToggle').onclick = () => {
-  const open = settingsBody.classList.toggle('open')
-  settingsChev.textContent = open ? '▴' : '▾'
-}
-
-// ─── Tab switching ───────────────────────────────────────
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'))
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
-    btn.classList.add('active')
-    $(`panel-${btn.dataset.tab}`).classList.add('active')
-  }
-})
-
-// ─── Drop zone ───────────────────────────────────────────
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over') })
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'))
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('drag-over')
-  addFiles(e.dataTransfer.files)
-})
-fileInput.addEventListener('change', e => { addFiles(e.target.files); e.target.value = '' })
-
-const MAX_FILES = 20, MAX_MB = 15
-const ACCEPTED = ['image/jpeg','image/png','image/webp','image/gif','image/bmp']
-
-function addFiles(fileList) {
-  const arr = Array.from(fileList)
-  let added = 0, skipped = []
-  for (const f of arr) {
-    if (state.images.length >= MAX_FILES) { skipped.push('limit reached'); break }
-    if (!ACCEPTED.includes(f.type)) { skipped.push(`${f.name}: unsupported format`); continue }
-    if (f.size > MAX_MB * 1024 * 1024) { skipped.push(`${f.name}: too large`); continue }
-    const dup = state.images.find(i => i.name === f.name && i.size === f.size)
-    if (dup) continue
-    state.images.push({ id: uid(), file: f, url: URL.createObjectURL(f), name: f.name, size: f.size })
-    added++
-  }
-  if (skipped.length) toast(skipped[0], 'error')
-  if (added) { renderThumbs(); updateUI() }
-}
-
-function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2,8)}` }
-
-// ─── Thumbnails ──────────────────────────────────────────
-function renderThumbs() {
-  thumbGrid.innerHTML = ''
-  state.images.forEach((img, i) => {
-    const r = state.results[img.id]
-    const statusHtml = r ? `<div class="thumb-status ${r.status}">${
-      r.status==='done'?'✓':r.status==='error'?'✗':r.status==='processing'?'…':''
-    }</div>` : ''
-    const el = document.createElement('div')
-    el.className = 'thumb-item'
-    el.dataset.id = img.id
-    el.draggable = !state.running
-    el.innerHTML = `
-      <div class="thumb-img-wrap"><img src="${img.url}" alt="" loading="lazy"/></div>
-      <div class="thumb-foot"><span class="thumb-num">পেজ ${i+1} · ${fmtBytes(img.size)}</span></div>
-      ${statusHtml}
-      ${!state.running ? `<button class="thumb-remove" data-id="${img.id}" title="Remove">✕</button>` : ''}
-    `
-    // drag events
-    el.addEventListener('dragstart', () => { state.dragSrcId = img.id; el.classList.add('drag-src') })
-    el.addEventListener('dragend', () => { el.classList.remove('drag-src'); state.dragSrcId = null; renderThumbs() })
-    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over-target') })
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over-target'))
-    el.addEventListener('drop', e => {
-      e.preventDefault(); el.classList.remove('drag-over-target')
-      if (!state.dragSrcId || state.dragSrcId === img.id) return
-      const srcIdx = state.images.findIndex(x => x.id === state.dragSrcId)
-      const tgtIdx = i
-      const [moved] = state.images.splice(srcIdx, 1)
-      state.images.splice(tgtIdx, 0, moved)
-      renderThumbs()
-    })
-    thumbGrid.appendChild(el)
-  })
-  // remove buttons
-  thumbGrid.querySelectorAll('.thumb-remove').forEach(btn => {
-    btn.onclick = e => { e.stopPropagation(); removeImage(btn.dataset.id) }
-  })
-}
-
-function removeImage(id) {
-  const img = state.images.find(i => i.id === id)
-  if (img) URL.revokeObjectURL(img.url)
-  state.images = state.images.filter(i => i.id !== id)
-  delete state.results[id]
-  renderThumbs(); updateUI()
-  if (state.images.length === 0) {
-    resultsSection.style.display = 'none'
-    progressWrap.style.display = 'none'
-  }
-}
-
-$('clearAllBtn').onclick = clearAll
-function clearAll() {
-  state.images.forEach(i => URL.revokeObjectURL(i.url))
-  state.images = []; state.results = {}
-  renderThumbs(); updateUI()
-  resultsSection.style.display = 'none'
-  progressWrap.style.display = 'none'
-  panelPages.innerHTML = ''
-  allTextPre.textContent = ''
-  copyAllBtn.style.display = 'none'
-  downloadBtn.style.display = 'none'
-  statsBar.style.display = 'none'
-}
-
-// ─── UI state ────────────────────────────────────────────
-function updateUI() {
-  const has = state.images.length > 0
-  thumbSection.style.display = has ? '' : 'none'
-  settingsPanel.style.display = has ? '' : 'none'
-  actionBar.style.display = has ? '' : 'none'
-  emptyState.style.display = has ? 'none' : ''
-  thumbCount.innerHTML = `<strong>${state.images.length}টি ছবি</strong> <span>(drag করে সাজান)</span>`
-  extractBtn.disabled = state.running || !has
-  extractBtn.textContent = state.running ? '⏳ Processing…' : '🔍 Text Extract করুন (Tesseract)'
-}
-
-// ─── Extraction ──────────────────────────────────────────
-extractBtn.onclick = runExtraction
-
-async function runExtraction() {
-  if (state.running || !state.images.length) return
-  state.running = true
-  updateUI()
-
-  const lang = $('langSelect').value === 'auto' ? 'eng+ben' : $('langSelect').value
-  const parallel = $('toggleParallel').checked
-
-  // init results
-  panelPages.innerHTML = ''
-  state.images.forEach(img => {
-    state.results[img.id] = { status: 'pending', text: '', error: '' }
-    panelPages.appendChild(makeCard(img, state.images.indexOf(img)))
-  })
-
-  resultsSection.style.display = ''
-  progressWrap.style.display = ''
-  updateProgress()
-
-  const process = async (img) => {
-    setResult(img.id, { status: 'processing' })
-    updateCard(img.id)
-    const start = Date.now()
-    try {
-      const { data } = await Tesseract.recognize(img.file, lang, {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            // optional per-image sub-progress — we just keep card spinning
-          }
-        }
-      })
-      const text = data.text?.trim() || '[No text found]'
-      setResult(img.id, { status: 'done', text, duration: Date.now() - start })
-    } catch(e) {
-      setResult(img.id, { status: 'error', text: '', error: e.message || 'OCR failed', duration: Date.now() - start })
+async function handleFiles(files) {
+  const arr = Array.from(files);
+  for (const file of arr) {
+    if (file.type === 'application/pdf') {
+      await loadPdf(file);
+    } else if (file.type.startsWith('image/')) {
+      addPage(file.name, file, URL.createObjectURL(file));
     }
-    updateCard(img.id)
-    updateProgress()
   }
+  fileInput.value = '';
+  renderAll();
+}
 
-  if (parallel) {
-    await Promise.all(state.images.map(img => process(img)))
-  } else {
-    for (const img of state.images) await process(img)
+async function loadPdf(file) {
+  toast(`📄 PDF loading: ${file.name}`, '', 2000);
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: buf }).promise;
+    const total = Math.min(pdf.numPages, 30);
+    for (let i = 1; i <= total; i++) {
+      const page = await pdf.getPage(i);
+      const vp = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+      addPage(`${file.name} — পেজ ${i}`, blob, URL.createObjectURL(blob));
+    }
+    toast(`✅ ${total} pages loaded from PDF`, 'ok');
+  } catch(e) {
+    toast('PDF load error: ' + e.message, 'err');
   }
-
-  state.running = false
-  updateUI()
-  buildAllText()
-  copyAllBtn.style.display = ''
-  downloadBtn.style.display = ''
-  renderThumbs()
-  updateStats()
-  toast('সব ছবি extract সম্পন্ন! ✓', 'success')
 }
 
-function setResult(id, patch) {
-  state.results[id] = { ...state.results[id], ...patch }
+function addPage(name, blob, url) {
+  const id = Math.random().toString(36).slice(2);
+  state.pages.push({ id, name, blob, url, status:'pending', remoteUrl:'', text:'' });
 }
 
-// ─── Progress ────────────────────────────────────────────
-function updateProgress() {
-  const total = state.images.length
-  if (!total) return
-  const vals = Object.values(state.results)
-  const done = vals.filter(r => r.status === 'done').length
-  const err  = vals.filter(r => r.status === 'error').length
-  const proc = vals.filter(r => r.status === 'processing').length
-  const fin  = done + err
-  const pct  = Math.round((fin / total) * 100)
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
+function renderAll() {
+  const has = state.pages.length > 0;
+  stripWrap.classList.toggle('hidden', !has);
+  actionRow.classList.toggle('hidden', !has);
+  workspace.classList.toggle('hidden', !has);
+  lensSection.classList.toggle('hidden', !has);
+  if (!has) return;
 
-  $('progressLabel').textContent = fin === total ? '✅ সব সম্পন্ন!' : `Processing ${fin+proc} / ${total}…`
-  $('progressPct').textContent = pct + '%'
-  $('pDone').style.width = (done/total*100)+'%'
-  $('pErr').style.width  = (err/total*100)+'%'
-  $('pProc').style.width = (proc/total*100)+'%'
-
-  const ptD = $('ptDone'), ptE = $('ptErr'), ptP = $('ptProc')
-  if (done) { ptD.style.display=''; ptD.textContent=`${done} সফল` } else ptD.style.display='none'
-  if (err)  { ptE.style.display=''; ptE.textContent=`${err} error` } else ptE.style.display='none'
-  if (proc) { ptP.style.display=''; ptP.textContent=`${proc} চলছে` } else ptP.style.display='none'
+  pageCount.textContent = state.pages.length;
+  renderStrip();
+  renderLensGrid();
+  renderWorkspace();
+  updateStats();
 }
 
-// ─── Cards ───────────────────────────────────────────────
-function makeCard(img, idx) {
-  const r = state.results[img.id] || { status: 'pending', text: '' }
-  const div = document.createElement('div')
-  div.className = 'result-card'
-  div.id = `card-${img.id}`
-  div.innerHTML = cardHTML(img, idx, r)
-  // head click toggle
-  div.querySelector('.result-head').onclick = () => {
-    const body = div.querySelector('.result-body')
-    const chev = div.querySelector('.chevron')
-    body.classList.toggle('open'); chev.classList.toggle('open')
-  }
-  // copy btn
-  const copyBtn = div.querySelector('.btn-copy-card')
-  if (copyBtn) copyBtn.onclick = e => { e.stopPropagation(); copyCard(img.id, copyBtn) }
-  return div
-}
-
-function cardHTML(img, idx, r) {
-  const pillClass = { pending:'sp-pending', processing:'sp-processing', done:'sp-done', error:'sp-error' }[r.status]
-  const pillLabel = { pending:'অপেক্ষারত', processing:'Processing…', done:'সম্পন্ন', error:'Error' }[r.status]
-  const meta = r.status === 'done'
-    ? `<span>${r.text.length} chars</span><span>${countWords(r.text)} words</span>${r.duration?`<span>${fmtDur(r.duration)}</span>`:''}`
-    : `<span>${fmtBytes(img.size)}</span>`
-  const autoExpand = $('toggleExpand').checked
-  const bodyOpen = r.status === 'done' && autoExpand ? 'open' : ''
-  const chevOpen = bodyOpen ? 'open' : ''
-
-  let bodyContent = ''
-  if (r.status === 'processing') bodyContent = `<div class="result-loading"><div class="spinner"></div>Tesseract OCR চলছে…</div>`
-  else if (r.status === 'pending') bodyContent = `<div class="result-loading" style="padding:1.5rem">অপেক্ষা করছে…</div>`
-  else if (r.status === 'error') bodyContent = `<div class="result-error">⚠ ${r.error}</div>`
-  else if (r.status === 'done') bodyContent = `<pre>${escHtml(r.text)}</pre>`
-
-  return `
-    <div class="result-head">
-      <div class="rh-thumb"><img src="${img.url}" alt="" loading="lazy"/></div>
-      <div class="rh-info">
-        <div class="rh-title">পেজ ${idx+1} — ${escHtml(img.name)}</div>
-        <div class="rh-meta">${meta}</div>
+function renderStrip() {
+  strip.innerHTML = '';
+  state.pages.forEach((pg, i) => {
+    const el = document.createElement('div');
+    el.className = `page-thumb${i === state.current ? ' active' : ''}${pg.status === 'done' ? ' done' : ''}${pg.status === 'uploading' ? ' uploading' : ''}`;
+    el.dataset.i = i;
+    el.innerHTML = `
+      <img class="pt-img" src="${pg.url}" alt="page ${i+1}"/>
+      <div class="pt-foot">
+        <span class="pt-num">#${i+1}</span>
+        <span class="pt-badge ${pg.status}">${statusLabel(pg.status)}</span>
       </div>
-      <span class="status-pill ${pillClass}">${pillLabel}</span>
-      ${r.status==='done' ? `<button class="btn-copy-card" data-id="${img.id}">📋 Copy</button>` : ''}
-      <span class="chevron ${chevOpen}">▾</span>
-    </div>
-    <div class="result-body ${bodyOpen}">${bodyContent}</div>
-  `
+      ${pg.status === 'uploading' ? '<div class="pt-progress"></div>' : ''}
+      <button class="pt-remove" data-i="${i}">✕</button>
+    `;
+    el.addEventListener('click', e => {
+      if (e.target.classList.contains('pt-remove')) return;
+      state.current = i;
+      renderAll();
+    });
+    el.querySelector('.pt-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      state.pages.splice(i, 1);
+      if (state.current >= state.pages.length) state.current = Math.max(0, state.pages.length-1);
+      renderAll();
+    });
+    strip.appendChild(el);
+  });
+  // scroll active into view
+  const active = strip.querySelector('.active');
+  if (active) active.scrollIntoView({ inline:'nearest', behavior:'smooth' });
 }
 
-function updateCard(id) {
-  const img = state.images.find(i => i.id === id)
-  if (!img) return
-  const idx = state.images.indexOf(img)
-  const card = $(`card-${id}`)
-  if (!card) return
-  const r = state.results[id]
-  const wasOpen = card.querySelector('.result-body')?.classList.contains('open')
-  card.innerHTML = cardHTML(img, idx, r)
-  if (wasOpen && r.status !== 'processing') {
-    card.querySelector('.result-body')?.classList.add('open')
-    card.querySelector('.chevron')?.classList.add('open')
-  }
-  card.querySelector('.result-head').onclick = () => {
-    const body = card.querySelector('.result-body')
-    const chev = card.querySelector('.chevron')
-    body.classList.toggle('open'); chev.classList.toggle('open')
-  }
-  const copyBtn = card.querySelector('.btn-copy-card')
-  if (copyBtn) copyBtn.onclick = e => { e.stopPropagation(); copyCard(id, copyBtn) }
+function renderLensGrid() {
+  lensGrid.innerHTML = '';
+  state.pages.forEach((pg, i) => {
+    const el = document.createElement('div');
+    el.className = `lens-page-card${i === state.current ? ' active-page' : ''}${pg.status === 'done' ? ' card-done' : ''}`;
+    el.id = `lpc-${pg.id}`;
+    const canLens = pg.status === 'ready' || pg.status === 'done';
+    const btnClass = pg.status === 'done' ? 'done-btn' : '';
+    el.innerHTML = `
+      <div class="lpc-num">PAGE ${i+1}</div>
+      <div class="lpc-name" title="${pg.name}">${pg.name}</div>
+      <div class="lpc-status ${pg.status}">${statusLabel(pg.status)}</div>
+      <button class="lpc-btn ${btnClass}" data-i="${i}" ${!canLens ? 'disabled' : ''}>
+        ${pg.status === 'done' ? '✓ Done' : '🔍 Open Lens'}
+      </button>
+    `;
+    el.querySelector('.lpc-btn').addEventListener('click', () => openLens(i));
+    lensGrid.appendChild(el);
+  });
 }
 
-async function copyCard(id, btn) {
-  const r = state.results[id]
-  if (!r || !r.text) return
-  const ok = await copyText(r.text)
-  if (ok) {
-    btn.textContent = '✓ Copied!'
-    btn.classList.add('copied')
-    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied') }, 2000)
-  }
+function renderWorkspace() {
+  const pg = state.pages[state.current];
+  if (!pg) return;
+  $('previewPageNum').textContent = state.current + 1;
+  $('textPageNum').textContent = state.current + 1;
+
+  // preview image
+  $('previewImgWrap').innerHTML = `<img src="${pg.url}" alt="page ${state.current+1}" style="max-width:100%;max-height:480px;object-fit:contain"/>`;
+
+  // textarea
+  textArea.value = pg.text || '';
+  updateTxtStats();
 }
 
-// ─── All text ────────────────────────────────────────────
-function buildAllText() {
-  const parts = state.images.map((img, i) => {
-    const r = state.results[img.id]
-    if (r?.status !== 'done') return null
-    return `=== পেজ ${i+1} — ${img.name} ===\n${r.text}`
-  }).filter(Boolean)
-  const full = parts.join('\n\n')
-  allTextPre.textContent = full || 'কোনো text extract হয়নি।'
-  const chars = full.length, words = countWords(full)
-  allStats.innerHTML = `<span>${chars.toLocaleString()} chars</span><span>·</span><span>${words.toLocaleString()} words</span>`
-  return full
+function updateTxtStats() {
+  const t = textArea.value;
+  const words = t.trim() ? t.trim().split(/\s+/).length : 0;
+  $('txtStats').textContent = `${t.length} chars · ${words} words`;
+}
+
+function statusLabel(s) {
+  return { pending:'⏳ Pending', uploading:'⬆️ Upload', ready:'✅ Ready', done:'✓ Done', error:'❌ Error' }[s] || s;
 }
 
 function updateStats() {
-  const full = buildAllText()
-  if (full) {
-    statsBar.style.display = ''
-    statsBar.textContent = `${full.length.toLocaleString()} chars · ${countWords(full).toLocaleString()} words`
+  const done = state.pages.filter(p => p.status === 'done').length;
+  const ready = state.pages.filter(p => p.status === 'ready').length;
+  const chip = $('statsChip');
+  chip.classList.remove('hidden');
+  chip.textContent = `${done}/${state.pages.length} done`;
+
+  // results section
+  const texts = state.pages.filter(p=>p.text).map((p,i)=>`=== পেজ ${state.pages.indexOf(p)+1} — ${p.name} ===\n${p.text}`);
+  if (texts.length) {
+    resultsSection.classList.remove('hidden');
+    const full = texts.join('\n\n');
+    allTextarea.value = full;
+    const words = full.trim() ? full.trim().split(/\s+/).length : 0;
+    $('allMeta').innerHTML = `<b>${texts.length}</b> pages · ${full.length} chars · ${words} words`;
+    $('copyAllBtn').classList.remove('hidden');
+    $('downloadBtn').classList.remove('hidden');
   }
 }
 
-// ─── Copy / Download ─────────────────────────────────────
-copyAllBtn.onclick = async () => {
-  const txt = buildAllText()
-  const ok = await copyText(txt)
-  if (ok) { copyAllBtn.textContent = '✓ Copied!'; setTimeout(() => copyAllBtn.textContent = '📋 সব Copy', 2000) }
+// ══════════════════════════════════════════
+// IMGBB UPLOAD
+// ══════════════════════════════════════════
+// We use imgbb anonymous upload (free tier, no key needed for small files)
+// Fallback: use freeimage.host
+async function uploadToImgbb(blob) {
+  const fd = new FormData();
+  fd.append('image', blob, 'page.jpg');
+  // imgbb anonymous (they allow up to 32MB, no key needed for basic upload via their API with key=0 trick)
+  // Actually imgbb requires an API key. Let's use freeimage.host which is truly free
+  // freeimage.host API:
+  const res = await fetch('https://freeimage.host/api/1/upload?key=6d207e02198a847aa98d0a2a901485a2&format=json', {
+    method: 'POST',
+    body: fd
+  });
+  const data = await res.json();
+  if (data.status_code === 200) {
+    return data.image.url;
+  }
+  throw new Error(data.status_txt || 'Upload failed');
 }
-$('copyBtnAll').onclick = copyAllBtn.onclick
 
-downloadBtn.onclick = () => { const t = buildAllText(); downloadTxt(t, `lens-ocr-${Date.now()}.txt`) }
-$('downloadBtnAll').onclick = downloadBtn.onclick
-
-function downloadTxt(text, name) {
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'}))
-  a.download = name; a.click()
+async function uploadPage(i) {
+  const pg = state.pages[i];
+  if (!pg || pg.status === 'ready' || pg.status === 'done') return;
+  pg.status = 'uploading';
+  renderStrip();
+  renderLensGrid();
+  try {
+    const url = await uploadToImgbb(pg.blob);
+    pg.remoteUrl = url;
+    pg.status = 'ready';
+    toast(`✅ পেজ ${i+1} uploaded!`, 'ok', 2000);
+  } catch(e) {
+    pg.status = 'error';
+    pg.remoteUrl = '';
+    toast(`❌ পেজ ${i+1} upload failed: ${e.message}`, 'err', 4000);
+  }
+  renderStrip();
+  renderLensGrid();
+  updateStats();
 }
 
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); return true } catch {
-    const ta = document.createElement('textarea')
-    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'
-    document.body.appendChild(ta); ta.focus(); ta.select()
-    try { document.execCommand('copy'); return true } catch { return false }
-    finally { document.body.removeChild(ta) }
+$('uploadAllBtn').onclick = async () => {
+  const pending = state.pages.filter(p => p.status === 'pending' || p.status === 'error');
+  if (!pending.length) { toast('সব pages already uploaded!', 'ok'); return }
+  uplProgress.classList.add('show');
+  let done = 0;
+  for (let i = 0; i < state.pages.length; i++) {
+    const pg = state.pages[i];
+    if (pg.status !== 'pending' && pg.status !== 'error') { done++; continue; }
+    uplLabel.textContent = `Uploading পেজ ${i+1} / ${state.pages.length}...`;
+    const pct = Math.round((done/state.pages.length)*100);
+    uplBar.style.width = pct + '%';
+    uplPct.textContent = pct + '%';
+    await uploadPage(i);
+    done++;
+    uplBar.style.width = Math.round((done/state.pages.length)*100) + '%';
+    uplPct.textContent = Math.round((done/state.pages.length)*100) + '%';
+  }
+  uplProgress.classList.remove('show');
+  uplLabel.textContent = 'Uploading...';
+  uplBar.style.width = '0%';
+  uplPct.textContent = '0%';
+  toast('✅ সব pages upload complete!', 'ok');
+};
+
+// ══════════════════════════════════════════
+// GOOGLE LENS OPEN
+// ══════════════════════════════════════════
+function openLens(i) {
+  const pg = state.pages[i];
+  if (!pg) return;
+  if (!pg.remoteUrl) {
+    toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err', 3000);
+    return;
+  }
+  // Google Lens URL with image URL parameter
+  const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
+  window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=800,noopener');
+  // switch workspace to this page
+  state.current = i;
+  renderAll();
+  toast(`🔍 পেজ ${i+1} Google Lens এ খুলেছে!`, 'ok', 3000);
+}
+
+$('openAllLensBtn').onclick = async () => {
+  const readyPages = state.pages.filter(p => p.status === 'ready' || p.status === 'done');
+  if (!readyPages.length) {
+    toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err');
+    return;
+  }
+  // Open pages with a small delay to avoid popup blocker
+  for (let i = 0; i < state.pages.length; i++) {
+    const pg = state.pages[i];
+    if (pg.remoteUrl) {
+      await new Promise(r => setTimeout(r, 400));
+      const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
+      window.open(lensUrl, `lens_page_${i+1}`, 'width=1100,height=750,noopener');
+    }
+  }
+  toast(`🚀 ${readyPages.length}টি পেজ Lens এ খুলছে!`, 'ok', 4000);
+};
+
+$('lensAllGridBtn').onclick = () => $('openAllLensBtn').click();
+
+// ══════════════════════════════════════════
+// WORKSPACE INTERACTIONS
+// ══════════════════════════════════════════
+$('prevPage').onclick = () => {
+  if (state.current > 0) { state.current--; renderAll() }
+};
+$('nextPage').onclick = () => {
+  if (state.current < state.pages.length-1) { state.current++; renderAll() }
+};
+
+textArea.addEventListener('input', () => {
+  const pg = state.pages[state.current];
+  if (pg) pg.text = textArea.value;
+  updateTxtStats();
+  updateStats();
+});
+
+$('pasteClipBtn').onclick = async () => {
+  try {
+    const t = await navigator.clipboard.readText();
+    textArea.value = t;
+    textArea.dispatchEvent(new Event('input'));
+    toast('✓ Paste হয়েছে!', 'ok', 2000);
+  } catch {
+    toast('Ctrl+V দিয়ে manually paste করুন', '', 2000);
+  }
+};
+
+$('lensCurrentBtn').onclick = () => openLens(state.current);
+
+$('clearTxtBtn').onclick = () => {
+  textArea.value = '';
+  textArea.dispatchEvent(new Event('input'));
+};
+
+$('saveTxtBtn').onclick = () => {
+  const pg = state.pages[state.current];
+  if (!pg) return;
+  pg.text = textArea.value.trim();
+  pg.status = pg.text ? 'done' : pg.status;
+  toast(`✅ পেজ ${state.current+1} saved!`, 'ok', 2000);
+  if (state.current < state.pages.length-1) {
+    state.current++;
+    renderAll();
+  } else {
+    renderAll();
+    toast('🎉 সব pages complete!', 'ok', 3000);
+  }
+};
+
+// ══════════════════════════════════════════
+// COPY / DOWNLOAD
+// ══════════════════════════════════════════
+async function copyText(txt) {
+  try {
+    await navigator.clipboard.writeText(txt);
+    return true;
+  } catch {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    return true;
   }
 }
 
-// ─── Google Lens modal ───────────────────────────────────
-lensBtn.onclick = () => lensModal.classList.add('open')
-$('modalClose').onclick = $('modalClose2').onclick = () => lensModal.classList.remove('open')
-lensModal.onclick = e => { if (e.target === lensModal) lensModal.classList.remove('open') }
-
-// ─── Toast ───────────────────────────────────────────────
-function toast(msg, type='') {
-  const el = document.createElement('div')
-  el.className = `toast ${type}`
-  el.textContent = msg
-  $('toastContainer').appendChild(el)
-  setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 350) }, 2800)
+function buildAllText() {
+  return state.pages
+    .filter(p=>p.text)
+    .map((p,i)=>`=== পেজ ${state.pages.indexOf(p)+1} — ${p.name} ===\n${p.text}`)
+    .join('\n\n');
 }
 
-// ─── Helpers ─────────────────────────────────────────────
-function fmtBytes(b) { return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB' }
-function fmtDur(ms)  { return ms<1000?ms+'ms':(ms/1000).toFixed(1)+'s' }
-function countWords(t) { return t.trim().split(/\s+/).filter(Boolean).length }
-function escHtml(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+$('copyAllBtn').onclick = async () => {
+  const t = buildAllText();
+  if (!t) { toast('কোনো text নেই!', 'err'); return }
+  await copyText(t);
+  toast('✓ সব text copied!', 'ok');
+};
+
+$('downloadBtn').onclick = () => {
+  const t = buildAllText();
+  if (!t) { toast('কোনো text নেই!', 'err'); return }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([t], {type:'text/plain;charset=utf-8'}));
+  a.download = `lensflow_${Date.now()}.txt`;
+  a.click();
+};
+
+$('allCopyBtn').onclick = async () => {
+  await copyText(allTextarea.value);
+  toast('✓ Copied!', 'ok');
+};
+
+$('allDlBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([allTextarea.value], {type:'text/plain;charset=utf-8'}));
+  a.download = `lensflow_all_${Date.now()}.txt`;
+  a.click();
+};
+
+$('clearBtn').onclick = () => {
+  if (confirm('সব pages মুছে ফেলবেন?')) {
+    state.pages = [];
+    state.current = 0;
+    resultsSection.classList.add('hidden');
+    $('statsChip').classList.add('hidden');
+    renderAll();
+  }
+};
+
+// keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft') { if(state.current>0){state.current--;renderAll()} }
+  if (e.key === 'ArrowRight') { if(state.current<state.pages.length-1){state.current++;renderAll()} }
+});
+
+// Paste on textarea auto-save reminder
+textArea.addEventListener('paste', () => {
+  setTimeout(() => {
+    toast('💡 Text paste হয়েছে — "Save & Next" চাপুন', '', 3000);
+  }, 100);
+});
 </script>
 </body>
 </html>

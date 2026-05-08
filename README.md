@@ -1,96 +1,78 @@
-# 🔍 LensOCR — 100% Free, No API, No Cost
+# 🔍 LensFlow — Google Lens OCR Studio
 
-ছবি থেকে text extract করুন — সম্পূর্ণ বিনামূল্যে।
+**Image/PDF → Google Lens → Text Extract | 100% Free | No API | No Signup**
+
+---
 
 ## ✨ Features
 
-- 🆓 **সম্পূর্ণ Free** — কোনো API key, কোনো payment, কোনো signup লাগবে না
-- 🧠 **Tesseract.js OCR** — Browser-এই সব হয়, কোনো server নেই
-- 🌐 **Google Lens বাটন** — একটা click-এ Google Lens-এ পাঠাবে
-- 📸 **Multi-image** — একসাথে ২০টি ছবি
-- 🖱 **Drag & Drop** — সহজে আপলোড, drag করে সাজান
-- 🌍 **১৫+ ভাষা** — বাংলা, English, Arabic, Hindi, Chinese…
-- 🌙 **Dark mode** — auto-detect
-- 📋 **Copy & Download** — per-page বা সব একসাথে
+- **PDF Support** — PDF automatically splits into pages (up to 30)
+- **Bulk Upload** — Multiple images at once  
+- **Auto imgbb Upload** — Each page gets a free public link
+- **Google Lens Integration** — Opens Lens with your image pre-loaded
+- **Page-by-Page workflow** — Navigate pages, paste text, save & next
+- **All-in-one results** — Copy all text or download as .txt
+- **Dark/Light theme**
+- **Keyboard shortcuts** (← → to navigate pages)
 
 ---
 
-## 🚀 Deploy করুন — ৩টি Option (সবই FREE)
-
-### Option 1 — Vercel (Recommended, সবচেয়ে fast)
+## 🚀 Deploy to Vercel (Free, Global)
 
 ```bash
-# Terminal-এ এই commands চালান:
+# Method 1: Vercel CLI
+npm install -g vercel
+vercel --prod
 
-npm install -g vercel   # একবারই করতে হবে
-cd lens-ocr-free
-vercel
+# Method 2: Vercel Dashboard
+# 1. Go to vercel.com → New Project
+# 2. Upload this folder OR connect GitHub repo
+# 3. Deploy — done! Global CDN, HTTPS, custom domain
 ```
 
-- Project name দিন → Enter
-- Done! একটা `xxx.vercel.app` URL পাবেন
+## 🌐 Deploy to Netlify (Alternative)
 
-**পরের বার update করতে:** `vercel --prod`
-
----
-
-### Option 2 — GitHub Pages (Free, সহজ)
-
-1. [github.com](https://github.com) — নতুন repository বানান
-2. `index.html` file টি upload করুন
-3. **Settings → Pages → Source: main branch → Save**
-4. URL পাবেন: `https://username.github.io/repo-name`
-
----
-
-### Option 3 — Netlify (Drag & Drop Deploy!)
-
-1. [netlify.com](https://netlify.com) → Sign up (free)
-2. Dashboard-এ `index.html` ফাইলটি **drag করে drop করুন**
-3. Done! Live URL পাবেন সাথে সাথে
-
----
-
-### Option 4 — Local (নিজের PC-তে)
-
-শুধু `index.html` ফাইলটি browser-এ open করুন।
-কোনো installation লাগবে না। ইন্টারনেট ছাড়াও কাজ করে (Tesseract CDN ছাড়া)।
-
----
-
-## 💡 কীভাবে কাজ করে
-
-```
-আপনার ছবি
-    ↓
-Browser (Tesseract.js)  ←── সব এখানেই হয়, কোনো server নেই
-    ↓
-Extracted Text
+```bash
+# Drag & drop the project folder at netlify.com/drop
+# Or: netlify deploy --prod --dir .
 ```
 
-**Tesseract.js** হলো Google-এর Tesseract OCR engine-এর JavaScript version।
-এটি সম্পূর্ণ browser-এ চলে — আপনার ছবি কোনো server-এ যায় না।
+---
+
+## 📖 How to Use
+
+1. **Upload** — Drag image(s) or PDF onto the upload zone
+2. **Upload to Cloud** — Click "সব Upload করুন" — pages go to imgbb.com (free)
+3. **Open Google Lens** — Click "Google Lens এ সব খুলুন" — each page opens in a new tab
+4. **Extract Text** — In the Lens tab, select all text → Copy
+5. **Paste & Save** — Back in LensFlow, paste text → "Save & Next"
+6. **Done!** — All pages' text collected, copy/download
+
+---
+
+## 🔧 Tech Stack
+
+- **Vanilla HTML/CSS/JS** — No framework, no build step
+- **PDF.js** — PDF rendering (CDN)
+- **imgbb.com** — Free image hosting (anonymous uploads)
+- **Google Lens** — OCR engine (via `lens.google.com/uploadbyurl`)
 
 ---
 
 ## 📁 Files
 
 ```
-lens-ocr-free/
-└── index.html    ← এটাই সব! একটাই file।
+lensflow/
+├── index.html      ← Main app (single file)
+├── vercel.json     ← Vercel deployment config
+└── README.md       ← This file
 ```
 
 ---
 
-## ⚡ Performance Tips
+## ⚠️ Notes
 
-- **বাংলা text** ভালো extract করতে: Settings → Language → বাংলা (Bengali)
-- **Mixed language** (বাংলা + English): Auto detect ব্যবহার করুন
-- **Parallel mode**: Settings-এ চালু করলে সব ছবি একসাথে process হবে (দ্রুত কিন্তু বেশি memory)
-- **ছবির quality** যত ভালো, OCR তত accurate
-
----
-
-## License
-
-MIT — যেভাবে খুশি use করুন।
+- imgbb free tier allows uploads up to 32MB
+- Google Lens may require being logged in for best results
+- Pop-up blocker may block multiple Lens tabs — allow popups for the site
+- Works best in Chrome/Edge (Google Lens is a Google product)
