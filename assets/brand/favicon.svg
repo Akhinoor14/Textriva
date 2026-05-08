@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Textriva icon">
+  <defs>
+    <linearGradient id="txi-bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#13080c"/>
+      <stop offset="1" stop-color="#240f16"/>
+    </linearGradient>
+    <linearGradient id="txi-red" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f0466a"/>
+      <stop offset="1" stop-color="#a60d2f"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#txi-bg)" stroke="#7a1428" stroke-width="4"/>
+  <path d="M58 66h140l-10 28h-49v102h-30V94H68z" fill="url(#txi-red)"/>
+  <path d="M94 120h68l-8 20h-24v56h-20v-56H102z" fill="#2a0d14"/>
+</svg>

@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Textriva by A3KM Studio — Google Lens OCR Tool</title>
 <meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Textriva by A3KM Studio — Google Lens OCR Tool"/>
+<meta property="og:description" content="Upload images or PDFs, auto-send to Google Lens page by page, and extract text fast."/>
+<meta property="og:image" content="/assets/brand/icon-180.svg"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Textriva by A3KM Studio — Google Lens OCR Tool"/>
+<meta name="twitter:description" content="Free OCR workflow with Google Lens for image and PDF pages."/>
+<meta name="twitter:image" content="/assets/brand/icon-180.svg"/>
+<link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg"/>
+<link rel="icon" type="image/svg+xml" sizes="32x32" href="/assets/brand/icon-32.svg"/>
+<link rel="icon" type="image/svg+xml" sizes="64x64" href="/assets/brand/icon-64.svg"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/icon-180.svg"/>
+<link rel="manifest" href="/site.webmanifest"/>
+<meta name="theme-color" content="#140b0f"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
@@ -119,23 +133,24 @@ a { color:inherit; text-decoration:none }
 }
 .logo-mark {
   width:36px; height:36px;
-  background: linear-gradient(145deg, #6e0a1f, #c5163a);
+  background: linear-gradient(145deg, #201015, #2c171e);
   border-radius:10px;
   display:flex; align-items:center; justify-content:center;
-  font-size:14px;
-  font-weight:700;
-  font-family:var(--font-display);
-  color:#fff;
-  box-shadow: 0 4px 14px rgba(197,22,58,.35);
+  border: 1px solid var(--line2);
+  box-shadow: 0 4px 14px rgba(197,22,58,.18);
   flex-shrink:0;
 }
-.logo-name {
-  font-family:var(--font-display);
-  font-weight:700; font-size:1.06rem;
-  color: var(--bright);
-  letter-spacing:-.02em;
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  border-radius:10px;
+  object-fit:cover;
 }
-.logo-name span { color: var(--accent) }
+.logo-wordmark {
+  width: 116px;
+  height: auto;
+  display: block;
+}
 .logo-tag {
   font-size:.68rem; color:var(--dim);
   font-family: var(--font-body);
@@ -611,8 +626,14 @@ a { color:inherit; text-decoration:none }
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #1b0f14;
   border: 1px solid var(--line2);
+}
+.ftr-wordmark {
+  width: 120px;
+  height: auto;
+  display: block;
 }
 .ftr-text {
   font-size: .8rem;
@@ -680,7 +701,7 @@ a { color:inherit; text-decoration:none }
 }
 
 @media (max-width: 640px) {
-  .logo-name { font-size: .98rem; }
+  .logo-wordmark { width: 104px; }
   .logo-tag { font-size: .64rem; }
   .chip { font-size: .62rem; }
   .btn-icon { width: 40px; height: 40px; }
@@ -759,9 +780,9 @@ a { color:inherit; text-decoration:none }
 <header class="hdr">
   <div class="hdr-inner">
     <div class="logo">
-      <div class="logo-mark">T</div>
+      <div class="logo-mark"><img src="/assets/brand/textriva-monogram.svg" alt="Textriva mark"/></div>
       <div>
-        <div class="logo-name">Text<span>riva</span></div>
+        <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="logo-wordmark"/>
         <div class="logo-tag">by A3KM Studio</div>
       </div>
     </div>
@@ -933,10 +954,10 @@ a { color:inherit; text-decoration:none }
   <div class="ftr-inner">
     <div>
       <div class="ftr-brand">
-        <img src="/a3kmstudiologo.png" alt="A3KM Studio Logo" class="ftr-a3km-logo"/>
-        <div class="ftr-title">Textriva by A3KM Studio</div>
+        <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
+        <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="ftr-wordmark"/>
       </div>
-      <div class="ftr-text">Upload → Google Lens → copy text. Fast page-by-page OCR workflow.</div>
+      <div class="ftr-text">Textriva by A3KM Studio. Upload → Google Lens → copy text. Fast page-by-page OCR workflow.</div>
       <div class="ftr-links">
         <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
         <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>

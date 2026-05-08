@@ -1,0 +1,21 @@
+{
+  "name": "Textriva",
+  "short_name": "Textriva",
+  "description": "Google Lens OCR workflow for image and PDF text extraction.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#140b0f",
+  "theme_color": "#140b0f",
+  "icons": [
+    {
+      "src": "/assets/brand/icon-64.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/assets/brand/icon-180.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ]
+}
