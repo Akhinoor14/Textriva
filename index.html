@@ -1896,7 +1896,7 @@ langBtn.onclick = () => {
   applyLanguage();
 };
 const savedTheme = readSaved('textriva-theme');
-const defaultTheme = 'milki';
+const defaultTheme = 'light';
 html.dataset.theme = themeUi[savedTheme] ? savedTheme : defaultTheme;
 if (!savedTheme) saveSetting('textriva-theme', defaultTheme);
 currentLang = langUi[readSaved('textriva-lang')] ? readSaved('textriva-lang') : 'eb';
