@@ -1,61 +1,41 @@
 # 🔍 LensFlow — Google Lens OCR Studio
 
-**Image/PDF → Google Lens → Text Extract | 100% Free | No API | No Signup**
+**Image/PDF → imgbb upload → Google Lens → Text Extract | Free | No Monthly Cost**
 
 ---
 
-## ✨ Features
+## 🚀 Quick Deploy (5 minutes)
 
-- **PDF Support** — PDF automatically splits into pages (up to 30)
-- **Bulk Upload** — Multiple images at once  
-- **Auto imgbb Upload** — Each page gets a free public link
-- **Google Lens Integration** — Opens Lens with your image pre-loaded
-- **Page-by-Page workflow** — Navigate pages, paste text, save & next
-- **All-in-one results** — Copy all text or download as .txt
-- **Dark/Light theme**
-- **Keyboard shortcuts** (← → to navigate pages)
+### Step 1 — Get free imgbb API key
+1. Go to **https://api.imgbb.com/**
+2. Sign up free (just email)
+3. Copy your API key
 
----
+### Step 2 — Deploy to Vercel (recommended)
 
-## 🚀 Deploy to Vercel (Free, Global)
+**Option A: Vercel Dashboard**
+1. Push this folder to a GitHub repo (or zip upload)
+2. vercel.com → New Project → Import
+3. Environment Variables: `IMGBB_KEY` = your key
+4. Deploy ✅
 
+**Option B: Vercel CLI**
 ```bash
-# Method 1: Vercel CLI
-npm install -g vercel
+npm i -g vercel
 vercel --prod
-
-# Method 2: Vercel Dashboard
-# 1. Go to vercel.com → New Project
-# 2. Upload this folder OR connect GitHub repo
-# 3. Deploy — done! Global CDN, HTTPS, custom domain
-```
-
-## 🌐 Deploy to Netlify (Alternative)
-
-```bash
-# Drag & drop the project folder at netlify.com/drop
-# Or: netlify deploy --prod --dir .
+# Add env var when prompted: IMGBB_KEY
 ```
 
 ---
 
 ## 📖 How to Use
 
-1. **Upload** — Drag image(s) or PDF onto the upload zone
-2. **Upload to Cloud** — Click "সব Upload করুন" — pages go to imgbb.com (free)
-3. **Open Google Lens** — Click "Google Lens এ সব খুলুন" — each page opens in a new tab
-4. **Extract Text** — In the Lens tab, select all text → Copy
-5. **Paste & Save** — Back in LensFlow, paste text → "Save & Next"
-6. **Done!** — All pages' text collected, copy/download
-
----
-
-## 🔧 Tech Stack
-
-- **Vanilla HTML/CSS/JS** — No framework, no build step
-- **PDF.js** — PDF rendering (CDN)
-- **imgbb.com** — Free image hosting (anonymous uploads)
-- **Google Lens** — OCR engine (via `lens.google.com/uploadbyurl`)
+1. Upload image(s) or PDF
+2. Click "সব Upload করুন" → pages get public URLs (imgbb)
+3. Click "Google Lens এ সব খুলুন" → Lens opens per page
+4. In Lens: text auto-highlighted → copy it
+5. Paste back in LensFlow → "Save & Next"
+6. Download or copy all text at the end
 
 ---
 
@@ -63,16 +43,15 @@ vercel --prod
 
 ```
 lensflow/
-├── index.html      ← Main app (single file)
-├── vercel.json     ← Vercel deployment config
-└── README.md       ← This file
+├── index.html        ← Main app
+├── api/upload.js     ← Vercel serverless proxy (fixes CORS)
+├── vercel.json       ← Deploy config
+├── .env.example      ← Env var template
+└── README.md
 ```
 
----
+## ⚙️ Env Vars
 
-## ⚠️ Notes
-
-- imgbb free tier allows uploads up to 32MB
-- Google Lens may require being logged in for best results
-- Pop-up blocker may block multiple Lens tabs — allow popups for the site
-- Works best in Chrome/Edge (Google Lens is a Google product)
+| Variable    | Get it from          |
+|-------------|----------------------|
+| IMGBB_KEY   | api.imgbb.com (free) |

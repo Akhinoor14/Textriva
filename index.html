@@ -1013,7 +1013,7 @@ function updateStats() {
   chip.textContent = `${done}/${state.pages.length} done`;
 
   // results section
-  const texts = state.pages.filter(p=>p.text).map((p,i)=>`=== পেজ ${state.pages.indexOf(p)+1} — ${p.name} ===\n${p.text}`);
+  const texts = state.pages.map((p,i)=>p.text ? `=== পেজ ${i+1} — ${p.name} ===\n${p.text}` : null).filter(Boolean);
   if (texts.length) {
     resultsSection.classList.remove('hidden');
     const full = texts.join('\n\n');
@@ -1026,25 +1026,53 @@ function updateStats() {
 }
 
 // ══════════════════════════════════════════
-// IMGBB UPLOAD
+// IMAGE UPLOAD — via /api/upload proxy (no CORS issues)
+// blob → base64 → POST /api/upload → imgbb.com (server-side)
 // ══════════════════════════════════════════
-// We use imgbb anonymous upload (free tier, no key needed for small files)
-// Fallback: use freeimage.host
-async function uploadToImgbb(blob) {
-  const fd = new FormData();
-  fd.append('image', blob, 'page.jpg');
-  // imgbb anonymous (they allow up to 32MB, no key needed for basic upload via their API with key=0 trick)
-  // Actually imgbb requires an API key. Let's use freeimage.host which is truly free
-  // freeimage.host API:
-  const res = await fetch('https://freeimage.host/api/1/upload?key=6d207e02198a847aa98d0a2a901485a2&format=json', {
-    method: 'POST',
-    body: fd
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
-  const data = await res.json();
-  if (data.status_code === 200) {
-    return data.image.url;
+}
+
+async function compressBlob(blob, maxKB = 3500) {
+  if (blob.size / 1024 <= maxKB) return blob;
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = blob.size > 8*1024*1024 ? 0.55 : blob.size > 5*1024*1024 ? 0.72 : 0.85;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(b => resolve(b || blob), 'image/jpeg', 0.88);
+    };
+    img.onerror = () => resolve(blob);
+    img.src = url;
+  });
+}
+
+async function uploadImage(blob) {
+  const compressed = await compressBlob(blob);
+  const b64 = await blobToBase64(compressed);
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: b64 }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Server error ${res.status}`);
   }
-  throw new Error(data.status_txt || 'Upload failed');
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Upload failed');
+  return data.url;
 }
 
 async function uploadPage(i) {
@@ -1054,7 +1082,7 @@ async function uploadPage(i) {
   renderStrip();
   renderLensGrid();
   try {
-    const url = await uploadToImgbb(pg.blob);
+    const url = await uploadImage(pg.blob);
     pg.remoteUrl = url;
     pg.status = 'ready';
     toast(`✅ পেজ ${i+1} uploaded!`, 'ok', 2000);
@@ -1062,6 +1090,7 @@ async function uploadPage(i) {
     pg.status = 'error';
     pg.remoteUrl = '';
     toast(`❌ পেজ ${i+1} upload failed: ${e.message}`, 'err', 4000);
+    console.error('Upload error page', i+1, e);
   }
   renderStrip();
   renderLensGrid();
@@ -1070,7 +1099,7 @@ async function uploadPage(i) {
 
 $('uploadAllBtn').onclick = async () => {
   const pending = state.pages.filter(p => p.status === 'pending' || p.status === 'error');
-  if (!pending.length) { toast('সব pages already uploaded!', 'ok'); return }
+  if (!pending.length) { toast('সব pages already uploaded! Lens বাটন চাপুন।', 'ok'); return }
   uplProgress.classList.add('show');
   let done = 0;
   for (let i = 0; i < state.pages.length; i++) {
@@ -1102,13 +1131,17 @@ function openLens(i) {
     toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err', 3000);
     return;
   }
-  // Google Lens URL with image URL parameter
+  // Google Lens URL with image URL parameter — direct URL load
   const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-  window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=800,noopener');
-  // switch workspace to this page
+  const win = window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+  if (!win) {
+    // Popup blocked fallback
+    toast('🚫 Popup blocked! Browser এ popup allow করুন তারপর আবার চেষ্টা করুন।', 'err', 5000);
+    return;
+  }
   state.current = i;
   renderAll();
-  toast(`🔍 পেজ ${i+1} Google Lens এ খুলেছে!`, 'ok', 3000);
+  toast(`🔍 পেজ ${i+1} Google Lens এ খুলেছে! Text copy করে এখানে paste করুন।`, 'ok', 4000);
 }
 
 $('openAllLensBtn').onclick = async () => {
@@ -1202,8 +1235,8 @@ async function copyText(txt) {
 
 function buildAllText() {
   return state.pages
-    .filter(p=>p.text)
-    .map((p,i)=>`=== পেজ ${state.pages.indexOf(p)+1} — ${p.name} ===\n${p.text}`)
+    .map((p,i)=> p.text ? `=== পেজ ${i+1} — ${p.name} ===\n${p.text}` : null)
+    .filter(Boolean)
     .join('\n\n');
 }
 
