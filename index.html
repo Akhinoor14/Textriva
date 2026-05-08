@@ -161,6 +161,12 @@ a { color:inherit; text-decoration:none }
 .logo {
   display:flex; align-items:center; gap:10px;
 }
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
 .logo-mark {
   width:36px; height:36px;
   background: linear-gradient(145deg, #0f1a33, #1b2f56);
@@ -180,14 +186,43 @@ a { color:inherit; text-decoration:none }
   object-fit:cover;
 }
 .logo-wordmark {
-  width: 116px;
-  height: auto;
+  font-family: var(--font-display);
+  font-size: 1.26rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 1;
   display: block;
+  color: #8ab4ff;
+  text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34);
 }
 .logo-tag {
   font-size:.68rem; color:var(--dim);
   font-family: var(--font-body);
   letter-spacing:.02em;
+}
+[data-theme="light"] .logo-wordmark {
+  color: #24539d;
+  text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 8px rgba(36,83,157,.2);
+}
+[data-theme="milki"] .logo-wordmark {
+  color: #2f7a4c;
+  text-shadow: 0 1px 0 rgba(255,252,242,.82), 0 2px 8px rgba(36,92,64,.2);
+}
+[data-theme="light"] .logo-tag,
+[data-theme="milki"] .logo-tag {
+  color: #3f4f6d;
+}
+[data-theme="milki"] .logo-tag {
+  color: #5f5748;
+}
+[data-theme="light"] .ftr-wordmark,
+[data-theme="milki"] .ftr-wordmark {
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,.35))
+    drop-shadow(0 2px 6px rgba(8,16,32,.22))
+    saturate(1.12)
+    contrast(1.22)
+    brightness(.86);
 }
 .hdr-right { display:flex; align-items:center; gap:.6rem }
 .chip {
@@ -657,38 +692,42 @@ a { color:inherit; text-decoration:none }
 .ftr-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 1.35rem 1.25rem;
+  padding: 1.15rem 1.25rem .95rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: .95rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .9fr);
+  gap: .75rem;
 }
 .ftr-col {
   border: 1px solid var(--line);
   background: var(--card2);
   border-radius: var(--r);
-  padding: .9rem .95rem;
-  min-height: 170px;
+  padding: .78rem .84rem;
+}
+.ftr-col-primary {
+  background: linear-gradient(180deg, var(--card2), var(--card));
+  border-color: var(--accent-gm);
+  box-shadow: 0 8px 22px rgba(0,0,0,.12);
 }
 .ftr-kicker {
-  font-size: .64rem;
+  font-size: .61rem;
   font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: .08em;
-  margin-bottom: .28rem;
+  margin-bottom: .22rem;
 }
 .ftr-title {
   font-family:var(--font-display);
-  font-size: .92rem;
+  font-size: .9rem;
   color: var(--bright);
   font-weight: 700;
-  margin-bottom: .45rem;
+  margin-bottom: .32rem;
 }
 .ftr-brand {
   display: flex;
   align-items: center;
   gap: .55rem;
-  margin-bottom: .45rem;
+  margin-bottom: .34rem;
 }
 .ftr-a3km-logo {
   width: 34px;
@@ -702,38 +741,85 @@ a { color:inherit; text-decoration:none }
   width: 120px;
   height: auto;
   display: block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.2));
 }
 .ftr-text {
-  font-size: .8rem;
+  font-size: .76rem;
   color: var(--dim);
-  line-height: 1.62;
+  line-height: 1.58;
+}
+.ftr-owner-list {
+  margin-top: .35rem;
+  display: grid;
+  gap: .2rem;
+  list-style: none;
+}
+.ftr-owner-list li {
+  font-size: .72rem;
+  color: var(--mid);
+}
+.ftr-social {
+  margin-top: .45rem;
+  display: grid;
+  gap: .32rem;
+}
+.ftr-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: .38rem;
+  width: fit-content;
+  font-size: .71rem;
+  color: var(--mid);
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: transparent;
+  padding: .2rem .48rem .2rem .3rem;
+  transition: all .2s;
+}
+.ftr-social a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-gl);
+}
+.ftr-ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--line2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .62rem;
+  font-weight: 700;
+  line-height: 1;
 }
 .ftr-meta {
-  margin-top: .5rem;
+  margin-top: .4rem;
   display: flex;
   flex-wrap: wrap;
-  gap: .35rem;
+  gap: .28rem;
 }
 .ftr-badge {
-  font-size: .66rem;
-  padding: .2rem .45rem;
+  font-size: .62rem;
+  padding: .16rem .4rem;
   border-radius: 999px;
-  border: 1px solid var(--line2);
+  border: 1px solid var(--line);
   color: var(--mid);
   background: var(--accent-gl);
 }
 .ftr-links {
-  margin-top: .55rem;
+  margin-top: .45rem;
   display: flex;
   flex-wrap: wrap;
-  gap: .45rem;
+  gap: .3rem;
 }
 .ftr-links a {
-  font-size: .73rem;
-  color: var(--mid);
-  border: 1px solid var(--line);
-  background: var(--card);
-  padding: .26rem .5rem;
+  font-size: .69rem;
+  font-weight: 500;
+  color: var(--dim);
+  border: 1px solid var(--line2);
+  background: transparent;
+  padding: .2rem .46rem;
   border-radius: 999px;
   transition: all .2s;
 }
@@ -745,14 +831,14 @@ a { color:inherit; text-decoration:none }
 .ftr-bottom {
   max-width: 1100px;
   margin: 0 auto;
-  padding: .75rem 1.25rem 1.05rem;
+  padding: .62rem 1.25rem .92rem;
   border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: .6rem;
   flex-wrap: wrap;
-  font-size: .75rem;
+  font-size: .7rem;
   color: var(--dim);
 }
 .ftr-bottom-links {
@@ -767,8 +853,12 @@ a { color:inherit; text-decoration:none }
 [data-theme="light"] .ftr-bottom { color: #4f6285; }
 [data-theme="milki"] .ftr-text { color: #5f5748; }
 [data-theme="milki"] .ftr-bottom { color: #5f5748; }
-[data-theme="light"] .ftr-col { background: rgba(255,255,255,.9); }
-[data-theme="milki"] .ftr-col { background: rgba(255,253,246,.9); }
+[data-theme="light"] .ftr-col { background: rgba(255,255,255,.84); }
+[data-theme="milki"] .ftr-col { background: rgba(255,253,246,.86); }
+[data-theme="light"] .ftr-col-primary { background: rgba(248,252,255,.92); }
+[data-theme="milki"] .ftr-col-primary { background: rgba(255,250,238,.94); }
+[data-theme="light"] .ftr-owner-list li { color: #3f5679; }
+[data-theme="milki"] .ftr-owner-list li { color: #5b5244; }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE (MOBILE FIRST POLISH)
@@ -801,10 +891,13 @@ a { color:inherit; text-decoration:none }
   .results-body {
     padding: .7rem .8rem;
   }
+  .ftr-inner {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
-  .logo-wordmark { width: 104px; }
+  .logo-wordmark { font-size: 1.1rem; }
   .logo-tag { font-size: .64rem; }
   .chip { font-size: .62rem; }
   .btn-icon { width: 40px; height: 40px; }
@@ -889,8 +982,8 @@ a { color:inherit; text-decoration:none }
   <div class="hdr-inner">
     <div class="logo">
       <div class="logo-mark"><img src="/assets/brand/textriva-monogram.svg" alt="Textriva mark"/></div>
-      <div>
-        <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="logo-wordmark"/>
+      <div class="logo-text">
+        <span class="logo-wordmark" aria-label="Textriva">Textriva</span>
         <div class="logo-tag">by A3KM Studio</div>
       </div>
     </div>
@@ -981,8 +1074,8 @@ a { color:inherit; text-decoration:none }
       <span id="openAllLensBtnTxt">&nbsp;Lens-এ সব খুলুন (page by page)</span>
     </button>
     <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
-    <button class="btn btn-secondary hidden" id="downloadBtn">💾 .txt Download</button>
-    <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 Merged Copy</button>
+    <button class="btn btn-secondary hidden" id="downloadBtn">💾 <span id="downloadBtnTxt">.txt Download</span></button>
+    <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
   </div>
 
   <!-- WORKSPACE (preview + text editor) -->
@@ -1061,50 +1154,50 @@ a { color:inherit; text-decoration:none }
 <!-- ═══════════ FOOTER ═══════════ -->
 <footer class="ftr">
   <div class="ftr-inner">
-    <div class="ftr-col">
-      <div class="ftr-kicker">Textriva OCR Studio</div>
+    <div class="ftr-col ftr-col-primary">
+      <div class="ftr-kicker" id="ftrKicker1">Textriva OCR Studio</div>
       <div class="ftr-brand">
         <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
         <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="ftr-wordmark"/>
       </div>
-      <div class="ftr-text">Textriva streamlines OCR workflow: Upload → Google Lens → Copy text. Fast, free, and practical for multi-page extraction.</div>
+      <div class="ftr-text" id="ftrText1">Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.</div>
       <div class="ftr-meta">
-        <span class="ftr-badge">No Paid API</span>
-        <span class="ftr-badge">Image + PDF</span>
-        <span class="ftr-badge">Page-wise Control</span>
-      </div>
-      <div class="ftr-links">
-        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">View Portfolio</a>
-        <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
+        <span class="ftr-badge" id="ftrBadge1">Free Workflow</span>
+        <span class="ftr-badge" id="ftrBadge2">Image + PDF</span>
+        <span class="ftr-badge" id="ftrBadge3">No Paid API</span>
       </div>
     </div>
     <div class="ftr-col">
-      <div class="ftr-kicker">Portfolio Owner</div>
+      <div class="ftr-kicker" id="ftrKicker2">Portfolio Owner</div>
       <div class="ftr-title">Md Akhinoor Islam</div>
-      <div class="ftr-text">Energy Science &amp; Engineering Student<br/>KUET • Batch 2K23<br/>Available for opportunities.</div>
+      <div class="ftr-text" id="ftrText2">Energy Science &amp; Engineering Student</div>
+      <ul class="ftr-owner-list">
+        <li id="ftrOwnerLine1">KUET • Batch 2K23</li>
+        <li id="ftrOwnerLine2">Portfolio & Research-focused profile</li>
+      </ul>
       <div class="ftr-links">
-        <a href="mailto:mdakhinoorislam.official.2005@gmail.com">Email</a>
+        <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrLinkEmail">Email</a>
         <a href="https://wa.me/8801724812042" target="_blank" rel="noopener">WhatsApp</a>
-        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
+        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" id="ftrLinkPortfolioMid">Portfolio</a>
       </div>
     </div>
     <div class="ftr-col">
-      <div class="ftr-kicker">Professional Network</div>
-      <div class="ftr-title">Connect & Collaborate</div>
-      <div class="ftr-text">For project discussions, internships, freelance opportunities, or collaborations, connect through the channels below.</div>
-      <div class="ftr-links">
-        <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener">Facebook</a>
+      <div class="ftr-kicker" id="ftrKicker3">Professional Network</div>
+      <div class="ftr-title" id="ftrTitle3">Connect & Collaborate</div>
+      <div class="ftr-text" id="ftrText3">Open for collaboration, internships, and project opportunities.</div>
+      <div class="ftr-social">
+        <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener"><span class="ftr-ico">in</span>LinkedIn</a>
+        <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener"><span class="ftr-ico">gh</span>GitHub</a>
+        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener"><span class="ftr-ico">f</span>Facebook</a>
       </div>
     </div>
   </div>
   <div class="ftr-bottom">
-    <span>© Textriva • Portfolio of Md Akhinoor Islam</span>
+    <span id="ftrBottomText">© Textriva • Portfolio of Md Akhinoor Islam</span>
     <span class="ftr-bottom-links">
-      <a href="mailto:mdakhinoorislam.official.2005@gmail.com">Contact</a>
-      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener">Portfolio</a>
-      <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener">A3KM Studio</a>
+      <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrBottomContact">Contact</a>
+      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" id="ftrBottomPortfolio">Portfolio</a>
+      <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener" id="ftrBottomStudio" class="hidden">A3KM Studio</a>
     </span>
   </div>
 </footer>
@@ -1227,6 +1320,8 @@ const i18n = {
     clearBtnTxt: 'মুছুন',
     openAllLensBtnTxt: 'Lens-এ সব খুলুন (page by page)',
     copyAllBtnTxt: 'সব Text Copy',
+    copyAllMergedBtnTxt: 'Merged Copy',
+    downloadBtnTxt: '.txt Download',
     previewTitleTxt: '👁 Preview — পেজ',
     prevPageTitle: 'আগের পেজ',
     nextPageTitle: 'পরের পেজ',
@@ -1240,6 +1335,24 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
+    ftrKicker1: 'Textriva OCR Studio',
+    ftrText1: 'Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.',
+    ftrBadge1: 'Free Workflow',
+    ftrBadge2: 'Image + PDF',
+    ftrBadge3: 'No Paid API',
+    ftrKicker2: 'Portfolio Owner',
+    ftrText2: 'Energy Science & Engineering Student',
+    ftrOwnerLine1: 'KUET • Batch 2K23',
+    ftrOwnerLine2: 'Portfolio & Research-focused profile',
+    ftrLinkEmail: 'Email',
+    ftrLinkPortfolioMid: 'Portfolio',
+    ftrKicker3: 'Professional Network',
+    ftrTitle3: 'Connect & Collaborate',
+    ftrText3: 'Open for collaboration, internships, and project opportunities.',
+    ftrBottomText: '© Textriva • Portfolio of Md Akhinoor Islam',
+    ftrBottomContact: 'Contact',
+    ftrBottomPortfolio: 'Portfolio',
+    ftrBottomStudio: 'A3KM Studio',
     helpModalTitle: '🔍 কীভাবে ব্যবহার করবেন',
     helpStep1: '<strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।',
     helpStep2: '<strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।',
@@ -1280,6 +1393,7 @@ const i18n = {
     allPagesDone: '🎉 সব pages complete!',
     noText: 'কোনো text নেই!',
     copiedAllText: '✓ সব text copied!',
+    copiedMergedText: '✓ merged text copied!',
     copied: '✓ Copied!',
     clearConfirm: 'সব pages মুছে ফেলবেন?',
     pasteReminder: '💡 Text paste হয়েছে — "Save & Next" চাপুন',
@@ -1303,6 +1417,8 @@ const i18n = {
     clearBtnTxt: 'Clear',
     openAllLensBtnTxt: 'Open all in Lens (page by page)',
     copyAllBtnTxt: 'Copy All Text',
+    copyAllMergedBtnTxt: 'Merged Copy',
+    downloadBtnTxt: '.txt Download',
     previewTitleTxt: '👁 Preview — Page',
     prevPageTitle: 'Previous page',
     nextPageTitle: 'Next page',
@@ -1316,6 +1432,24 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'All extracted text across pages will appear here...',
+    ftrKicker1: 'Textriva OCR Studio',
+    ftrText1: 'Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.',
+    ftrBadge1: 'Free Workflow',
+    ftrBadge2: 'Image + PDF',
+    ftrBadge3: 'No Paid API',
+    ftrKicker2: 'Portfolio Owner',
+    ftrText2: 'Energy Science & Engineering Student',
+    ftrOwnerLine1: 'KUET • Batch 2K23',
+    ftrOwnerLine2: 'Portfolio & Research-focused profile',
+    ftrLinkEmail: 'Email',
+    ftrLinkPortfolioMid: 'Portfolio',
+    ftrKicker3: 'Professional Network',
+    ftrTitle3: 'Connect & Collaborate',
+    ftrText3: 'Open for collaboration, internships, and project opportunities.',
+    ftrBottomText: '© Textriva • Portfolio of Md Akhinoor Islam',
+    ftrBottomContact: 'Contact',
+    ftrBottomPortfolio: 'Portfolio',
+    ftrBottomStudio: 'A3KM Studio',
     helpModalTitle: '🔍 How to use',
     helpStep1: '<strong>Upload an image or PDF.</strong> PDF files will be split into pages.',
     helpStep2: '<strong>Click "Upload All".</strong> Each page is uploaded to imgbb.com and a public link is generated.',
@@ -1356,6 +1490,7 @@ const i18n = {
     allPagesDone: '🎉 All pages completed!',
     noText: 'No text available!',
     copiedAllText: '✓ All text copied!',
+    copiedMergedText: '✓ Merged text copied!',
     copied: '✓ Copied!',
     clearConfirm: 'Do you want to clear all pages?',
     pasteReminder: '💡 Text pasted — click "Save & Next"',
@@ -1417,6 +1552,8 @@ function applyLanguage() {
   $('clearBtnTxt').textContent = t('clearBtnTxt');
   $('openAllLensBtnTxt').textContent = t('openAllLensBtnTxt');
   $('copyAllBtnTxt').textContent = t('copyAllBtnTxt');
+  $('copyAllMergedBtnTxt').textContent = t('copyAllMergedBtnTxt');
+  $('downloadBtnTxt').textContent = t('downloadBtnTxt');
   $('previewTitleTxt').textContent = t('previewTitleTxt');
   $('prevPage').title = t('prevPageTitle');
   $('nextPage').title = t('nextPageTitle');
@@ -1430,6 +1567,24 @@ function applyLanguage() {
   $('allCopyBtnTxt').textContent = t('allCopyBtnTxt');
   $('allDlBtnTxt').textContent = t('allDlBtnTxt');
   allTextarea.placeholder = t('allTextareaPlaceholder');
+  $('ftrKicker1').textContent = t('ftrKicker1');
+  $('ftrText1').textContent = t('ftrText1');
+  $('ftrBadge1').textContent = t('ftrBadge1');
+  $('ftrBadge2').textContent = t('ftrBadge2');
+  $('ftrBadge3').textContent = t('ftrBadge3');
+  $('ftrKicker2').textContent = t('ftrKicker2');
+  $('ftrText2').textContent = t('ftrText2');
+  $('ftrOwnerLine1').textContent = t('ftrOwnerLine1');
+  $('ftrOwnerLine2').textContent = t('ftrOwnerLine2');
+  $('ftrLinkEmail').textContent = t('ftrLinkEmail');
+  $('ftrLinkPortfolioMid').textContent = t('ftrLinkPortfolioMid');
+  $('ftrKicker3').textContent = t('ftrKicker3');
+  $('ftrTitle3').textContent = t('ftrTitle3');
+  $('ftrText3').textContent = t('ftrText3');
+  $('ftrBottomText').textContent = t('ftrBottomText');
+  $('ftrBottomContact').textContent = t('ftrBottomContact');
+  $('ftrBottomPortfolio').textContent = t('ftrBottomPortfolio');
+  $('ftrBottomStudio').textContent = t('ftrBottomStudio');
   $('helpModalTitle').textContent = t('helpModalTitle');
   $('helpStep1').innerHTML = t('helpStep1');
   $('helpStep2').innerHTML = t('helpStep2');
@@ -1632,7 +1787,6 @@ function statusLabel(s) {
 
 function updateStats() {
   const done = state.pages.filter(p => p.status === 'done').length;
-  const ready = state.pages.filter(p => p.status === 'ready').length;
   const chip = $('statsChip');
   chip.classList.remove('hidden');
   chip.textContent = `${done}/${state.pages.length} ${t('doneWord')}`;
@@ -1646,7 +1800,13 @@ function updateStats() {
     const words = full.trim() ? full.trim().split(/\s+/).length : 0;
     $('allMeta').innerHTML = t('allMeta', { pages: texts.length, chars: full.length, words });
     $('copyAllBtn').classList.remove('hidden');
+    $('copyAllMergedBtn').classList.remove('hidden');
     $('downloadBtn').classList.remove('hidden');
+  } else {
+    resultsSection.classList.add('hidden');
+    $('copyAllBtn').classList.add('hidden');
+    $('copyAllMergedBtn').classList.add('hidden');
+    $('downloadBtn').classList.add('hidden');
   }
 }
 
@@ -1873,11 +2033,25 @@ function buildAllText() {
     .join('\n\n');
 }
 
+function buildMergedText() {
+  return state.pages
+    .map(p => (p.text || '').trim())
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 $('copyAllBtn').onclick = async () => {
   const fullText = buildAllText();
   if (!fullText) { toast(t('noText'), 'err'); return }
   await copyText(fullText);
   toast(t('copiedAllText'), 'ok');
+};
+
+$('copyAllMergedBtn').onclick = async () => {
+  const mergedText = buildMergedText();
+  if (!mergedText) { toast(t('noText'), 'err'); return }
+  await copyText(mergedText);
+  toast(t('copiedMergedText'), 'ok');
 };
 
 $('downloadBtn').onclick = () => {
