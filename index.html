@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="dark">
+<html lang="bn" data-theme="milki">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -64,6 +64,21 @@
   --shadow:    0 2px 12px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
   --shadow-lg: 0 8px 40px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
 
+  --social-bg: rgba(9,16,30,.6);
+  --social-border: rgba(90,120,170,.45);
+  --social-hover: rgba(59,130,246,.18);
+  --social-shadow: 0 6px 16px rgba(0,0,0,.35);
+
+  --ctl-bg: rgba(9,16,30,.7);
+  --ctl-border: rgba(70,96,140,.55);
+  --ctl-hover: rgba(59,130,246,.2);
+  --ctl-active: rgba(59,130,246,.3);
+  --ctl-shadow: 0 8px 20px rgba(0,0,0,.25);
+
+  --modal-bg: linear-gradient(180deg, rgba(23,32,51,.98), rgba(17,24,39,.98));
+  --modal-border: rgba(79,115,170,.45);
+  --modal-glow: rgba(59,130,246,.18);
+
   --font-body: 'Inter', 'Hind Siliguri', system-ui, sans-serif;
   --font-display: 'Sora', 'Inter', 'Hind Siliguri', system-ui, sans-serif;
   --font-mono: 'Space Mono', monospace;
@@ -86,6 +101,21 @@
   --yellow-gl: rgba(245,166,35,.08);
   --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
   --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
+
+  --social-bg: rgba(255,255,255,.8);
+  --social-border: rgba(45,90,150,.35);
+  --social-hover: rgba(36,83,157,.14);
+  --social-shadow: 0 6px 16px rgba(16,38,72,.12);
+
+  --ctl-bg: rgba(255,255,255,.85);
+  --ctl-border: rgba(36,83,157,.25);
+  --ctl-hover: rgba(36,83,157,.12);
+  --ctl-active: rgba(36,83,157,.2);
+  --ctl-shadow: 0 8px 20px rgba(16,38,72,.12);
+
+  --modal-bg: linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,247,253,.98));
+  --modal-border: rgba(45,90,150,.25);
+  --modal-glow: rgba(36,83,157,.12);
 }
 [data-theme="milki"] {
   --ink:    #0f0e0c;
@@ -108,6 +138,21 @@
   --yellow-gl: rgba(245,166,35,.08);
   --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
   --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
+
+  --social-bg: rgba(255,250,238,.85);
+  --social-border: rgba(95,87,72,.35);
+  --social-hover: rgba(47,184,96,.12);
+  --social-shadow: 0 6px 16px rgba(32,28,20,.12);
+
+  --ctl-bg: rgba(255,250,238,.9);
+  --ctl-border: rgba(95,87,72,.3);
+  --ctl-hover: rgba(47,184,96,.12);
+  --ctl-active: rgba(47,184,96,.18);
+  --ctl-shadow: 0 8px 20px rgba(32,28,20,.12);
+
+  --modal-bg: linear-gradient(180deg, rgba(255,253,246,.98), rgba(243,237,220,.98));
+  --modal-border: rgba(95,87,72,.28);
+  --modal-glow: rgba(47,184,96,.12);
 }
 
 /* ══════════════════════════════════════════════
@@ -225,6 +270,78 @@ a { color:inherit; text-decoration:none }
     brightness(.86);
 }
 .hdr-right { display:flex; align-items:center; gap:.6rem }
+.hdr-ctl-group {
+  display:flex;
+  align-items:center;
+  gap:.22rem;
+  padding:.16rem;
+  border-radius:999px;
+  background: var(--ctl-bg);
+  border: 1px solid var(--ctl-border);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--ctl-shadow);
+}
+.hdr-ctl {
+  width:44px; height:44px;
+  border-radius:999px;
+  background: transparent;
+  border:1px solid transparent;
+  color: var(--mid);
+  font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 6px 6px;
+  transition: transform .2s ease, color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.hdr-ctl-ico {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.hdr-ctl-ico svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hdr-ctl-label {
+  font-size: .54rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  line-height: 1;
+}
+.hdr-ctl:hover {
+  color: var(--accent);
+  background: var(--ctl-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.hdr-ctl:hover .hdr-ctl-label { color: var(--accent); }
+.hdr-ctl:active {
+  transform: translateY(0);
+  background: var(--ctl-active);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.hdr-ctl.hdr-ctl-lang {
+  width:auto;
+  min-width: 58px;
+  padding: 5px 8px 6px;
+}
+.hdr-ctl-badge {
+  font-size: .56rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--text);
+  background: rgba(51,74,104,.6);
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  padding: 1px 6px;
+  line-height: 1.2;
+}
 .chip {
   font-size:.68rem; font-weight:700;
   padding:3px 9px; border-radius:20px;
@@ -630,29 +747,83 @@ a { color:inherit; text-decoration:none }
 }
 .modal-bg.open { display:flex }
 .modal {
-  background:var(--card); border:1px solid var(--line);
-  border-radius:var(--r-lg); max-width:480px; width:100%;
-  box-shadow:var(--shadow-lg); animation:slideUp .3s ease;
+  background: var(--modal-bg);
+  border:1px solid var(--modal-border);
+  border-radius:var(--r-lg); max-width:520px; width:100%;
+  box-shadow: 0 16px 44px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.2);
+  position: relative;
+  animation:slideUp .3s ease;
+}
+.modal::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: .8;
 }
 .modal-hdr {
   padding:1rem 1.25rem; border-bottom:1px solid var(--line);
   display:flex; align-items:center; justify-content:space-between;
+  background: radial-gradient(120% 120% at 10% 10%, var(--modal-glow), transparent 60%);
 }
-.modal-title { font-size:.95rem; font-weight:700; color:var(--bright); font-family:var(--font-display) }
+.modal-title {
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--bright);
+  font-family:var(--font-display);
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.modal-title-ico svg {
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
 .modal-body { padding:1.25rem }
 .modal-ftr {
   padding:.75rem 1.25rem; border-top:1px solid var(--line);
   display:flex; gap:.5rem; justify-content:flex-end;
 }
+.modal-close {
+  width:32px; height:32px;
+  border-radius:10px;
+  background: var(--card2);
+  border:1px solid var(--line2);
+  color: var(--mid);
+  display:flex; align-items:center; justify-content:center;
+  transition: all .2s;
+}
+.modal-close:hover {
+  background: var(--accent-gl);
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .step-row { display:flex; gap:.75rem; margin-bottom:.9rem; align-items:flex-start }
 .step-n {
-  width:22px; height:22px; flex-shrink:0;
-  background:var(--accent); color:#fff;
-  border-radius:50%; font-size:.7rem; font-weight:700;
+  width:24px; height:24px; flex-shrink:0;
+  background: linear-gradient(145deg, var(--accent), var(--accent-d));
+  color:#fff;
+  border-radius:50%; font-size:.72rem; font-weight:700;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
   display:flex; align-items:center; justify-content:center;
 }
 .step-t { font-size:.8rem; color:var(--mid); line-height:1.55 }
 .step-t strong { color:var(--text) }
+.help-tip {
+  background: var(--yellow-gl);
+  border: 1px solid var(--yellow);
+  border-radius: var(--r-sm);
+  padding: .7rem .9rem;
+  font-size: .75rem;
+  color: var(--mid);
+  margin-top: .5rem;
+}
 
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
@@ -694,7 +865,7 @@ a { color:inherit; text-decoration:none }
   margin: 0 auto;
   padding: 1.15rem 1.25rem .95rem;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .9fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: .75rem;
 }
 .ftr-col {
@@ -760,38 +931,83 @@ a { color:inherit; text-decoration:none }
 }
 .ftr-social {
   margin-top: .45rem;
-  display: grid;
-  gap: .32rem;
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.ftr-social::-webkit-scrollbar { display: none; }
 .ftr-social a {
   display: inline-flex;
   align-items: center;
-  gap: .38rem;
-  width: fit-content;
-  font-size: .71rem;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
   color: var(--mid);
-  border: 1px solid var(--line2);
-  border-radius: 999px;
-  background: transparent;
-  padding: .2rem .48rem .2rem .3rem;
-  transition: all .2s;
+  border: 1px solid var(--social-border);
+  border-radius: 50%;
+  background: radial-gradient(120% 120% at 20% 20%, var(--social-bg), transparent 70%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--social-shadow);
+  transition: transform .2s ease, border-color .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.ftr-social .ftr-logo-icon {
+  padding: 0;
+  overflow: hidden;
+}
+.ftr-social .ftr-logo-icon img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  filter: none;
+}
+.ftr-mail-btn {
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,65,65,.18), rgba(120,0,0,.28));
+  border-color: rgba(255,70,70,.5);
+  color: #ff4a4a;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 6px 16px rgba(120,0,0,.25);
+}
+.ftr-mail-btn .ftr-social-ico {
+  width: 22px;
+  height: 22px;
+}
+.ftr-mail-btn:hover {
+  background: linear-gradient(180deg, rgba(255,65,65,.26), rgba(120,0,0,.38));
+  border-color: rgba(255,110,110,.7);
 }
 .ftr-social a:hover {
   color: var(--accent);
   border-color: var(--accent);
-  background: var(--accent-gl);
+  background: radial-gradient(120% 120% at 20% 20%, var(--social-hover), transparent 70%);
+  transform: translateY(-2px);
 }
-.ftr-ico {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1px solid var(--line2);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .62rem;
+.ftr-social a:active {
+  transform: translateY(0);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.ftr-social-ico {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: currentColor;
+}
+.ftr-wordmark-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   font-weight: 700;
-  line-height: 1;
+  letter-spacing: .02em;
+  color: #8ab4ff;
+  text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34);
+}
+[data-theme="light"] .ftr-wordmark-text {
+  color: #24539d;
+  text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 8px rgba(36,83,157,.2);
+}
+[data-theme="milki"] .ftr-wordmark-text {
+  color: #2f7a4c;
+  text-shadow: 0 1px 0 rgba(255,252,242,.82), 0 2px 8px rgba(36,92,64,.2);
 }
 .ftr-meta {
   margin-top: .4rem;
@@ -807,23 +1023,8 @@ a { color:inherit; text-decoration:none }
   color: var(--mid);
   background: var(--accent-gl);
 }
-.ftr-links {
-  margin-top: .45rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem;
-}
-.ftr-links a {
-  font-size: .69rem;
-  font-weight: 500;
-  color: var(--dim);
-  border: 1px solid var(--line2);
-  background: transparent;
-  padding: .2rem .46rem;
-  border-radius: 999px;
-  transition: all .2s;
-}
-.ftr-links a:hover {
+.ftr-links a:hover,
+.ftr-social a:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-gl);
@@ -901,6 +1102,8 @@ a { color:inherit; text-decoration:none }
   .logo-tag { font-size: .64rem; }
   .chip { font-size: .62rem; }
   .btn-icon { width: 40px; height: 40px; }
+  .hdr-ctl { width: 42px; height: 42px; }
+  .hdr-ctl.hdr-ctl-lang { min-width: 56px; }
   .btn {
     min-height: 44px;
     font-size: .9rem;
@@ -991,9 +1194,34 @@ a { color:inherit; text-decoration:none }
       <span class="chip chip-free" id="chipFree">Free</span>
       <span class="chip chip-lens" id="chipNoApi">No API</span>
       <div id="statsChip" class="chip chip-lens hidden"></div>
-      <button class="btn-icon" id="themeBtn" title="Toggle theme">☀️</button>
-      <button class="btn-icon" id="langBtn" title="Language mode">EB</button>
-      <button class="btn-icon" id="helpBtn" title="How it works">❓</button>
+      <div class="hdr-ctl-group">
+        <button class="hdr-ctl" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+          <span class="hdr-ctl-ico" id="themeBtnIcon"></span>
+          <span class="hdr-ctl-label">Theme</span>
+        </button>
+        <button class="hdr-ctl hdr-ctl-lang" id="langBtn" title="Language mode" aria-label="Language mode">
+          <span class="hdr-ctl-ico">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M3 12h18"/>
+              <path d="M12 3a12 12 0 0 1 0 18"/>
+              <path d="M12 3a12 12 0 0 0 0 18"/>
+            </svg>
+          </span>
+          <span class="hdr-ctl-label">Lang</span>
+          <span class="hdr-ctl-badge" id="langBtnBadge">EB</span>
+        </button>
+        <button class="hdr-ctl" id="helpBtn" title="How it works" aria-label="How it works">
+          <span class="hdr-ctl-ico">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-2 2.4-2 4"/>
+              <path d="M12 17h.01"/>
+            </svg>
+          </span>
+          <span class="hdr-ctl-label">Help</span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
@@ -1040,7 +1268,7 @@ a { color:inherit; text-decoration:none }
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
       <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
-      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages</span>
+      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে</span>
     </div>
   </div>
 
@@ -1155,48 +1383,59 @@ a { color:inherit; text-decoration:none }
 <footer class="ftr">
   <div class="ftr-inner">
     <div class="ftr-col ftr-col-primary">
-      <div class="ftr-kicker" id="ftrKicker1">Textriva OCR Studio</div>
+      <div class="ftr-kicker hidden" id="ftrKicker1">Textriva OCR Studio</div>
       <div class="ftr-brand">
         <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
-        <img src="/assets/brand/textriva-wordmark.svg" alt="Textriva" class="ftr-wordmark"/>
+        <span class="ftr-wordmark-text" aria-label="Textriva">Textriva</span>
       </div>
-      <div class="ftr-text" id="ftrText1">Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.</div>
+      <div class="ftr-text" id="ftrText1">Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.</div>
       <div class="ftr-meta">
         <span class="ftr-badge" id="ftrBadge1">Free Workflow</span>
-        <span class="ftr-badge" id="ftrBadge2">Image + PDF</span>
-        <span class="ftr-badge" id="ftrBadge3">No Paid API</span>
+        <span class="ftr-badge" id="ftrBadge2">Page-wise OCR</span>
+        <span class="ftr-badge" id="ftrBadge3">Lens-based</span>
       </div>
     </div>
     <div class="ftr-col">
-      <div class="ftr-kicker" id="ftrKicker2">Portfolio Owner</div>
+      <div class="ftr-kicker" id="ftrKicker2">Developer</div>
       <div class="ftr-title">Md Akhinoor Islam</div>
-      <div class="ftr-text" id="ftrText2">Energy Science &amp; Engineering Student</div>
+      <div class="ftr-text" id="ftrText2">Undergraduate Student</div>
       <ul class="ftr-owner-list">
-        <li id="ftrOwnerLine1">KUET • Batch 2K23</li>
-        <li id="ftrOwnerLine2">Portfolio & Research-focused profile</li>
+        <li id="ftrOwnerLine1">Khulna University of Engineering &amp; Technology (KUET)</li>
+        <li id="ftrOwnerLine2">Department of Energy Science and Engineering</li>
+        <li id="ftrOwnerLine3">Owner of A3KM Studio</li>
       </ul>
-      <div class="ftr-links">
-        <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrLinkEmail">Email</a>
-        <a href="https://wa.me/8801724812042" target="_blank" rel="noopener">WhatsApp</a>
-        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" id="ftrLinkPortfolioMid">Portfolio</a>
-      </div>
     </div>
     <div class="ftr-col">
-      <div class="ftr-kicker" id="ftrKicker3">Professional Network</div>
-      <div class="ftr-title" id="ftrTitle3">Connect & Collaborate</div>
-      <div class="ftr-text" id="ftrText3">Open for collaboration, internships, and project opportunities.</div>
+      <div class="ftr-kicker" id="ftrKicker3">Connect</div>
+      <div class="ftr-title" id="ftrTitle3">Social &amp; Community</div>
+      <div class="ftr-text" id="ftrText3">Follow updates and reach out for collaboration or project ideas.</div>
       <div class="ftr-social">
-        <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener"><span class="ftr-ico">in</span>LinkedIn</a>
-        <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener"><span class="ftr-ico">gh</span>GitHub</a>
-        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener"><span class="ftr-ico">f</span>Facebook</a>
+        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" aria-label="Developer portfolio" title="Developer portfolio" class="ftr-logo-icon">
+          <img src="/assets/brand/a3km-studio-icon.png" alt="A3KM Studio" />
+        </a>
+        <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrLinkEmail" class="ftr-mail-btn" aria-label="Email" title="Email">
+          <svg class="ftr-social-ico" viewBox="0 0 24 24" role="img"><path d="M3 5c0-1 1-2 2-2h14c1 0 2 1 2 2v2l-8 5-8-5V5zm0 3.5v8.5c0 1 1 2 2 2h14c1 0 2-1 2-2V8.5l-8 5-8-5z"/></svg>
+        </a>
+        <a href="https://wa.me/8801724812042" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
+          <svg class="ftr-social-ico" viewBox="0 0 24 24" role="img"><path d="M20.5 3.5A10 10 0 0 0 3.2 18.6L2 22l3.5-1.1A10 10 0 1 0 20.5 3.5zm-8.5 17a8.1 8.1 0 0 1-4.1-1.1l-.3-.2-2.4.8.8-2.3-.2-.3A8.1 8.1 0 1 1 12 20.5zm4.6-5.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.9 1-.1.2-.3.2-.5.1-1-.5-1.8-1.1-2.5-1.9-.7-.8-1-1.5-1.1-1.7-.1-.2 0-.4.1-.5.1-.1.2-.2.3-.4.1-.1.2-.3.3-.4.1-.2.1-.4 0-.6-.1-.1-.6-1.5-.9-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2 0 1.2.9 2.4 1 2.6.1.2 1.8 2.8 4.4 3.9.6.3 1.1.5 1.5.6.6.2 1.1.2 1.5.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-.9.1-1-.1-.2-.2-.2-.4-.3z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/mdakhinoorislam/" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn">
+          <svg class="ftr-social-ico" viewBox="0 0 24 24" role="img"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5zM3.5 9h3v11h-3V9zm6.5 0h2.9v1.5h.1c.4-.8 1.5-1.7 3.1-1.7 3.3 0 3.9 2.1 3.9 4.9V20h-3v-5.1c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V20h-3V9z"/></svg>
+        </a>
+        <a href="https://github.com/Akhinoor14" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+          <svg class="ftr-social-ico" viewBox="0 0 24 24" role="img"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5a4 4 0 0 1 1.1-2.8 3.7 3.7 0 0 1 .1-2.8s.9-.3 2.9 1.1a10 10 0 0 1 5.3 0c2-1.4 2.9-1.1 2.9-1.1a3.7 3.7 0 0 1 .1 2.8 4 4 0 0 1 1.1 2.8c0 3.9-2.4 4.7-4.7 5 .4.3.8 1 .8 2v3c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg>
+        </a>
+        <a href="https://www.facebook.com/mdakhinoorislam" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+          <svg class="ftr-social-ico" viewBox="0 0 24 24" role="img"><path d="M13.5 9H16l-.3 3h-2.2v8h-3v-8H8V9h2.5V7.2C10.5 5 11.6 4 13.7 4H16v3h-1.6c-.7 0-.9.3-.9.9V9z"/></svg>
+        </a>
       </div>
     </div>
   </div>
   <div class="ftr-bottom">
-    <span id="ftrBottomText">© Textriva • Portfolio of Md Akhinoor Islam</span>
+    <span id="ftrBottomText">© Textriva • OCR tool developed by Md Akhinoor Islam</span>
     <span class="ftr-bottom-links">
-      <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrBottomContact">Contact</a>
-      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" id="ftrBottomPortfolio">Portfolio</a>
+      <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrBottomContact" class="hidden">Contact</a>
+      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Projects%20Code/websites/websites-listing.html" target="_blank" rel="noopener" id="ftrBottomPortfolio">Websites &amp; Tools</a>
       <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener" id="ftrBottomStudio" class="hidden">A3KM Studio</a>
     </span>
   </div>
@@ -1206,8 +1445,16 @@ a { color:inherit; text-decoration:none }
 <div class="modal-bg" id="helpModal">
   <div class="modal">
     <div class="modal-hdr">
-      <div class="modal-title" id="helpModalTitle">🔍 কীভাবে ব্যবহার করবেন</div>
-      <button class="btn-icon" id="helpClose">✕</button>
+      <div class="modal-title">
+        <span class="modal-title-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+        </span>
+        <span id="helpModalTitle">কীভাবে ব্যবহার করবেন</span>
+      </div>
+      <button class="modal-close" id="helpClose">✕</button>
     </div>
     <div class="modal-body">
       <div class="step-row">
@@ -1230,7 +1477,7 @@ a { color:inherit; text-decoration:none }
         <div class="step-n">5</div>
         <div class="step-t" id="helpStep5"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div>
       </div>
-      <div id="helpTip" style="background:var(--yellow-gl);border:1px solid var(--yellow);border-radius:var(--r-sm);padding:.7rem .9rem;font-size:.75rem;color:var(--mid);margin-top:.5rem">
+      <div id="helpTip" class="help-tip">
         💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।
       </div>
     </div>
@@ -1287,14 +1534,38 @@ const allTextarea  = $('allTextarea');
 // ══════════════════════════════════════════
 const html = document.documentElement;
 const themeBtn = $('themeBtn');
+const themeBtnIcon = $('themeBtnIcon');
 const langBtn = $('langBtn');
+const langBtnBadge = $('langBtnBadge');
 const themeColorMeta = $('themeColorMeta');
 const themeOrder = ['dark', 'light', 'milki'];
 const langOrder = ['eb', 'en'];
 const themeUi = {
-  dark:  { icon: '🌙', title: 'Dark theme active',  color: '#0f172a' },
-  light: { icon: '☀️', title: 'Light theme active', color: '#eef3fb' },
-  milki: { icon: '🥛', title: 'Milki theme active', color: '#f8f3e5' },
+  dark: {
+    icon:
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/>' +
+      '</svg>',
+    title: 'Dark theme active',
+    color: '#0f172a',
+  },
+  light: {
+    icon:
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="4"/>' +
+      '<path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>' +
+      '</svg>',
+    title: 'Light theme active',
+    color: '#eef3fb',
+  },
+  milki: {
+    icon:
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M12 2.5c3.5 4.5 6.5 7.7 6.5 11A6.5 6.5 0 1 1 5.5 13.5c0-3.3 3-6.5 6.5-11z"/>' +
+      '</svg>',
+    title: 'Milki theme active',
+    color: '#f8f3e5',
+  },
 };
 const langUi = {
   eb: { btn: 'EB', title: 'Language: English + Bangla mixed' },
@@ -1306,14 +1577,14 @@ const i18n = {
     chipNoApi: 'No API',
     how1Title: 'Upload করুন',
     how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
-    how2Title: 'Auto-Upload',
-    how2Text: 'প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে',
+    how2Title: 'Upload',
+    how2Text: '“সব Upload করুন” চাপলে প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে',
     how3Title: 'Google Lens',
     how3Text: 'সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে',
     how4Title: 'Copy & Paste',
     how4Text: 'Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন',
     uploadTitle: 'ছবি বা PDF drag করুন / click করুন',
-    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · সর্বোচ্চ 30 pages',
+    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে',
     stripLabelPrefix: 'পেজ:',
     stripLabelSuffix: 'টি লোড হয়েছে',
     uploadAllBtnTxt: 'সব Upload করুন',
@@ -1335,31 +1606,32 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
-    ftrKicker1: 'Textriva OCR Studio',
-    ftrText1: 'Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.',
+    ftrKicker1: '',
+    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
     ftrBadge1: 'Free Workflow',
-    ftrBadge2: 'Image + PDF',
-    ftrBadge3: 'No Paid API',
-    ftrKicker2: 'Portfolio Owner',
-    ftrText2: 'Energy Science & Engineering Student',
-    ftrOwnerLine1: 'KUET • Batch 2K23',
-    ftrOwnerLine2: 'Portfolio & Research-focused profile',
+    ftrBadge2: 'Page-wise OCR',
+    ftrBadge3: 'Lens-based',
+    ftrKicker2: 'Developer',
+    ftrText2: 'Undergraduate Student',
+    ftrOwnerLine1: 'Khulna University of Engineering & Technology (KUET)',
+    ftrOwnerLine2: 'Department of Energy Science and Engineering',
+    ftrOwnerLine3: 'Owner of A3KM Studio',
     ftrLinkEmail: 'Email',
-    ftrLinkPortfolioMid: 'Portfolio',
-    ftrKicker3: 'Professional Network',
-    ftrTitle3: 'Connect & Collaborate',
-    ftrText3: 'Open for collaboration, internships, and project opportunities.',
-    ftrBottomText: '© Textriva • Portfolio of Md Akhinoor Islam',
+    ftrLinkPortfolioMid: '',
+    ftrKicker3: 'Connect',
+    ftrTitle3: 'Social & Community',
+    ftrText3: 'Follow updates and reach out for collaboration or project ideas.',
+    ftrBottomText: '© Textriva • OCR tool developed by Md Akhinoor Islam',
     ftrBottomContact: 'Contact',
-    ftrBottomPortfolio: 'Portfolio',
+    ftrBottomPortfolio: 'Websites & Tools',
     ftrBottomStudio: 'A3KM Studio',
-    helpModalTitle: '🔍 কীভাবে ব্যবহার করবেন',
-    helpStep1: '<strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।',
-    helpStep2: '<strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।',
-    helpStep3: '<strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।',
-    helpStep4: '<strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।',
-    helpStep5: '<strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।',
+    helpModalTitle: 'দ্রুত গাইড',
+    helpStep1: '<strong>ছবি বা PDF দিন।</strong> PDF হলে প্রতিটা পেজ আলাদা হয়ে যাবে।',
+    helpStep2: '<strong>“সব Upload করুন”</strong> চাপুন। প্রতিটা পেজ imgbb.com এ যাবে এবং একটা public link তৈরি হবে।',
+    helpStep3: '<strong>“Lens-এ সব খুলুন”</strong> চাপুন। প্রতিটা পেজের জন্য Google Lens আলাদা ট্যাবে খুলবে।',
+    helpStep4: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, তারপর এখানে ফিরে এসে পেস্ট করুন।',
+    helpStep5: '<strong>“Save & Next”</strong> চাপুন। পরের পেজে যাবে, শেষে সব টেক্সট একসাথে পাবেন।',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> ট্যাবগুলো খোলা রাখলে দ্রুত কাজ হয়। Lens নিজেই টেক্সট হাইলাইট করে — শুধু "Copy text" দিন।',
     helpOk: 'বুঝেছি ✓',
     pageWord: 'পেজ',
     doneWord: 'done',
@@ -1403,14 +1675,14 @@ const i18n = {
     chipNoApi: 'No API',
     how1Title: 'Upload',
     how1Text: 'Upload image (JPG/PNG/WEBP) or PDF — PDFs are split page by page.',
-    how2Title: 'Auto-Upload',
-    how2Text: 'Each page uploads to imgbb.com and gets a free shareable link.',
+    how2Title: 'Upload',
+    how2Text: 'Click “Upload All” to send each page to imgbb.com and get a free shareable link.',
     how3Title: 'Google Lens',
     how3Text: 'The link opens in Google Lens, which extracts text automatically.',
     how4Title: 'Copy & Paste',
     how4Text: 'Copy text from Lens and paste it here — collect all pages together.',
     uploadTitle: 'Drag image or PDF here / click to browse',
-    uploadSubNote: 'PDF pages are processed separately · maximum 30 pages',
+    uploadSubNote: 'PDF pages are processed separately · large PDFs may be slower',
     stripLabelPrefix: 'Pages:',
     stripLabelSuffix: 'loaded',
     uploadAllBtnTxt: 'Upload All',
@@ -1432,31 +1704,32 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'All extracted text across pages will appear here...',
-    ftrKicker1: 'Textriva OCR Studio',
-    ftrText1: 'Textriva is a focused OCR workspace for image and PDF pages with a practical Google Lens flow and clean page-wise text management.',
+    ftrKicker1: '',
+    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
     ftrBadge1: 'Free Workflow',
-    ftrBadge2: 'Image + PDF',
-    ftrBadge3: 'No Paid API',
-    ftrKicker2: 'Portfolio Owner',
-    ftrText2: 'Energy Science & Engineering Student',
-    ftrOwnerLine1: 'KUET • Batch 2K23',
-    ftrOwnerLine2: 'Portfolio & Research-focused profile',
+    ftrBadge2: 'Page-wise OCR',
+    ftrBadge3: 'Lens-based',
+    ftrKicker2: 'Developer',
+    ftrText2: 'Undergraduate Student',
+    ftrOwnerLine1: 'Khulna University of Engineering & Technology (KUET)',
+    ftrOwnerLine2: 'Department of Energy Science and Engineering',
+    ftrOwnerLine3: 'Owner of A3KM Studio',
     ftrLinkEmail: 'Email',
-    ftrLinkPortfolioMid: 'Portfolio',
-    ftrKicker3: 'Professional Network',
-    ftrTitle3: 'Connect & Collaborate',
-    ftrText3: 'Open for collaboration, internships, and project opportunities.',
-    ftrBottomText: '© Textriva • Portfolio of Md Akhinoor Islam',
+    ftrLinkPortfolioMid: '',
+    ftrKicker3: 'Connect',
+    ftrTitle3: 'Social & Community',
+    ftrText3: 'Follow updates and reach out for collaboration or project ideas.',
+    ftrBottomText: '© Textriva • OCR tool developed by Md Akhinoor Islam',
     ftrBottomContact: 'Contact',
-    ftrBottomPortfolio: 'Portfolio',
+    ftrBottomPortfolio: 'Websites & Tools',
     ftrBottomStudio: 'A3KM Studio',
-    helpModalTitle: '🔍 How to use',
-    helpStep1: '<strong>Upload an image or PDF.</strong> PDF files will be split into pages.',
-    helpStep2: '<strong>Click "Upload All".</strong> Each page is uploaded to imgbb.com and a public link is generated.',
-    helpStep3: '<strong>Click "Open all in Lens".</strong> Google Lens opens each page in a new tab.',
-    helpStep4: '<strong>In Lens tab,</strong> select text → copy → return to this app and paste.',
-    helpStep5: '<strong>Click "Save & Next".</strong> It moves to the next page; finally all text is merged.',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Keep Lens tabs open after launching. Lens highlights text automatically — just use "Copy text".',
+    helpModalTitle: 'Quick guide',
+    helpStep1: '<strong>Upload an image or PDF.</strong> PDFs are split into pages automatically.',
+    helpStep2: '<strong>Select “Upload All”.</strong> Each page is uploaded to imgbb.com and a public link is created.',
+    helpStep3: '<strong>Select “Open all in Lens”.</strong> Google Lens opens one page per tab.',
+    helpStep4: '<strong>In the Lens tab,</strong> select the text, copy it, then return here and paste.',
+    helpStep5: '<strong>Select “Save & Next”.</strong> Repeat until all pages are done; the full text is compiled below.',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Keep Lens tabs open to move faster. Lens highlights text for you — just use “Copy text”.',
     helpOk: 'Got it ✓',
     pageWord: 'page',
     doneWord: 'done',
@@ -1523,14 +1796,20 @@ function saveSetting(key, value) {
 function syncThemeButton() {
   const theme = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
   html.dataset.theme = theme;
-  themeBtn.textContent = themeUi[theme].icon;
+  if (themeBtnIcon) {
+    themeBtnIcon.innerHTML = themeUi[theme].icon;
+  }
   themeBtn.title = themeUi[theme].title;
+  themeBtn.setAttribute('aria-label', themeUi[theme].title);
   themeColorMeta?.setAttribute('content', themeUi[theme].color);
 }
 function syncLangButton() {
   currentLang = langUi[currentLang] ? currentLang : 'eb';
-  langBtn.textContent = langUi[currentLang].btn;
+  if (langBtnBadge) {
+    langBtnBadge.textContent = langUi[currentLang].btn;
+  }
   langBtn.title = langUi[currentLang].title;
+  langBtn.setAttribute('aria-label', langUi[currentLang].title);
 }
 function applyLanguage() {
   html.lang = currentLang === 'en' ? 'en' : 'bn';
@@ -1576,8 +1855,13 @@ function applyLanguage() {
   $('ftrText2').textContent = t('ftrText2');
   $('ftrOwnerLine1').textContent = t('ftrOwnerLine1');
   $('ftrOwnerLine2').textContent = t('ftrOwnerLine2');
-  $('ftrLinkEmail').textContent = t('ftrLinkEmail');
-  $('ftrLinkPortfolioMid').textContent = t('ftrLinkPortfolioMid');
+  $('ftrOwnerLine3').textContent = t('ftrOwnerLine3');
+  const ftrEmail = $('ftrLinkEmail');
+  if (ftrEmail) {
+    const ftrEmailLabel = t('ftrLinkEmail');
+    ftrEmail.setAttribute('aria-label', ftrEmailLabel);
+    ftrEmail.setAttribute('title', ftrEmailLabel);
+  }
   $('ftrKicker3').textContent = t('ftrKicker3');
   $('ftrTitle3').textContent = t('ftrTitle3');
   $('ftrText3').textContent = t('ftrText3');
@@ -1662,7 +1946,7 @@ async function loadPdf(file) {
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: buf }).promise;
-    const total = Math.min(pdf.numPages, 30);
+    const total = pdf.numPages;
     for (let i = 1; i <= total; i++) {
       const page = await pdf.getPage(i);
       const vp = page.getViewport({ scale: 2.0 });
