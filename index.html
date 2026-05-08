@@ -13,12 +13,14 @@
 <meta name="twitter:title" content="Textriva by A3KM Studio — Google Lens OCR Tool"/>
 <meta name="twitter:description" content="Free OCR workflow with Google Lens for image and PDF pages."/>
 <meta name="twitter:image" content="/assets/brand/icon-180.svg"/>
+<link rel="icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg"/>
+<link rel="shortcut icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" sizes="32x32" href="/assets/brand/icon-32.svg"/>
 <link rel="icon" type="image/svg+xml" sizes="64x64" href="/assets/brand/icon-64.svg"/>
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/icon-180.svg"/>
 <link rel="manifest" href="/site.webmanifest"/>
-<meta name="theme-color" content="#140b0f"/>
+<meta name="theme-color" content="#0f172a"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
@@ -28,26 +30,26 @@
    DESIGN TOKENS
 ══════════════════════════════════════════════ */
 :root {
-  --ink:       #0d0709;
-  --paper:     #140b0f;
-  --card:      #1d1116;
-  --card2:     #26171d;
-  --line:      #3b2630;
-  --line2:     #5e3a47;
-  --dim:       #aa8e98;
-  --mid:       #d2b9c2;
-  --text:      #f3e8ed;
-  --bright:    #fff7fb;
+  --ink:       #0b1020;
+  --paper:     #0f172a;
+  --card:      #111827;
+  --card2:     #172033;
+  --line:      #273449;
+  --line2:     #334a68;
+  --dim:       #90a3bf;
+  --mid:       #b5c5de;
+  --text:      #e8eefc;
+  --bright:    #f8fbff;
 
-  --lens-b:    #7d0c24;
-  --lens-r:    #e03b59;
-  --lens-y:    #f2a44c;
-  --lens-g:    #c5163a;
+  --lens-b:    #2563eb;
+  --lens-r:    #ef4444;
+  --lens-y:    #f59e0b;
+  --lens-g:    #22c55e;
 
-  --accent:    #c5163a;
-  --accent-d:  #8e0f2a;
-  --accent-gl: rgba(197,22,58,.14);
-  --accent-gm: rgba(197,22,58,.3);
+  --accent:    #3b82f6;
+  --accent-d:  #1d4ed8;
+  --accent-gl: rgba(59,130,246,.14);
+  --accent-gm: rgba(59,130,246,.30);
 
   --green:     #2fb860;
   --green-gl:  rgba(47,184,96,.12);
@@ -67,18 +69,18 @@
   --font-mono: 'Space Mono', monospace;
 }
 [data-theme="light"] {
-  --ink:    #faf6f7;
-  --paper:  #f6f0f2;
+  --ink:    #f4f7fc;
+  --paper:  #eef3fb;
   --card:   #ffffff;
-  --card2:  #f9f4f6;
-  --line:   #ebdce1;
-  --line2:  #dcb7c3;
-  --dim:    #7e5c67;
-  --mid:    #5d3f49;
-  --text:   #352028;
-  --bright: #201116;
-  --accent-gl: rgba(197,22,58,.1);
-  --accent-gm: rgba(197,22,58,.18);
+  --card2:  #f4f7fd;
+  --line:   #d7e0ef;
+  --line2:  #bfd0e6;
+  --dim:    #5f7192;
+  --mid:    #415a82;
+  --text:   #1b2a44;
+  --bright: #0f1e36;
+  --accent-gl: rgba(59,130,246,.1);
+  --accent-gm: rgba(59,130,246,.18);
   --green-gl:  rgba(47,184,96,.08);
   --red-gl:    rgba(232,85,85,.08);
   --yellow-gl: rgba(245,166,35,.08);
@@ -133,11 +135,11 @@ a { color:inherit; text-decoration:none }
 }
 .logo-mark {
   width:36px; height:36px;
-  background: linear-gradient(145deg, #201015, #2c171e);
+  background: linear-gradient(145deg, #0f1a33, #1b2f56);
   border-radius:10px;
   display:flex; align-items:center; justify-content:center;
   border: 1px solid var(--line2);
-  box-shadow: 0 4px 14px rgba(197,22,58,.18);
+  box-shadow: 0 4px 14px rgba(59,130,246,.22);
   flex-shrink:0;
 }
 .logo-mark img {
@@ -165,7 +167,7 @@ a { color:inherit; text-decoration:none }
 }
 .chip-free { background:var(--green-gl); color:var(--green); border:1px solid currentColor }
 .chip-lens { 
-  background: linear-gradient(90deg, rgba(197,22,58,.1), rgba(197,22,58,.2));
+  background: linear-gradient(90deg, rgba(59,130,246,.08), rgba(59,130,246,.18));
   border:1px solid var(--line2); color:var(--mid);
 }
 .btn-icon {
@@ -200,7 +202,7 @@ a { color:inherit; text-decoration:none }
 .upload-area::before {
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(197,22,58,.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(59,130,246,.12) 0%, transparent 70%);
   pointer-events:none;
 }
 .upload-area:hover, .upload-area.over {
@@ -213,7 +215,7 @@ a { color:inherit; text-decoration:none }
 }
 .upload-icon {
   width:72px; height:72px; margin:0 auto 1.25rem;
-  background: linear-gradient(135deg, var(--accent-gl), rgba(125,12,36,.18));
+  background: linear-gradient(135deg, var(--accent-gl), rgba(29,78,216,.2));
   border:1px solid var(--line2);
   border-radius:20px;
   display:flex; align-items:center; justify-content:center; font-size:30px;
@@ -311,11 +313,11 @@ a { color:inherit; text-decoration:none }
 .btn:disabled { opacity:.45; cursor:not-allowed }
 .btn-primary {
   background:var(--accent); color:#fff;
-  box-shadow:0 2px 10px rgba(197,22,58,.28);
+  box-shadow:0 2px 10px rgba(59,130,246,.30);
 }
 .btn-primary:hover:not(:disabled) {
   background:var(--accent-d);
-  box-shadow:0 4px 18px rgba(197,22,58,.4);
+  box-shadow:0 4px 18px rgba(59,130,246,.42);
   transform:translateY(-1px);
 }
 .btn-secondary {
@@ -664,8 +666,8 @@ a { color:inherit; text-decoration:none }
 .ftr-bottom a {
   color: var(--accent);
 }
-[data-theme="light"] .ftr-text { color: #6b4a55; }
-[data-theme="light"] .ftr-bottom { color: #6b4a55; }
+[data-theme="light"] .ftr-text { color: #4f6285; }
+[data-theme="light"] .ftr-bottom { color: #4f6285; }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE (MOBILE FIRST POLISH)

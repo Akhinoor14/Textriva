@@ -4,18 +4,26 @@
   "description": "Google Lens OCR workflow for image and PDF text extraction.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#140b0f",
-  "theme_color": "#140b0f",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
+    {
+      "src": "/assets/brand/icon-32.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/assets/brand/icon-64.svg",
       "sizes": "64x64",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
       "src": "/assets/brand/icon-180.svg",
       "sizes": "180x180",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }

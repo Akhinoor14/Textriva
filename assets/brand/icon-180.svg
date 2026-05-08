@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 256 256" role="img" aria-label="Textriva 180 icon">
   <defs>
     <linearGradient id="i180-bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#13080c"/>
-      <stop offset="1" stop-color="#240f16"/>
+      <stop offset="0" stop-color="#0b1222"/>
+      <stop offset="1" stop-color="#122344"/>
     </linearGradient>
-    <linearGradient id="i180-red" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#f0466a"/>
-      <stop offset="1" stop-color="#a60d2f"/>
+    <linearGradient id="i180-blue" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#66a8ff"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
     </linearGradient>
   </defs>
-  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#i180-bg)" stroke="#7a1428" stroke-width="4"/>
-  <path d="M58 66h140l-10 28h-49v102h-30V94H68z" fill="url(#i180-red)"/>
-  <path d="M94 120h68l-8 20h-24v56h-20v-56H102z" fill="#2a0d14"/>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#i180-bg)" stroke="#1d4ed8" stroke-width="4"/>
+  <path d="M58 66h140l-10 28h-49v102h-30V94H68z" fill="url(#i180-blue)"/>
+  <path d="M94 120h68l-8 20h-24v56h-20v-56H102z" fill="#0f1c35"/>
 </svg>
