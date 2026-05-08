@@ -7,33 +7,33 @@
 <meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
 <style>
 /* ══════════════════════════════════════════════
    DESIGN TOKENS
 ══════════════════════════════════════════════ */
 :root {
-  --ink:       #0a0b0f;
-  --paper:     #111318;
-  --card:      #181c24;
-  --card2:     #1e2330;
-  --line:      #2a3045;
-  --line2:     #3a4560;
-  --dim:       #5a6a8a;
-  --mid:       #8899bb;
-  --text:      #d8e2f5;
-  --bright:    #f0f4ff;
+  --ink:       #0d0709;
+  --paper:     #140b0f;
+  --card:      #1d1116;
+  --card2:     #26171d;
+  --line:      #3b2630;
+  --line2:     #5e3a47;
+  --dim:       #aa8e98;
+  --mid:       #d2b9c2;
+  --text:      #f3e8ed;
+  --bright:    #fff7fb;
 
-  --lens-b:    #4a90f0;
-  --lens-r:    #e85555;
-  --lens-y:    #f5a623;
-  --lens-g:    #2fb860;
+  --lens-b:    #7d0c24;
+  --lens-r:    #e03b59;
+  --lens-y:    #f2a44c;
+  --lens-g:    #c5163a;
 
-  --accent:    #4a90f0;
-  --accent-d:  #2a6abf;
-  --accent-gl: rgba(74,144,240,.12);
-  --accent-gm: rgba(74,144,240,.25);
+  --accent:    #c5163a;
+  --accent-d:  #8e0f2a;
+  --accent-gl: rgba(197,22,58,.14);
+  --accent-gm: rgba(197,22,58,.3);
 
   --green:     #2fb860;
   --green-gl:  rgba(47,184,96,.12);
@@ -48,22 +48,23 @@
   --shadow:    0 2px 12px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
   --shadow-lg: 0 8px 40px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
 
-  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-body: 'Inter', 'Hind Siliguri', system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', 'Hind Siliguri', system-ui, sans-serif;
   --font-mono: 'Space Mono', monospace;
 }
 [data-theme="light"] {
-  --ink:    #f5f7ff;
-  --paper:  #edf0f9;
+  --ink:    #faf6f7;
+  --paper:  #f6f0f2;
   --card:   #ffffff;
-  --card2:  #f2f4fb;
-  --line:   #dde2f0;
-  --line2:  #c5ccdd;
-  --dim:    #5f6f93;
-  --mid:    #44587d;
-  --text:   #1e2840;
-  --bright: #0a0f20;
-  --accent-gl: rgba(74,144,240,.08);
-  --accent-gm: rgba(74,144,240,.18);
+  --card2:  #f9f4f6;
+  --line:   #ebdce1;
+  --line2:  #dcb7c3;
+  --dim:    #7e5c67;
+  --mid:    #5d3f49;
+  --text:   #352028;
+  --bright: #201116;
+  --accent-gl: rgba(197,22,58,.1);
+  --accent-gm: rgba(197,22,58,.18);
   --green-gl:  rgba(47,184,96,.08);
   --red-gl:    rgba(232,85,85,.08);
   --yellow-gl: rgba(245,166,35,.08);
@@ -118,34 +119,38 @@ a { color:inherit; text-decoration:none }
 }
 .logo-mark {
   width:36px; height:36px;
-  background: linear-gradient(135deg, var(--lens-b), var(--lens-g));
+  background: linear-gradient(145deg, #6e0a1f, #c5163a);
   border-radius:10px;
   display:flex; align-items:center; justify-content:center;
-  font-size:18px;
-  box-shadow: 0 2px 10px rgba(74,144,240,.4);
+  font-size:14px;
+  font-weight:700;
+  font-family:var(--font-display);
+  color:#fff;
+  box-shadow: 0 4px 14px rgba(197,22,58,.35);
   flex-shrink:0;
 }
 .logo-name {
-  font-weight:700; font-size:1.1rem;
+  font-family:var(--font-display);
+  font-weight:700; font-size:1.06rem;
   color: var(--bright);
-  letter-spacing:-.03em;
+  letter-spacing:-.02em;
 }
 .logo-name span { color: var(--accent) }
 .logo-tag {
-  font-size:.65rem; color:var(--dim);
-  font-family: var(--font-mono);
-  letter-spacing:.04em;
+  font-size:.68rem; color:var(--dim);
+  font-family: var(--font-body);
+  letter-spacing:.02em;
 }
 .hdr-right { display:flex; align-items:center; gap:.6rem }
 .chip {
-  font-size:.65rem; font-weight:700;
+  font-size:.68rem; font-weight:700;
   padding:3px 9px; border-radius:20px;
-  letter-spacing:.05em;
+  letter-spacing:.03em;
   text-transform:uppercase;
 }
 .chip-free { background:var(--green-gl); color:var(--green); border:1px solid currentColor }
 .chip-lens { 
-  background: linear-gradient(90deg, rgba(74,144,240,.15), rgba(47,184,96,.15));
+  background: linear-gradient(90deg, rgba(197,22,58,.1), rgba(197,22,58,.2));
   border:1px solid var(--line2); color:var(--mid);
 }
 .btn-icon {
@@ -180,7 +185,7 @@ a { color:inherit; text-decoration:none }
 .upload-area::before {
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(74,144,240,.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 120%, rgba(197,22,58,.12) 0%, transparent 70%);
   pointer-events:none;
 }
 .upload-area:hover, .upload-area.over {
@@ -193,14 +198,14 @@ a { color:inherit; text-decoration:none }
 }
 .upload-icon {
   width:72px; height:72px; margin:0 auto 1.25rem;
-  background: linear-gradient(135deg, var(--accent-gl), var(--green-gl));
+  background: linear-gradient(135deg, var(--accent-gl), rgba(125,12,36,.18));
   border:1px solid var(--line2);
   border-radius:20px;
   display:flex; align-items:center; justify-content:center; font-size:30px;
   transition:transform .25s;
 }
 .upload-area:hover .upload-icon { transform:scale(1.1) rotate(-5deg) }
-.upload-title { font-size:1.15rem; font-weight:700; color:var(--bright); margin-bottom:.4rem }
+.upload-title { font-family:var(--font-display); font-size:1.15rem; font-weight:700; color:var(--bright); margin-bottom:.4rem }
 .upload-sub { font-size:.82rem; color:var(--dim); line-height:1.6 }
 .upload-sub strong { color:var(--mid) }
 
@@ -212,7 +217,7 @@ a { color:inherit; text-decoration:none }
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom:.75rem;
 }
-.strip-label { font-size:.78rem; color:var(--mid); font-family:var(--font-mono) }
+.strip-label { font-size:.8rem; color:var(--mid); font-family:var(--font-body); font-weight:600 }
 .strip-label b { color:var(--accent) }
 .strip-actions { display:flex; gap:.4rem }
 
@@ -291,11 +296,11 @@ a { color:inherit; text-decoration:none }
 .btn:disabled { opacity:.45; cursor:not-allowed }
 .btn-primary {
   background:var(--accent); color:#fff;
-  box-shadow:0 2px 10px rgba(74,144,240,.35);
+  box-shadow:0 2px 10px rgba(197,22,58,.28);
 }
 .btn-primary:hover:not(:disabled) {
   background:var(--accent-d);
-  box-shadow:0 4px 18px rgba(74,144,240,.5);
+  box-shadow:0 4px 18px rgba(197,22,58,.4);
   transform:translateY(-1px);
 }
 .btn-secondary {
@@ -351,8 +356,8 @@ a { color:inherit; text-decoration:none }
   flex-wrap:wrap; gap:.4rem;
 }
 .panel-title {
-  font-size:.78rem; font-weight:700; color:var(--mid);
-  font-family:var(--font-mono); letter-spacing:.04em; text-transform:uppercase;
+  font-size:.8rem; font-weight:700; color:var(--mid);
+  font-family:var(--font-display); letter-spacing:.01em;
 }
 .panel-title b { color:var(--accent) }
 .preview-img-wrap {
@@ -464,7 +469,7 @@ a { color:inherit; text-decoration:none }
   border-bottom:1px solid var(--line);
   background:var(--card2); flex-wrap:wrap; gap:.5rem;
 }
-.results-meta { font-size:.75rem; color:var(--dim); font-family:var(--font-mono) }
+.results-meta { font-size:.78rem; color:var(--dim); font-family:var(--font-body) }
 .results-meta b { color:var(--green) }
 .results-body {
   padding:1rem 1.25rem;
@@ -498,7 +503,7 @@ a { color:inherit; text-decoration:none }
   font-family:var(--font-mono); font-size:.75rem; font-weight:700;
   display:flex; align-items:center; justify-content:center;
 }
-.how-txt p { font-size:.78rem; font-weight:600; color:var(--text); margin-bottom:.15rem }
+.how-txt p { font-size:.8rem; font-weight:600; color:var(--text); margin-bottom:.15rem; font-family:var(--font-display) }
 .how-txt small { font-size:.7rem; color:var(--dim); line-height:1.5 }
 
 /* ══════════════════════════════════════════════
@@ -543,7 +548,7 @@ a { color:inherit; text-decoration:none }
   padding:1rem 1.25rem; border-bottom:1px solid var(--line);
   display:flex; align-items:center; justify-content:space-between;
 }
-.modal-title { font-size:.9rem; font-weight:700; color:var(--bright) }
+.modal-title { font-size:.95rem; font-weight:700; color:var(--bright); font-family:var(--font-display) }
 .modal-body { padding:1.25rem }
 .modal-ftr {
   padding:.75rem 1.25rem; border-top:1px solid var(--line);
@@ -590,6 +595,7 @@ a { color:inherit; text-decoration:none }
   gap: 1rem;
 }
 .ftr-title {
+  font-family:var(--font-display);
   font-size: .9rem;
   color: var(--bright);
   font-weight: 700;
@@ -637,8 +643,105 @@ a { color:inherit; text-decoration:none }
 .ftr-bottom a {
   color: var(--accent);
 }
-[data-theme="light"] .ftr-text { color: #4a5d83; }
-[data-theme="light"] .ftr-bottom { color: #4a5d83; }
+[data-theme="light"] .ftr-text { color: #6b4a55; }
+[data-theme="light"] .ftr-bottom { color: #6b4a55; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE (MOBILE FIRST POLISH)
+══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hdr-inner {
+    height: auto;
+    min-height: 58px;
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+    flex-wrap: wrap;
+  }
+  .wrap {
+    padding: 1rem .8rem 2rem;
+  }
+  .how-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .upload-area {
+    padding: 2.3rem 1rem;
+  }
+  .action-row .btn,
+  .lens-launch-hdr > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .results-hdr {
+    padding: .7rem .8rem;
+  }
+  .results-body {
+    padding: .7rem .8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .logo-name { font-size: .98rem; }
+  .logo-tag { font-size: .64rem; }
+  .chip { font-size: .62rem; }
+  .btn-icon { width: 40px; height: 40px; }
+  .btn {
+    min-height: 44px;
+    font-size: .9rem;
+    padding: .62rem .9rem;
+  }
+  .strip-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .45rem;
+  }
+  .how-strip {
+    grid-template-columns: 1fr;
+    gap: .55rem;
+  }
+  .workspace {
+    gap: .7rem;
+    margin-top: 1rem;
+  }
+  .panel-hdr {
+    padding: .55rem .7rem;
+  }
+  .txt-body {
+    padding: .55rem;
+  }
+  .txt-body textarea,
+  .all-textarea {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .txt-foot .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  #saveTxtBtn {
+    flex: 1.2;
+  }
+  .lens-pages-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ftr-inner {
+    grid-template-columns: 1fr;
+    gap: .8rem;
+    padding: 1rem .8rem;
+  }
+  .ftr-bottom {
+    padding: .75rem .8rem calc(1rem + env(safe-area-inset-bottom));
+  }
+  .toasts {
+    left: .7rem;
+    right: .7rem;
+    bottom: calc(.7rem + env(safe-area-inset-bottom));
+  }
+  .toast {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
 
 /* ══════════════════════════════════════════════
    UTILITY
@@ -656,7 +759,7 @@ a { color:inherit; text-decoration:none }
 <header class="hdr">
   <div class="hdr-inner">
     <div class="logo">
-      <div class="logo-mark">🔍</div>
+      <div class="logo-mark">T</div>
       <div>
         <div class="logo-name">Text<span>riva</span></div>
         <div class="logo-tag">by A3KM Studio</div>
@@ -799,7 +902,7 @@ a { color:inherit; text-decoration:none }
           <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
           &nbsp;Lens — সব পেজ
         </div>
-        <div class="ll-sub">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Status দেখুন।</div>
+        <div class="ll-sub">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।</div>
       </div>
       <button class="btn btn-primary" id="lensAllGridBtn">🚀 সব Lens খুলুন</button>
     </div>
@@ -915,6 +1018,9 @@ const state = {
   pages: [],     // { id, name, blob, url, status:'pending'|'uploading'|'ready'|'done'|'error', remoteUrl:'', text:'' }
   current: 0,    // active page index
 };
+const isMobileDevice = () =>
+  window.matchMedia('(max-width: 900px)').matches ||
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 // ══════════════════════════════════════════
 // DOM REFS
@@ -941,11 +1047,18 @@ const allTextarea  = $('allTextarea');
 // THEME
 // ══════════════════════════════════════════
 const html = document.documentElement;
-$('themeBtn').onclick = () => {
+const themeBtn = $('themeBtn');
+function syncThemeButton() {
+  const isDark = html.dataset.theme === 'dark';
+  themeBtn.textContent = isDark ? '🌙' : '☀️';
+  themeBtn.title = isDark ? 'Dark theme active' : 'Light theme active';
+}
+themeBtn.onclick = () => {
   const isDark = html.dataset.theme === 'dark';
   html.dataset.theme = isDark ? 'light' : 'dark';
-  $('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  syncThemeButton();
 };
+syncThemeButton();
 
 // ══════════════════════════════════════════
 // HELP MODAL
@@ -1237,7 +1350,9 @@ function openLens(i) {
   }
   // Google Lens URL with image URL parameter — direct URL load
   const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-  const win = window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+  const win = isMobileDevice()
+    ? window.open(lensUrl, '_blank')
+    : window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
   if (!win) {
     // Popup blocked fallback
     toast('🚫 Popup blocked! Browser এ popup allow করুন তারপর আবার চেষ্টা করুন।', 'err', 5000);
@@ -1252,6 +1367,12 @@ $('openAllLensBtn').onclick = async () => {
   const readyPages = state.pages.filter(p => p.status === 'ready' || p.status === 'done');
   if (!readyPages.length) {
     toast('⬆️ আগে "সব Upload করুন" চাপুন!', 'err');
+    return;
+  }
+  if (isMobileDevice()) {
+    const firstIdx = state.pages.findIndex(p => p.remoteUrl);
+    if (firstIdx >= 0) openLens(firstIdx);
+    toast('📱 Mobile mode: একবারে ১টা Lens tab খুলবে। পরেরগুলো grid এর Lens button থেকে খুলুন।', 'ok', 5500);
     return;
   }
   // Open pages with a small delay to avoid popup blocker
