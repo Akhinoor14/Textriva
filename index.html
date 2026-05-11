@@ -1322,7 +1322,7 @@ a { color:inherit; text-decoration:none }
         <div class="panel-title"><span id="textTitleTxt">✏️ Text — পেজ</span> <b id="textPageNum">1</b></div>
         <div style="display:flex;gap:.4rem;align-items:center">
           <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📋 Paste</button>
-          <button class="btn btn-secondary" id="copyClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📄 <span id="copyClipBtnTxt">Copy</span></button>
+          <button class="btn btn-secondary" id="quickSaveBtn" style="padding:.3rem .65rem;font-size:.72rem" title="Save & Next" aria-label="Save & Next">✅</button>
           <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">🔍 Lens</button>
         </div>
       </div>
@@ -1330,6 +1330,7 @@ a { color:inherit; text-decoration:none }
         <textarea id="textArea" placeholder="Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...&#10;&#10;অথবা উপরের 'Lens' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।"></textarea>
         <div class="txt-foot">
           <span class="txt-stats" id="txtStats">0 chars · 0 words</span>
+          <button class="btn btn-secondary" id="copyClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📄 <span id="copyClipBtnTxt">Copy</span></button>
           <button class="btn btn-secondary" id="clearTxtBtn" style="padding:.3rem .7rem;font-size:.72rem">✕ Clear</button>
           <button class="btn btn-success" id="saveTxtBtn" style="padding:.3rem .9rem;font-size:.75rem">✓ Save & Next</button>
         </div>
@@ -2258,6 +2259,8 @@ $('copyClipBtn').onclick = async () => {
     toast(t('copyFailed'), '', 2000);
   }
 };
+
+$('quickSaveBtn').onclick = () => $('saveTxtBtn').click();
 
 $('lensCurrentBtn').onclick = () => openLens(state.current);
 
