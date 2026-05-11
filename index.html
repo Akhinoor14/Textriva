@@ -362,6 +362,14 @@ a { color:inherit; text-decoration:none }
   transition:all .2s;
 }
 .btn-icon:hover { background:var(--accent-gl); border-color:var(--accent); color:var(--accent) }
+.sr-only {
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap; border:0;
+}
 #langBtn {
   min-width: 42px;
   padding: 0 .45rem;
@@ -1304,6 +1312,7 @@ a { color:inherit; text-decoration:none }
       <div class="panel-hdr">
         <div class="panel-title"><span id="previewTitleTxt">👁 Preview — পেজ</span> <b id="previewPageNum">1</b></div>
         <div style="display:flex;gap:.4rem">
+          <button class="btn-icon" id="copyClipBtn" title="Copy" aria-label="Copy">📄 <span class="sr-only" id="copyClipBtnTxt">Copy</span></button>
           <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
           <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
         </div>
@@ -1330,7 +1339,6 @@ a { color:inherit; text-decoration:none }
         <textarea id="textArea" placeholder="Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...&#10;&#10;অথবা উপরের 'Lens' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।"></textarea>
         <div class="txt-foot">
           <span class="txt-stats" id="txtStats">0 chars · 0 words</span>
-          <button class="btn btn-secondary" id="copyClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📄 <span id="copyClipBtnTxt">Copy</span></button>
           <button class="btn btn-secondary" id="clearTxtBtn" style="padding:.3rem .7rem;font-size:.72rem">✕ Clear</button>
           <button class="btn btn-success" id="saveTxtBtn" style="padding:.3rem .9rem;font-size:.75rem">✓ Save & Next</button>
         </div>
@@ -1826,6 +1834,8 @@ function applyLanguage() {
   $('copyAllBtnTxt').textContent = t('copyAllBtnTxt');
   $('copyAllMergedBtnTxt').textContent = t('copyAllMergedBtnTxt');
   $('copyClipBtnTxt').textContent = t('copyClipBtnTxt');
+  $('copyClipBtn').title = t('copyClipBtnTxt');
+  $('copyClipBtn').setAttribute('aria-label', t('copyClipBtnTxt'));
   $('downloadBtnTxt').textContent = t('downloadBtnTxt');
   $('previewTitleTxt').textContent = t('previewTitleTxt');
   $('prevPage').title = t('prevPageTitle');
