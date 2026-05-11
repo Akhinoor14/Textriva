@@ -1176,6 +1176,7 @@ a { color:inherit; text-decoration:none }
 .flex   { display:flex }
 .gap-sm { gap:.4rem }
 .flex-1 { flex:1 }
+
 </style>
 </head>
 <body>
@@ -1277,12 +1278,6 @@ a { color:inherit; text-decoration:none }
     <div class="strip-hdr">
       <div class="strip-label"><span id="stripLabelPrefix">পেজ:</span> <b id="pageCount">0</b> <span id="stripLabelSuffix">টি লোড হয়েছে</span></div>
       <div class="strip-actions">
-        <button class="btn btn-secondary" id="uploadAllBtn" style="font-size:.75rem;padding:.4rem .8rem">
-          ☁️ <span id="uploadAllBtnTxt">সব Upload করুন</span>
-        </button>
-        <button class="btn btn-danger" id="clearBtn" style="font-size:.75rem;padding:.4rem .8rem">
-          ✕ <span id="clearBtnTxt">মুছুন</span>
-        </button>
       </div>
     </div>
     <div class="strip" id="strip"></div>
@@ -1297,10 +1292,6 @@ a { color:inherit; text-decoration:none }
 
   <!-- ACTION ROW -->
   <div class="action-row hidden" id="actionRow">
-    <button class="btn btn-primary" id="openAllLensBtn">
-      <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
-      <span id="openAllLensBtnTxt">&nbsp;Lens-এ সব খুলুন (page by page)</span>
-    </button>
     <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
     <button class="btn btn-secondary hidden" id="downloadBtn">💾 <span id="downloadBtnTxt">.txt Download</span></button>
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
@@ -1331,6 +1322,7 @@ a { color:inherit; text-decoration:none }
         <div class="panel-title"><span id="textTitleTxt">✏️ Text — পেজ</span> <b id="textPageNum">1</b></div>
         <div style="display:flex;gap:.4rem;align-items:center">
           <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📋 Paste</button>
+          <button class="btn btn-secondary" id="copyClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📄 <span id="copyClipBtnTxt">Copy</span></button>
           <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">🔍 Lens</button>
         </div>
       </div>
@@ -1355,7 +1347,6 @@ a { color:inherit; text-decoration:none }
         </div>
         <div class="ll-sub" id="lensSectionSubTxt">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।</div>
       </div>
-      <button class="btn btn-primary" id="lensAllGridBtn">🚀 <span id="lensAllGridBtnTxt">সব Lens খুলুন</span></button>
     </div>
     <div class="lens-pages-grid" id="lensGrid"></div>
   </div>
@@ -1587,11 +1578,9 @@ const i18n = {
     uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে',
     stripLabelPrefix: 'পেজ:',
     stripLabelSuffix: 'টি লোড হয়েছে',
-    uploadAllBtnTxt: 'সব Upload করুন',
-    clearBtnTxt: 'মুছুন',
-    openAllLensBtnTxt: 'Lens-এ সব খুলুন (page by page)',
     copyAllBtnTxt: 'সব Text Copy',
     copyAllMergedBtnTxt: 'Merged Copy',
+    copyClipBtnTxt: 'কপি',
     downloadBtnTxt: '.txt Download',
     previewTitleTxt: '👁 Preview — পেজ',
     prevPageTitle: 'আগের পেজ',
@@ -1601,7 +1590,6 @@ const i18n = {
     textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।',
     lensSectionTitleTxt: 'Lens — সব পেজ',
     lensSectionSubTxt: 'প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।',
-    lensAllGridBtnTxt: 'সব Lens খুলুন',
     allExtractedTitleTxt: '📋 All Extracted Text',
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
@@ -1661,6 +1649,7 @@ const i18n = {
     lensOpeningAll: '🚀 {count}টি পেজ Lens এ খুলছে!',
     pastedOk: '✓ Paste হয়েছে!',
     pasteManual: 'Ctrl+V দিয়ে manually paste করুন',
+    copyFailed: 'Copy করা যায়নি! Browser permission দিন।',
     pageSaved: '✅ পেজ {num} saved!',
     allPagesDone: '🎉 সব pages complete!',
     noText: 'কোনো text নেই!',
@@ -1685,11 +1674,9 @@ const i18n = {
     uploadSubNote: 'PDF pages are processed separately · large PDFs may be slower',
     stripLabelPrefix: 'Pages:',
     stripLabelSuffix: 'loaded',
-    uploadAllBtnTxt: 'Upload All',
-    clearBtnTxt: 'Clear',
-    openAllLensBtnTxt: 'Open all in Lens (page by page)',
     copyAllBtnTxt: 'Copy All Text',
     copyAllMergedBtnTxt: 'Merged Copy',
+    copyClipBtnTxt: 'Copy',
     downloadBtnTxt: '.txt Download',
     previewTitleTxt: '👁 Preview — Page',
     prevPageTitle: 'Previous page',
@@ -1699,7 +1686,6 @@ const i18n = {
     textPlaceholder: 'Copy text from Google Lens and paste it here (Ctrl+V)...\n\nOr click the "Lens" button above, open Google Lens, copy selected text, then paste here.',
     lensSectionTitleTxt: 'Lens — All Pages',
     lensSectionSubTxt: 'Each page has its own Lens button. On mobile, opening one tab at a time usually works best.',
-    lensAllGridBtnTxt: 'Open all Lens tabs',
     allExtractedTitleTxt: '📋 All Extracted Text',
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
@@ -1759,6 +1745,7 @@ const i18n = {
     lensOpeningAll: '🚀 Opening {count} pages in Lens!',
     pastedOk: '✓ Pasted!',
     pasteManual: 'Use Ctrl+V to paste manually',
+    copyFailed: 'Copy failed. Allow clipboard permissions.',
     pageSaved: '✅ Page {num} saved!',
     allPagesDone: '🎉 All pages completed!',
     noText: 'No text available!',
@@ -1791,6 +1778,14 @@ function saveSetting(key, value) {
   } catch {
     // ignore storage errors
   }
+}
+
+function clearWorkspace() {
+  state.pages = [];
+  state.current = 0;
+  resultsSection.classList.add('hidden');
+  $('statsChip').classList.add('hidden');
+  renderAll();
 }
 
 function syncThemeButton() {
@@ -1827,11 +1822,9 @@ function applyLanguage() {
   $('uploadSubNote').textContent = t('uploadSubNote');
   $('stripLabelPrefix').textContent = t('stripLabelPrefix');
   $('stripLabelSuffix').textContent = t('stripLabelSuffix');
-  $('uploadAllBtnTxt').textContent = t('uploadAllBtnTxt');
-  $('clearBtnTxt').textContent = t('clearBtnTxt');
-  $('openAllLensBtnTxt').textContent = t('openAllLensBtnTxt');
   $('copyAllBtnTxt').textContent = t('copyAllBtnTxt');
   $('copyAllMergedBtnTxt').textContent = t('copyAllMergedBtnTxt');
+  $('copyClipBtnTxt').textContent = t('copyClipBtnTxt');
   $('downloadBtnTxt').textContent = t('downloadBtnTxt');
   $('previewTitleTxt').textContent = t('previewTitleTxt');
   $('prevPage').title = t('prevPageTitle');
@@ -1841,7 +1834,6 @@ function applyLanguage() {
   textArea.placeholder = t('textPlaceholder');
   $('lensSectionTitleTxt').textContent = ` ${t('lensSectionTitleTxt')}`;
   $('lensSectionSubTxt').textContent = t('lensSectionSubTxt');
-  $('lensAllGridBtnTxt').textContent = t('lensAllGridBtnTxt');
   $('allExtractedTitleTxt').textContent = t('allExtractedTitleTxt');
   $('allCopyBtnTxt').textContent = t('allCopyBtnTxt');
   $('allDlBtnTxt').textContent = t('allDlBtnTxt');
@@ -1933,8 +1925,13 @@ fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 async function handleFiles(files) {
   const arr = Array.from(files);
+  let clearedForPdf = false;
   for (const file of arr) {
     if (file.type === 'application/pdf') {
+      if (!clearedForPdf) {
+        clearWorkspace();
+        clearedForPdf = true;
+      }
       await loadPdf(file);
     } else if (file.type.startsWith('image/')) {
       addPage(file.name, file, URL.createObjectURL(file));
@@ -1942,6 +1939,7 @@ async function handleFiles(files) {
   }
   fileInput.value = '';
   renderAll();
+  await uploadAllPages();
 }
 
 async function loadPdf(file) {
@@ -2169,7 +2167,7 @@ async function uploadPage(i) {
   updateStats();
 }
 
-$('uploadAllBtn').onclick = async () => {
+async function uploadAllPages() {
   const pending = state.pages.filter(p => p.status === 'pending' || p.status === 'error');
   if (!pending.length) { toast(t('allUploadedAlready'), 'ok'); return }
   uplProgress.classList.add('show');
@@ -2191,7 +2189,8 @@ $('uploadAllBtn').onclick = async () => {
   uplBar.style.width = '0%';
   uplPct.textContent = '0%';
   toast(t('allUploadComplete'), 'ok');
-};
+}
+
 
 // ══════════════════════════════════════════
 // GOOGLE LENS OPEN
@@ -2218,32 +2217,6 @@ function openLens(i) {
   toast(t('lensOpened', { num: i+1 }), 'ok', 4000);
 }
 
-$('openAllLensBtn').onclick = async () => {
-  const readyPages = state.pages.filter(p => p.status === 'ready' || p.status === 'done');
-  if (!readyPages.length) {
-    toast(t('uploadFirst'), 'err');
-    return;
-  }
-  if (isMobileDevice()) {
-    const firstIdx = state.pages.findIndex(p => p.remoteUrl);
-    if (firstIdx >= 0) openLens(firstIdx);
-    toast(t('mobileLensNote'), 'ok', 5500);
-    return;
-  }
-  // Open pages with a small delay to avoid popup blocker
-  for (let i = 0; i < state.pages.length; i++) {
-    const pg = state.pages[i];
-    if (pg.remoteUrl) {
-      await new Promise(r => setTimeout(r, 400));
-      const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-      window.open(lensUrl, `lens_page_${i+1}`, 'width=1100,height=750,noopener');
-    }
-  }
-  toast(t('lensOpeningAll', { count: readyPages.length }), 'ok', 4000);
-};
-
-$('lensAllGridBtn').onclick = () => $('openAllLensBtn').click();
-
 // ══════════════════════════════════════════
 // WORKSPACE INTERACTIONS
 // ══════════════════════════════════════════
@@ -2269,6 +2242,20 @@ $('pasteClipBtn').onclick = async () => {
     toast(t('pastedOk'), 'ok', 2000);
   } catch {
     toast(t('pasteManual'), '', 2000);
+  }
+};
+
+$('copyClipBtn').onclick = async () => {
+  const text = textArea.value;
+  if (!text.trim()) {
+    toast(t('noText'), '', 2000);
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(t('copied'), 'ok', 2000);
+  } catch {
+    toast(t('copyFailed'), '', 2000);
   }
 };
 
@@ -2362,15 +2349,6 @@ $('allDlBtn').onclick = () => {
   a.click();
 };
 
-$('clearBtn').onclick = () => {
-  if (confirm(t('clearConfirm'))) {
-    state.pages = [];
-    state.current = 0;
-    resultsSection.classList.add('hidden');
-    $('statsChip').classList.add('hidden');
-    renderAll();
-  }
-};
 
 // keyboard shortcuts
 document.addEventListener('keydown', e => {
