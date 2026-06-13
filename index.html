@@ -2,7 +2,7 @@
 <html lang="bn" data-theme="milki">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Textriva by A3KM Studio — Google Lens OCR Tool</title>
 <meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
 <meta property="og:type" content="website"/>
@@ -13,7 +13,6 @@
 <meta name="twitter:title" content="Textriva by A3KM Studio — Google Lens OCR Tool"/>
 <meta name="twitter:description" content="Free OCR workflow with Google Lens for image and PDF pages."/>
 <meta name="twitter:image" content="/assets/brand/icon-180.svg"/>
-<link rel="icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg"/>
 <link rel="shortcut icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" sizes="32x32" href="/assets/brand/icon-32.svg"/>
@@ -24,7 +23,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
 <style>
 /* ══════════════════════════════════════════════
    DESIGN TOKENS
@@ -259,15 +257,6 @@ a { color:inherit; text-decoration:none }
 }
 [data-theme="milki"] .logo-tag {
   color: #5f5748;
-}
-[data-theme="light"] .ftr-wordmark,
-[data-theme="milki"] .ftr-wordmark {
-  filter:
-    drop-shadow(0 1px 0 rgba(255,255,255,.35))
-    drop-shadow(0 2px 6px rgba(8,16,32,.22))
-    saturate(1.12)
-    contrast(1.22)
-    brightness(.86);
 }
 .hdr-right { display:flex; align-items:center; gap:.6rem }
 .hdr-ctl-group {
@@ -916,12 +905,6 @@ a { color:inherit; text-decoration:none }
   background: var(--ink);
   border: 1px solid var(--line2);
 }
-.ftr-wordmark {
-  width: 120px;
-  height: auto;
-  display: block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.2));
-}
 .ftr-text {
   font-size: .76rem;
   color: var(--dim);
@@ -1107,11 +1090,32 @@ a { color:inherit; text-decoration:none }
 
 @media (max-width: 640px) {
   .logo-wordmark { font-size: 1.1rem; }
-  .logo-tag { font-size: .64rem; }
-  .chip { font-size: .62rem; }
-  .btn-icon { width: 40px; height: 40px; }
-  .hdr-ctl { width: 42px; height: 42px; }
-  .hdr-ctl.hdr-ctl-lang { min-width: 56px; }
+  .hdr-inner {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 .7rem;
+    flex-wrap: nowrap;
+  }
+  .chip-free, .chip-lens, #statsChip {
+    display: none;
+  }
+  .hdr-ctl-group {
+    gap: .12rem;
+    padding: .12rem;
+  }
+  .hdr-ctl {
+    width: 38px; height: 38px;
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+  }
+  .hdr-ctl.hdr-ctl-lang { min-width: 38px; }
+  .hdr-ctl-label, .hdr-ctl-badge {
+    display: none;
+  }
+  .how-strip {
+    display: none;
+  }
   .btn {
     min-height: 44px;
     font-size: .9rem;
@@ -1383,7 +1387,6 @@ a { color:inherit; text-decoration:none }
 <footer class="ftr">
   <div class="ftr-inner">
     <div class="ftr-col ftr-col-primary">
-      <div class="ftr-kicker hidden" id="ftrKicker1">Textriva OCR Studio</div>
       <div class="ftr-brand">
         <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
         <span class="ftr-wordmark-text" aria-label="Textriva">Textriva</span>
@@ -1603,7 +1606,6 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
-    ftrKicker1: '',
     ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
     ftrBadge1: 'Free Workflow',
     ftrBadge2: 'Page-wise OCR',
@@ -1699,7 +1701,6 @@ const i18n = {
     allCopyBtnTxt: 'Copy All',
     allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'All extracted text across pages will appear here...',
-    ftrKicker1: '',
     ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
     ftrBadge1: 'Free Workflow',
     ftrBadge2: 'Page-wise OCR',
@@ -1849,7 +1850,6 @@ function applyLanguage() {
   $('allCopyBtnTxt').textContent = t('allCopyBtnTxt');
   $('allDlBtnTxt').textContent = t('allDlBtnTxt');
   allTextarea.placeholder = t('allTextareaPlaceholder');
-  $('ftrKicker1').textContent = t('ftrKicker1');
   $('ftrText1').textContent = t('ftrText1');
   $('ftrBadge1').textContent = t('ftrBadge1');
   $('ftrBadge2').textContent = t('ftrBadge2');
