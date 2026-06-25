@@ -2,8 +2,7 @@
   "version": 2,
   "functions": {
     "api/upload.js": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
   "routes": [
