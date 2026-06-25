@@ -381,6 +381,21 @@ a { color:inherit; text-decoration:none }
 .btn-warning:hover:not(:disabled) { background:rgba(245,166,35,.22); border-color:var(--yellow); transform:translateY(-1px); }
 
 /* Retry button pulse animation */
+/* Quality selector */
+.quality-sel {
+  display: flex; align-items: center; gap: .28rem;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: .22rem .36rem;
+  font-size: .6rem; color: var(--mid);
+}
+.quality-sel label { white-space: nowrap; font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; }
+.quality-sel select {
+  background: var(--card2); border: 1px solid var(--line2); border-radius: 4px;
+  color: var(--bright); font-size: .64rem; padding: .08rem .24rem;
+  cursor: pointer; outline: none;
+}
+.quality-sel select:focus { border-color: var(--accent); }
+@media(max-width:600px) { .quality-sel { display: none; } }
 @keyframes pulse-warn {
   0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,.0); }
   50% { box-shadow: 0 0 0 6px rgba(245,166,35,.25); }
@@ -620,6 +635,28 @@ a { color:inherit; text-decoration:none }
   border-radius: var(--r-sm); padding: .7rem .9rem;
   font-size: .75rem; color: var(--mid); margin-top: .5rem;
 }
+.help-isp-notice {
+  background: var(--red-gl); border: 1px solid var(--red);
+  border-radius: var(--r-sm); padding: .65rem .9rem;
+  font-size: .75rem; color: var(--mid); margin-top: .5rem;
+}
+.help-shortcuts-title {
+  font-size: .7rem; font-weight: 700; color: var(--accent);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin: .9rem 0 .45rem;
+}
+.shortcut-grid {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: .28rem .65rem; font-size: .76rem;
+}
+.shortcut-grid kbd {
+  background: var(--card2); border: 1px solid var(--line2);
+  border-bottom: 2px solid var(--line2); border-radius: 4px;
+  padding: .1rem .36rem; font-family: var(--font-mono);
+  font-size: .67rem; color: var(--bright); white-space: nowrap;
+  justify-self: start; align-self: center;
+}
+.shortcut-grid span { color: var(--mid); align-self: center; }
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
@@ -646,21 +683,21 @@ a { color:inherit; text-decoration:none }
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .8;
 }
-.ftr-inner { max-width: 1400px; margin: 0 auto; padding: 1.15rem 1.5rem .95rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-.ftr-col { border: 1px solid var(--line); background: var(--card2); border-radius: var(--r); padding: .78rem .84rem; }
-.ftr-col-primary { background: linear-gradient(180deg, var(--card2), var(--card)); border-color: var(--accent-gm); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
-.ftr-kicker { font-size: .61rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .22rem; }
-.ftr-title { font-family:var(--font-display); font-size: .9rem; color: var(--bright); font-weight: 700; margin-bottom: .32rem; }
-.ftr-brand { display: flex; align-items: center; gap: .55rem; margin-bottom: .34rem; }
-.ftr-a3km-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; background: var(--ink); border: 1px solid var(--line2); }
-.ftr-text { font-size: .76rem; color: var(--dim); line-height: 1.58; }
-.ftr-owner-list { margin-top: .35rem; display: grid; gap: .2rem; list-style: none; }
-.ftr-owner-list li { font-size: .72rem; color: var(--mid); }
-.ftr-social { margin-top: .45rem; display: flex; gap: .4rem; align-items: center; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.ftr-inner { max-width: 1400px; margin: 0 auto; padding: .65rem 1.5rem .55rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; align-items: start; }
+.ftr-col { border: 1px solid var(--line); background: var(--card2); border-radius: var(--r); padding: .52rem .64rem; }
+.ftr-col-primary { background: linear-gradient(180deg, var(--card2), var(--card)); border-color: var(--accent-gm); box-shadow: 0 4px 12px rgba(0,0,0,.10); }
+.ftr-kicker { font-size: .57rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .14rem; }
+.ftr-title { font-family:var(--font-display); font-size: .8rem; color: var(--bright); font-weight: 700; margin-bottom: .18rem; }
+.ftr-brand { display: flex; align-items: center; gap: .42rem; margin-bottom: .2rem; }
+.ftr-a3km-logo { width: 24px; height: 24px; border-radius: 6px; object-fit: contain; background: var(--ink); border: 1px solid var(--line2); }
+.ftr-text { font-size: .7rem; color: var(--dim); line-height: 1.46; }
+.ftr-owner-list { margin-top: .2rem; display: grid; gap: .1rem; list-style: none; }
+.ftr-owner-list li { font-size: .66rem; color: var(--mid); }
+.ftr-social { margin-top: .28rem; display: flex; gap: .28rem; align-items: center; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 .ftr-social::-webkit-scrollbar { display: none; }
 .ftr-social a {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 42px; height: 42px; color: var(--mid);
+  width: 30px; height: 30px; color: var(--mid);
   border: 1px solid var(--social-border); border-radius: 50%;
   background: radial-gradient(120% 120% at 20% 20%, var(--social-bg), transparent 70%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--social-shadow);
@@ -669,16 +706,16 @@ a { color:inherit; text-decoration:none }
 }
 .ftr-social .ftr-logo-icon { padding: 0; overflow: hidden; }
 .ftr-social .ftr-logo-icon img { width: 82%; height: 82%; object-fit: contain; }
-.ftr-mail-btn { border-radius: 12px; background: linear-gradient(180deg, rgba(255,65,65,.18), rgba(120,0,0,.28)); border-color: rgba(255,70,70,.5); color: #ff4a4a; }
+.ftr-mail-btn { border-radius: 10px; background: linear-gradient(180deg, rgba(255,65,65,.18), rgba(120,0,0,.28)); border-color: rgba(255,70,70,.5); color: #ff4a4a; }
 .ftr-social a:hover { color: var(--accent); border-color: var(--accent); background: radial-gradient(120% 120% at 20% 20%, var(--social-hover), transparent 70%); transform: translateY(-2px); }
 .ftr-social a:active { transform: translateY(0); }
-.ftr-social-ico { width: 19px; height: 19px; display: block; fill: currentColor; }
-.ftr-wordmark-text { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; color: #8ab4ff; text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34); }
+.ftr-social-ico { width: 15px; height: 15px; display: block; fill: currentColor; }
+.ftr-wordmark-text { font-family: var(--font-display); font-size: .95rem; font-weight: 700; letter-spacing: .02em; color: #8ab4ff; text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34); }
 [data-theme="light"] .ftr-wordmark-text { color: #24539d; }
 [data-theme="milki"] .ftr-wordmark-text { color: #2f7a4c; }
-.ftr-meta { margin-top: .4rem; display: flex; flex-wrap: wrap; gap: .28rem; }
-.ftr-badge { font-size: .62rem; padding: .16rem .4rem; border-radius: 999px; border: 1px solid var(--line); color: var(--mid); background: var(--accent-gl); }
-.ftr-bottom { max-width: 1400px; margin: 0 auto; padding: .62rem 1.5rem .92rem; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; font-size: .7rem; color: var(--dim); }
+.ftr-meta { margin-top: .28rem; display: flex; flex-wrap: wrap; gap: .22rem; }
+.ftr-badge { font-size: .58rem; padding: .12rem .34rem; border-radius: 999px; border: 1px solid var(--line); color: var(--mid); background: var(--accent-gl); }
+.ftr-bottom { max-width: 1400px; margin: 0 auto; padding: .45rem 1.5rem .7rem; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; font-size: .67rem; color: var(--dim); }
 .ftr-bottom-links { display: flex; flex-wrap: wrap; gap: .55rem; }
 .ftr-bottom a { color: var(--accent); }
 [data-theme="light"] .ftr-text { color: #4f6285; }
@@ -753,6 +790,15 @@ a { color:inherit; text-decoration:none }
       <span class="chip chip-free" id="chipFree">Free</span>
       <span class="chip chip-lens" id="chipNoApi">No API</span>
       <div id="statsChip" class="chip chip-lens hidden"></div>
+      <div class="quality-sel" title="PDF render quality — higher = better OCR but slower">
+        <label id="qualityLabel">DPI</label>
+        <select id="qualitySel">
+          <option value="1.0">1× Fast</option>
+          <option value="1.5">1.5× Bal</option>
+          <option value="2.0" selected>2× HQ</option>
+          <option value="3.0">3× Max</option>
+        </select>
+      </div>
       <div class="hdr-ctl-group">
         <button class="hdr-ctl" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
           <span class="hdr-ctl-ico" id="themeBtnIcon"></span>
@@ -782,7 +828,7 @@ a { color:inherit; text-decoration:none }
   <!-- HOW IT WORKS -->
   <div class="how-strip" id="howStrip">
     <div class="how-card"><div class="how-num">1</div><div class="how-txt"><p id="how1Title">Upload করুন</p><small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small></div></div>
-    <div class="how-card"><div class="how-num">2</div><div class="how-txt"><p id="how2Title">Auto-Upload</p><small id="how2Text">প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small></div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-txt"><p id="how2Title">Direct Lens</p><small id="how2Text">Upload ছাড়াই Google Lens এ সরাসরি page পাঠানো যাবে — ISP block নেই</small></div></div>
     <div class="how-card"><div class="how-num">3</div><div class="how-txt"><p id="how3Title">Google Lens</p><small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small></div></div>
     <div class="how-card"><div class="how-num">4</div><div class="how-txt"><p id="how4Title">Copy & Paste</p><small id="how4Text">Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small></div></div>
   </div>
@@ -840,6 +886,7 @@ a { color:inherit; text-decoration:none }
     <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
     <button class="btn btn-secondary hidden" id="downloadBtn">💾 <span id="downloadBtnTxt">.txt Download</span></button>
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
+    <button class="btn btn-warning hidden" id="retryActionBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryActionBtnTxt">Retry</span></button>
   </div>
 
   <!-- WORKSPACE -->
@@ -984,12 +1031,23 @@ a { color:inherit; text-decoration:none }
     </div>
     <div class="modal-body">
       <div class="step-row"><div class="step-n">1</div><div class="step-t" id="helpStep1"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div></div>
-      <div class="step-row"><div class="step-n">2</div><div class="step-t" id="helpStep2"><strong>Auto-upload হবে।</strong> প্রতিটা page imgbb.com এ upload হবে। Failed হলে "Retry" button আসবে।</div></div>
-      <div class="step-row"><div class="step-n">3</div><div class="step-t" id="helpStep3"><strong>Lens button চাপুন।</strong> প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div></div>
-      <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div></div>
-      <div class="step-row"><div class="step-n">5</div><div class="step-t" id="helpStep5"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div></div>
-      <div id="helpTip" class="help-tip">
-        💡 <strong style="color:var(--yellow)">Tip:</strong> imgbb.com block হলে ISP বা network এর কারণে হতে পারে। VPN বা অন্য network থেকে চেষ্টা করুন। Page successfully upload হলে Lens button সবুজ হবে।
+      <div class="step-row"><div class="step-n">2</div><div class="step-t" id="helpStep2"><strong>Lens button চাপুন।</strong> Upload ছাড়াই সরাসরি Google Lens এ যাবে।</div></div>
+      <div class="step-row"><div class="step-n">3</div><div class="step-t" id="helpStep3"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div></div>
+      <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Ctrl+Enter</strong> বা <strong>"Save & Next"</strong> চাপুন। পরের page এ যাবে।</div></div>
+
+      <div class="help-shortcuts-title" id="helpShortcutsTitle">⌨️ Keyboard Shortcuts</div>
+      <div class="shortcut-grid" id="helpShortcutsGrid">
+        <kbd>L</kbd>              <span id="sc1">Current page Google Lens এ খুলুন</span>
+        <kbd>Ctrl+Enter</kbd>     <span id="sc2">Text save করুন, পরের page এ যান</span>
+        <kbd>← →</kbd>           <span id="sc3">আগের / পরের page এ যান</span>
+        <kbd>Ctrl+V</kbd>         <span id="sc5">Screenshot / image clipboard থেকে add করুন</span>
+        <kbd>Esc</kbd>            <span id="sc4">এই modal বন্ধ করুন</span>
+      </div>
+
+      <div id="helpTip" class="help-tip"></div>
+      <div id="helpIspNotice" class="help-isp-notice" style="display:none">
+        ⛔ <strong id="helpIspTitle">Site ঢুকতে পারছেন না?</strong>
+        <span id="helpIspText"> ISP block হতে পারে। Custom domain যোগ করুন Vercel Dashboard → Settings → Domains। Free subdomain পাবেন <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a> তে।</span>
       </div>
     </div>
     <div class="modal-ftr">
@@ -1035,6 +1093,7 @@ const allTextarea   = $('allTextarea');
 const uploadBanner  = $('uploadBanner');
 const bannerText    = $('bannerText');
 const retryFailedBtn = $('retryFailedBtn');
+const retryActionBtn = $('retryActionBtn');
 
 // ══════════════════════════════════════════
 // PROGRESS HELPERS
@@ -1051,11 +1110,14 @@ function setSplitProgress(cur, total) {
   $('uploadPhase').classList.toggle('dim-phase', cur < total);
 }
 
-function setUploadProgress(cur, total, hasErrors) {
+function setUploadProgress(cur, total, hasErrors, pageNum) {
   const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
   $('uploadBar').style.width = pct + '%';
   $('uploadPct').textContent = pct + '%';
-  $('uploadDetail').textContent = total > 0 ? `${cur} / ${total}` : '';
+  const detail = total > 0
+    ? (pageNum ? `${t('pageWord')} ${pageNum} / ${total} (${pct}%)` : `${cur} / ${total}`)
+    : '';
+  $('uploadDetail').textContent = detail;
   $('uploadBar').classList.toggle('error', hasErrors && cur === total);
   $('splitPhase').classList.remove('dim-phase');
   $('uploadPhase').classList.remove('dim-phase');
@@ -1080,6 +1142,7 @@ function updateBanner() {
     uploadBanner.className = 'upload-status-banner show banner-ok';
     bannerText.textContent = t('allUploadComplete');
     retryFailedBtn.classList.add('hidden');
+    retryActionBtn.classList.add('hidden');
     setTimeout(() => uploadBanner.classList.remove('show'), 4000);
     return;
   }
@@ -1090,6 +1153,8 @@ function updateBanner() {
     retryFailedBtn.classList.remove('hidden');
     retryFailedBtn.classList.add('has-errors');
     $('retryBtnTxt').textContent = t('retryN', { n: errors.length });
+    retryActionBtn.classList.remove('hidden');
+    $('retryActionBtnTxt').textContent = t('retryN', { n: errors.length });
     return;
   }
 
@@ -1124,7 +1189,7 @@ const i18n = {
   eb: {
     chipFree: 'Free', chipNoApi: 'No API',
     how1Title: 'Upload করুন', how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
-    how2Title: 'Auto-Upload', how2Text: 'প্রতিটি page upload হবে — link তৈরি হবে',
+    how2Title: 'Direct Lens', how2Text: 'Upload ছাড়াই Lens এ সরাসরি পাঠানো হবে',
     how3Title: 'Google Lens', how3Text: 'সেই link দিয়ে Google Lens খুলবে',
     how4Title: 'Copy & Paste', how4Text: 'Lens থেকে text copy করে এখানে paste করুন',
     uploadTitle: 'ছবি বা PDF drag করুন / click করুন',
@@ -1153,11 +1218,18 @@ const i18n = {
     ftrBottomPortfolio: 'Websites & Tools',
     helpModalTitle: 'দ্রুত গাইড',
     helpStep1: '<strong>ছবি বা PDF দিন।</strong> PDF হলে প্রতিটা পেজ আলাদা হয়ে যাবে।',
-    helpStep2: '<strong>Auto-upload হবে।</strong> Failed হলে "Retry" button আসবে।',
-    helpStep3: '<strong>Lens button চাপুন।</strong> প্রতিটা পেজের জন্য Google Lens আলাদা ট্যাবে খুলবে।',
-    helpStep4: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, তারপর এখানে পেস্ট করুন।',
-    helpStep5: '<strong>"Save & Next"</strong> চাপুন। পরের পেজে যাবে।',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> imgbb.com block হলে VPN বা অন্য network থেকে চেষ্টা করুন।',
+    helpStep2: '<strong>Lens button চাপুন।</strong> Upload ছাড়াই সরাসরি Google Lens এ যাবে।',
+    helpStep3: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, এখানে পেস্ট করুন।',
+    helpStep4: '<strong>Ctrl+Enter</strong> বা <strong>"Save & Next"</strong> চাপুন। পরের পেজে যাবে।',
+    helpShortcutsTitle: '⌨️ কীবোর্ড শর্টকাট',
+    sc1: 'Current page Google Lens এ খুলুন',
+    sc2: 'Text save করুন, পরের page এ যান',
+    sc3: 'আগের / পরের page এ যান',
+    sc4: 'Modal বন্ধ করুন',
+    sc5: 'Screenshot বা image clipboard থেকে add করুন',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens এখন base64 দিয়ে সরাসরি খোলে — upload বা ISP block এর সমস্যা নেই।',
+    helpIspTitle: 'Site ঢুকতে পারছেন না?',
+    helpIspText: ' ISP block হতে পারে। Custom domain যোগ করুন Vercel Dashboard → Settings → Domains। Free subdomain পাবেন <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a> তে।',
     helpOk: 'বুঝেছি ✓',
     pageWord: 'পেজ', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
@@ -1176,6 +1248,7 @@ const i18n = {
     retryN: '↺ Retry {n} টি',
     splitPhaseLabel: '📄 PDF splitting',
     uploadPhaseLabel: '☁️ Uploading',
+    splitRendering: '📄 পেজ {cur} / {total} render করছে...',
     popupBlocked: '🚫 Popup blocked! Browser এ popup allow করুন।',
     lensOpened: '🔍 পেজ {num} Lens এ খুলেছে!',
     pastedOk: '✓ Paste হয়েছে!', pasteManual: 'Ctrl+V দিয়ে paste করুন',
@@ -1185,13 +1258,14 @@ const i18n = {
     copiedAllText: '✓ সব text copied!', copiedMergedText: '✓ merged text copied!', copied: '✓ Copied!',
     clearConfirm: 'সব pages মুছে ফেলবেন?',
     pasteReminder: '💡 Text paste হয়েছে — "Save & Next" চাপুন',
+    clipboardPasted: '📋 Clipboard image যোগ হয়েছে!',
     retryingPage: '↺ পেজ {num} retry করছে...',
     retryComplete: '✅ Retry complete!',
   },
   en: {
     chipFree: 'Free', chipNoApi: 'No API',
     how1Title: 'Upload', how1Text: 'Upload image or PDF — PDFs are split page by page.',
-    how2Title: 'Upload', how2Text: 'Each page uploads automatically. Failed pages can be retried.',
+    how2Title: 'Direct Lens', how2Text: 'Pages open in Google Lens directly via base64 — no upload, no ISP block.',
     how3Title: 'Google Lens', how3Text: 'The link opens in Google Lens for text extraction.',
     how4Title: 'Copy & Paste', how4Text: 'Copy text from Lens and paste it here.',
     uploadTitle: 'Drag image or PDF here / click to browse',
@@ -1220,11 +1294,18 @@ const i18n = {
     ftrBottomPortfolio: 'Websites & Tools',
     helpModalTitle: 'Quick guide',
     helpStep1: '<strong>Upload an image or PDF.</strong> PDFs split into pages automatically.',
-    helpStep2: '<strong>Auto-upload runs.</strong> A "Retry" button appears for any failed pages.',
-    helpStep3: '<strong>Click Lens.</strong> Google Lens opens one page per tab.',
-    helpStep4: '<strong>In the Lens tab,</strong> select the text, copy it, then paste here.',
-    helpStep5: '<strong>Click "Save & Next".</strong> Repeat for all pages.',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> If imgbb.com is blocked by your ISP, try a VPN or different network.',
+    helpStep2: '<strong>Click Lens.</strong> Pages open in Google Lens directly — no upload needed.',
+    helpStep3: '<strong>In the Lens tab,</strong> select the text, copy it, then paste here.',
+    helpStep4: '<strong>Press Ctrl+Enter</strong> or <strong>"Save & Next"</strong> to move to the next page.',
+    helpShortcutsTitle: '⌨️ Keyboard Shortcuts',
+    sc1: 'Open current page in Google Lens',
+    sc2: 'Save text and go to next page',
+    sc3: 'Previous / next page',
+    sc4: 'Close this modal',
+    sc5: 'Paste screenshot or image from clipboard',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens opens via base64 directly — no upload, no ISP blocking.',
+    helpIspTitle: "Can't access the site?",
+    helpIspText: ' Your ISP may be blocking the Vercel domain. Add a custom domain in Vercel Dashboard → Settings → Domains. Free subdomains available at <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a>.',
     helpOk: 'Got it ✓',
     pageWord: 'page', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
@@ -1243,6 +1324,7 @@ const i18n = {
     retryN: '↺ Retry {n}',
     splitPhaseLabel: '📄 PDF splitting',
     uploadPhaseLabel: '☁️ Uploading',
+    splitRendering: '📄 Rendering page {cur} of {total}...',
     popupBlocked: '🚫 Popup blocked! Allow popups in your browser.',
     lensOpened: '🔍 Page {num} opened in Lens!',
     pastedOk: '✓ Pasted!', pasteManual: 'Use Ctrl+V to paste',
@@ -1252,6 +1334,7 @@ const i18n = {
     copiedAllText: '✓ All text copied!', copiedMergedText: '✓ Merged text copied!', copied: '✓ Copied!',
     clearConfirm: 'Clear all pages?',
     pasteReminder: '💡 Text pasted — click "Save & Next"',
+    clipboardPasted: '📋 Clipboard image added!',
     retryingPage: '↺ Retrying page {num}...',
     retryComplete: '✅ Retry complete!',
   },
@@ -1287,10 +1370,13 @@ function applyLanguage() {
     'ftrText1','ftrBadge1','ftrBadge2','ftrBadge3','ftrKicker2','ftrText2','ftrOwnerLine1','ftrOwnerLine2','ftrOwnerLine3',
     'ftrKicker3','ftrTitle3','ftrText3','ftrBottomText','ftrBottomPortfolio'];
   ids.forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
-  const htmlIds = ['helpStep1','helpStep2','helpStep3','helpStep4','helpStep5','helpTip'];
+  const htmlIds = ['helpStep1','helpStep2','helpStep3','helpStep4','helpTip','helpIspText'];
   htmlIds.forEach(id => { const el = $(id); if (el) el.innerHTML = t(id); });
   $('helpModalTitle').textContent = t('helpModalTitle');
   $('helpOk').textContent = t('helpOk');
+  $('helpShortcutsTitle').textContent = t('helpShortcutsTitle');
+  $('helpIspTitle').textContent = t('helpIspTitle');
+  ['sc1','sc2','sc3','sc4','sc5'].forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
   $('prevPage').title = t('prevPageTitle');
   $('nextPage').title = t('nextPageTitle');
   textArea.placeholder = t('textPlaceholder');
@@ -1325,6 +1411,7 @@ $('helpBtn').onclick = () => $('helpModal').classList.add('open');
 $('helpClose').onclick = () => $('helpModal').classList.remove('open');
 $('helpOk').onclick = () => $('helpModal').classList.remove('open');
 $('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open'); };
+// Esc closes modal (handled in keydown below)
 
 // ══════════════════════════════════════════
 // TOAST
@@ -1371,9 +1458,10 @@ async function loadPdf(file) {
     const total = pdf.numPages;
     for (let i = 1; i <= total; i++) {
       setSplitProgress(i - 1, total);
-      $('splitDetail').textContent = `${t('pageWord')} ${i} / ${total} rendering...`;
+      $('splitDetail').textContent = t('splitRendering', { cur: i, total });
       const page = await pdf.getPage(i);
-      const vp = page.getViewport({ scale: 2.0 });
+      const scale = parseFloat($('qualitySel').value) || 2.0;
+      const vp = page.getViewport({ scale });
       const canvas = document.createElement('canvas');
       canvas.width = vp.width; canvas.height = vp.height;
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
@@ -1458,7 +1546,8 @@ function renderLensGrid() {
     const isError = pg.status === 'error';
     el.className = `lens-page-card${i === state.current ? ' active-page' : ''}${pg.status === 'done' ? ' card-done' : ''}${isError ? ' card-error' : ''}`;
     el.id = `lpc-${pg.id}`;
-    const canLens = pg.status === 'ready' || pg.status === 'done';
+    // Since openLens now uses base64 direct (no upload needed), all pages can open Lens
+    const canLens = pg.status !== 'uploading';
     let btnClass = '', btnLabel = t('lpcOpen');
     if (pg.status === 'done') { btnClass = 'done-btn'; btnLabel = t('lpcDone'); }
     if (isError) { btnClass = 'retry-btn'; btnLabel = t('lpcRetry'); }
@@ -1466,15 +1555,12 @@ function renderLensGrid() {
       <div class="lpc-num">PAGE ${i+1}</div>
       <div class="lpc-name" title="${pg.name}">${pg.name}</div>
       <div class="lpc-status ${pg.status}">${statusLabel(pg.status)}</div>
-      <button class="lpc-btn ${btnClass}" data-i="${i}" ${(!canLens && !isError) ? 'disabled' : ''}>
+      <button class="lpc-btn ${btnClass}" data-i="${i}" ${!canLens ? 'disabled' : ''}>
         ${btnLabel}
       </button>
     `;
     const btn = el.querySelector('.lpc-btn');
-    btn.addEventListener('click', () => {
-      if (isError) { retryPage(i); }
-      else { openLens(i); }
-    });
+    btn.addEventListener('click', () => { openLens(i); });
     lensGrid.appendChild(el);
   });
 }
@@ -1486,15 +1572,10 @@ function renderWorkspace() {
   $('textPageNum').textContent = state.current + 1;
   $('previewImgWrap').innerHTML = `<img src="${pg.url}" alt="page ${state.current+1}" style="max-width:100%;max-height:480px;object-fit:contain"/>`;
   textArea.value = pg.text || '';
-  // Update lens button state
+  // Lens button always works via base64 direct
   const lensBtn = $('lensCurrentBtn');
-  if (pg.status === 'error') {
-    lensBtn.textContent = '↺ Retry Upload';
-    lensBtn.onclick = () => retryPage(state.current);
-  } else {
-    lensBtn.textContent = '🔍 Lens';
-    lensBtn.onclick = () => openLens(state.current);
-  }
+  lensBtn.textContent = '🔍 Lens';
+  lensBtn.onclick = () => openLens(state.current);
   updateTxtStats();
 }
 
@@ -1532,7 +1613,8 @@ function updateStats() {
 }
 
 // ══════════════════════════════════════════
-// IMAGE UPLOAD — /api/upload → imgbb (server-side, no CORS)
+// IMAGE UPLOAD — /api/upload → Vercel Blob (server-side, vercel-storage.com)
+// Upload is optional — openLens() uses base64 direct as primary path.
 // ══════════════════════════════════════════
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
@@ -1601,10 +1683,12 @@ async function uploadPage(i) {
     const url = await uploadImageWithRetry(pg.blob);
     pg.remoteUrl = url;
     pg.status = 'ready';
+    trackUploadError(false);
     toast(t('pageUploaded', { num: i + 1 }), 'ok', 2000);
   } catch (e) {
     pg.status = 'error';
     pg.remoteUrl = '';
+    trackUploadError(true);
     toast(t('pageUploadFailed', { num: i + 1, error: e.message }), 'err', 4000);
   }
   renderStrip(); renderLensGrid();
@@ -1634,7 +1718,7 @@ async function uploadAllPages(onlyErrors = false) {
     done++;
     const uploaded = state.pages.filter(x => x.status === 'ready' || x.status === 'done').length;
     const errors   = state.pages.filter(x => x.status === 'error').length;
-    setUploadProgress(uploaded + errors, total, errors > 0);
+    setUploadProgress(uploaded + errors, total, errors > 0, i + 1);
   }
 
   state.uploading = false;
@@ -1668,24 +1752,47 @@ async function retryPage(i) {
 
 // Retry all failed button
 retryFailedBtn.onclick = () => uploadAllPages(true);
+retryActionBtn.onclick  = () => uploadAllPages(true);
 
 // ══════════════════════════════════════════
 // GOOGLE LENS
 // ══════════════════════════════════════════
-function openLens(i) {
+
+// Build a direct base64 Lens URL — no upload, no ISP block.
+// Uses the undocumented but stable `p=` param (subb endpoint).
+// Falls back to uploadbyurl if remoteUrl is available.
+async function openLens(i) {
   const pg = state.pages[i];
   if (!pg) return;
-  if (!pg.remoteUrl) {
-    toast(t('pageUploadFailed', { num: i + 1, error: 'not uploaded yet' }), 'err', 3000);
-    return;
+
+  // Primary: base64 direct — works even without upload
+  try {
+    const b64 = await blobToBase64(pg.blob);
+    const lensUrl = `https://lens.google.com/search?ep=subb&re=df&s=4&p=${encodeURIComponent(b64)}`;
+    const win = isMobile()
+      ? window.open(lensUrl, '_blank')
+      : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+    if (win) {
+      state.current = i; renderAll();
+      toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
+      return;
+    }
+  } catch (_) { /* fall through */ }
+
+  // Fallback: uploadbyurl (needs remoteUrl)
+  if (pg.remoteUrl) {
+    const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
+    const win = isMobile()
+      ? window.open(lensUrl, '_blank')
+      : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+    if (win) {
+      state.current = i; renderAll();
+      toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
+      return;
+    }
   }
-  const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-  const win = isMobile()
-    ? window.open(lensUrl, '_blank')
-    : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
-  if (!win) { toast(t('popupBlocked'), 'err', 5000); return; }
-  state.current = i; renderAll();
-  toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
+
+  toast(t('popupBlocked'), 'err', 5000);
 }
 
 // ══════════════════════════════════════════
@@ -1777,14 +1884,48 @@ $('allDlBtn').onclick = () => {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowLeft') { if (state.current > 0) { state.current--; renderAll(); } }
+  const inInput = e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT';
+  // Ctrl+Enter → Save & Next (works even inside textarea)
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    $('saveTxtBtn').click();
+    return;
+  }
+  // Esc → close modal
+  if (e.key === 'Escape') { $('helpModal').classList.remove('open'); return; }
+  if (inInput) return;
+  if (e.key === 'ArrowLeft')  { if (state.current > 0) { state.current--; renderAll(); } }
   if (e.key === 'ArrowRight') { if (state.current < state.pages.length - 1) { state.current++; renderAll(); } }
+  // L → open Lens for current page
+  if (e.key === 'l' || e.key === 'L') { if (state.pages.length) openLens(state.current); }
 });
 
-// Paste reminder
+// Show ISP notice in help modal after 3+ consecutive upload errors
+let _uploadErrStreak = 0;
+function trackUploadError(isErr) {
+  if (isErr) { _uploadErrStreak++; if (_uploadErrStreak >= 3) $('helpIspNotice').style.display = ''; }
+  else _uploadErrStreak = 0;
+}
+
+// Paste reminder (text paste inside textarea)
 textArea.addEventListener('paste', () => {
   setTimeout(() => toast(t('pasteReminder'), '', 3000), 100);
+});
+
+// Global image paste — Ctrl+V with image in clipboard adds it as a new page
+document.addEventListener('paste', e => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  const items = Array.from(e.clipboardData?.items || []);
+  const imgItem = items.find(it => it.type.startsWith('image/'));
+  if (!imgItem) return;
+  e.preventDefault();
+  const blob = imgItem.getAsFile();
+  if (!blob) return;
+  const name = `clipboard-${Date.now()}.png`;
+  addPage(name, blob, URL.createObjectURL(blob));
+  renderAll();
+  uploadAllPages();
+  toast(t('clipboardPasted'), 'ok', 2500);
 });
 
 // btn-icon style (not in CSS to avoid duplication)

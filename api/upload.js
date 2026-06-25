@@ -1,7 +1,14 @@
 // Vercel Serverless Function — /api/upload
 // Receives { image: base64string } from browser
-// Forwards to imgbb.com API server-side (no CORS issues)
-// Returns { success: true, url: "https://..." }
+// Stores via @vercel/blob (vercel-storage.com — never ISP-blocked)
+// Returns { success: true, url: "https://...vercel-storage.com/..." }
+//
+// Setup:
+//   1. Vercel Dashboard → Storage → Blob → Create Store
+//   2. vercel env add BLOB_READ_WRITE_TOKEN  (or paste in Dashboard → Settings → Env Vars)
+//   3. npm i @vercel/blob  (add to package.json)
+
+import { put } from '@vercel/blob';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,38 +22,15 @@ export default async function handler(req, res) {
     const { image } = req.body;
     if (!image) return res.status(400).json({ error: 'No image data' });
 
-    // imgbb.com free public API key (32MB limit, permanent storage)
-    // Get your own free key at: https://api.imgbb.com/
-    const KEY = process.env.IMGBB_KEY || '6d207e02198a847aa98d0a2a901485a2';
+    const buf = Buffer.from(image, 'base64');
+    const filename = `textriva/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
 
-    const params = new URLSearchParams();
-    params.append('key', KEY);
-    params.append('image', image);
-    // Set expiration to 0 = keep forever (free tier)
-    params.append('expiration', '0');
-
-    const response = await fetch('https://api.imgbb.com/1/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
+    const blob = await put(filename, buf, {
+      access: 'public',
+      contentType: 'image/jpeg',
     });
 
-    const data = await response.json();
-    console.log('imgbb response status:', response.status, 'success:', data.success);
-
-    if (data.success) {
-      return res.status(200).json({
-        success: true,
-        url: data.data.url,
-        display_url: data.data.display_url,
-        thumb: data.data.thumb?.url || data.data.url,
-      });
-    }
-
-    // imgbb failed — return error with details
-    const errMsg = data.error?.message || data.status_txt || `imgbb error (${response.status})`;
-    console.error('imgbb error:', JSON.stringify(data));
-    return res.status(502).json({ error: errMsg, imgbb_response: data });
+    return res.status(200).json({ success: true, url: blob.url });
 
   } catch (err) {
     console.error('Upload handler error:', err);
