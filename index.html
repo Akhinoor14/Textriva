@@ -1807,40 +1807,92 @@ retryActionBtn.onclick  = () => uploadAllPages(true);
 // ══════════════════════════════════════════
 
 // Build a direct base64 Lens URL — no upload, no ISP block.
-// Uses the undocumented but stable `p=` param (subb endpoint).
-// Falls back to uploadbyurl if remoteUrl is available.
+// Primary: upload to imgbb → lens.google.com/uploadbyurl
+// Fallback: use cached remoteUrl if already uploaded
+// openLens: upload to imgbb → open via lens.google.com/uploadbyurl
+// No base64 fallback — Google blocks the subb endpoint. imgbb upload is the only real path.
+// Retry: user clicks Lens again after failure; up to MAX_LENS_RETRIES total attempts.
+const MAX_LENS_RETRIES = 3;
+const lensRetryCount = {}; // keyed by page id
+
 async function openLens(i) {
   const pg = state.pages[i];
   if (!pg) return;
 
-  // Primary: base64 direct — works even without upload
-  try {
-    const b64 = await blobToBase64(pg.blob);
-    const lensUrl = `https://lens.google.com/search?ep=subb&re=df&s=4&p=${encodeURIComponent(b64)}`;
+  const openWithUrl = (remoteUrl) => {
+    const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(remoteUrl)}`;
     const win = isMobile()
       ? window.open(lensUrl, '_blank')
       : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
-    if (win) {
-      state.current = i; renderAll();
-      toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
-      return;
-    }
-  } catch (_) { /* fall through */ }
+    return win;
+  };
 
-  // Fallback: uploadbyurl (needs remoteUrl)
+  // Already uploaded → open immediately
   if (pg.remoteUrl) {
-    const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-    const win = isMobile()
-      ? window.open(lensUrl, '_blank')
-      : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+    const win = openWithUrl(pg.remoteUrl);
     if (win) {
       state.current = i; renderAll();
       toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
-      return;
+    } else {
+      toast(t('popupBlocked'), 'err', 5000);
     }
+    return;
   }
 
-  toast(t('popupBlocked'), 'err', 5000);
+  // Check retry cap
+  const attempt = (lensRetryCount[pg.id] || 0) + 1;
+  if (attempt > MAX_LENS_RETRIES) {
+    toast(`❌ পেজ ${i + 1}: ${MAX_LENS_RETRIES}বার try করেও upload হয়নি। Network/imgbb check করুন।`, 'err', 7000);
+    return;
+  }
+  lensRetryCount[pg.id] = attempt;
+
+  const uploadingMsg = attempt === 1
+    ? `⏳ পেজ ${i + 1} upload হচ্ছে Lens এর জন্য…`
+    : `↺ পেজ ${i + 1} retry ${attempt}/${MAX_LENS_RETRIES}… (${MAX_LENS_RETRIES - attempt} বাকি)`;
+  toast(uploadingMsg, attempt === 1 ? '' : 'warn', 4000);
+
+  pg.status = 'uploading'; renderAll();
+
+  // Exponential backoff between retries: 1st = 0s, 2nd = 2s, 3rd = 4s
+  if (attempt > 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 2)));
+
+  try {
+    const compressed = await compressBlob(pg.blob);
+    const b64 = await blobToBase64(compressed);
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: b64 }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Upload failed');
+
+    pg.remoteUrl = data.url;
+    pg.status = 'ready';
+    lensRetryCount[pg.id] = 0; // reset counter on success
+    renderAll();
+
+    const win = openWithUrl(pg.remoteUrl);
+    if (win) {
+      state.current = i; renderAll();
+      toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
+    } else {
+      toast(t('popupBlocked'), 'err', 5000);
+    }
+  } catch (e) {
+    pg.status = 'error'; renderAll();
+    const remaining = MAX_LENS_RETRIES - attempt;
+    if (remaining > 0) {
+      toast(`❌ Upload failed: ${e.message} — আরও ${remaining}টি retry বাকি। আবার Lens চাপুন।`, 'err', 6000);
+    } else {
+      toast(`❌ পেজ ${i + 1}: ${MAX_LENS_RETRIES}বার try করেও upload হয়নি। Network/imgbb check করুন।`, 'err', 7000);
+    }
+  }
 }
 
 // ══════════════════════════════════════════
