@@ -443,9 +443,18 @@ a { color:inherit; text-decoration:none }
 .preview-img-wrap {
   flex:1; display:flex; align-items:center; justify-content:center;
   background:var(--ink); position:relative; overflow:hidden;
-  min-height:240px;
+  min-height:240px; cursor:default;
 }
-.preview-img-wrap img { max-width:100%; max-height:480px; object-fit:contain; display:block; }
+.preview-img-wrap.zoomed { cursor:move; }
+.preview-img-wrap img { max-width:100%; max-height:480px; object-fit:contain; display:block; transition:transform .15s ease; transform-origin:center center; }
+.preview-img-wrap.zoomed img { max-width:none; max-height:none; transition:none; }
+.zoom-badge {
+  position:absolute; bottom:.5rem; right:.6rem;
+  background:rgba(0,0,0,.55); color:#fff; font-size:.62rem; font-weight:700;
+  padding:2px 7px; border-radius:20px; pointer-events:none;
+  opacity:0; transition:opacity .25s; letter-spacing:.04em; font-family:var(--font-mono);
+}
+.preview-img-wrap.zoomed .zoom-badge { opacity:1; }
 .preview-empty { color:var(--dim); text-align:center; padding:3rem 2rem; font-size:.82rem; }
 .preview-empty .big { font-size:2.5rem; margin-bottom:.75rem; }
 
@@ -896,7 +905,7 @@ a { color:inherit; text-decoration:none }
 
   <!-- UPLOAD ZONE -->
   <div class="upload-area" id="uploadArea" style="margin-top:1.25rem">
-    <input type="file" id="fileInput" accept="image/*,.pdf" multiple/>
+    <input type="file" id="fileInput" accept="image/*,.pdf,.txt,text/plain" multiple/>
     <div class="upload-icon">📂</div>
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
@@ -955,8 +964,9 @@ a { color:inherit; text-decoration:none }
     <!-- Preview -->
     <div class="preview-panel">
       <div class="panel-hdr">
-        <div class="panel-title"><span id="previewTitleTxt">👁 Preview — পেজ</span> <b id="previewPageNum">1</b></div>
+        <div class="panel-title"><span id="previewTitleTxt">👁 Preview</span> — <b id="previewPageNum">1</b><span id="previewPageTotal" style="color:var(--dim);font-weight:400"> / 1</span></div>
         <div style="display:flex;gap:.4rem">
+          <button class="btn-icon" id="cutPageBtn" title="এই page বাদ দাও (C)" aria-label="Cut page" style="color:var(--err,#f87171)">✂</button>
           <button class="btn-icon" id="copyClipBtn" title="Copy" aria-label="Copy">📄 <span class="sr-only" id="copyClipBtnTxt">Copy</span></button>
           <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
           <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
@@ -964,6 +974,7 @@ a { color:inherit; text-decoration:none }
       </div>
       <div class="preview-img-wrap" id="previewImgWrap">
         <div class="preview-empty"><div class="big">🖼</div><p id="previewEmptyTxt">কোনো পেজ select করুন</p></div>
+        <div class="zoom-badge" id="zoomBadge">100%</div>
       </div>
     </div>
 
@@ -982,6 +993,7 @@ a { color:inherit; text-decoration:none }
         <div class="txt-foot">
           <span class="txt-stats" id="txtStats">0 chars · 0 words</span>
           <button class="btn btn-secondary" id="clearTxtBtn" style="padding:.3rem .7rem;font-size:.72rem">✕ Clear</button>
+          <button class="btn btn-secondary" id="cutTxtBtn" title="Selected text cut করুন" style="padding:.3rem .7rem;font-size:.72rem">✂ Cut</button>
           <button class="btn btn-success" id="saveTxtBtn" style="padding:.3rem .9rem;font-size:.75rem">✓ Save & Next</button>
         </div>
       </div>
@@ -1098,12 +1110,26 @@ a { color:inherit; text-decoration:none }
 
       <div class="help-shortcuts-title" id="helpShortcutsTitle">⌨️ Keyboard Shortcuts</div>
       <div class="shortcut-grid" id="helpShortcutsGrid">
-        <kbd>L</kbd>              <span id="sc1">Current page Google Lens এ খুলুন</span>
-        <kbd>Space</kbd> / <kbd>F</kbd> / <kbd>K</kbd> <span id="sc6">🔥 Paste + Save + Next + Lens — full workflow</span>
-        <kbd>R</kbd>              <span id="scr">Clipboard paste + Save + Next (Lens ছাড়া)</span>
-        <kbd>Ctrl+Enter</kbd>     <span id="sc2">Text save করুন, পরের page এ যান</span>
+
+        <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.2rem 0 .1rem;text-transform:uppercase;">Navigation</div>
         <kbd>← →</kbd>           <span id="sc3">আগের / পরের page এ যান</span>
-        <kbd>Ctrl+V</kbd>         <span id="sc5">Screenshot / image clipboard থেকে add করুন</span>
+
+        <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Text Editing</div>
+        <kbd>C</kbd>             <span id="scc">Textarea এ selected text cut করুন</span>
+
+        <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Workflow</div>
+        <kbd>L</kbd>             <span id="sc1">Current page Google Lens এ খুলুন</span>
+        <kbd>Ctrl+Enter</kbd>    <span id="sc2">Text save করুন, পরের page এ যান</span>
+        <kbd>R</kbd>             <span id="scr">Clipboard paste → Save → Next (Lens ছাড়া)</span>
+        <kbd>Space</kbd> / <kbd>F</kbd> / <kbd>K</kbd> <span id="sc6">🔥 Paste + Save + Next + Lens — full auto workflow</span>
+
+        <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Preview Zoom</div>
+        <kbd>Z</kbd>             <span id="scz">Zoom in (বার বার চাপুন বাড়াতে)</span>
+        <kbd>X</kbd>             <span id="scx">Zoom reset — original size এ ফেরা</span>
+        <kbd>↑ ↓ ← →</kbd>      <span id="scpan">Zoom অবস্থায় image pan করুন</span>
+
+        <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Other</div>
+        <kbd>Ctrl+V</kbd>        <span id="sc5">Screenshot / image clipboard থেকে add করুন</span>
         <kbd>M</kbd> / <kbd>Esc</kbd> <span id="sc4">এই modal বন্ধ করুন</span>
       </div>
 
@@ -1140,6 +1166,11 @@ const state = {
   current: 0,
   uploading: false,
 };
+const zoomState = { scale: 1, tx: 0, ty: 0, hiRes: false, rendering: false };
+const ZOOM_STEP = 0.4;
+const ZOOM_MAX = 5;
+const PAN_STEP = 80;
+const HIRES_THRESHOLD = 1.5;
 const isMobile = () => window.matchMedia('(max-width:900px)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 // ══════════════════════════════════════════
@@ -1261,12 +1292,12 @@ const i18n = {
     how2Title: 'Direct Lens', how2Text: 'Upload ছাড়াই Lens এ সরাসরি পাঠানো হবে',
     how3Title: 'Google Lens', how3Text: 'সেই link দিয়ে Google Lens খুলবে',
     how4Title: 'Copy & Paste', how4Text: 'Lens থেকে text copy করে এখানে paste করুন',
-    uploadTitle: 'ছবি বা PDF drag করুন / click করুন',
-    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে',
+    uploadTitle: 'ছবি, PDF বা .txt drag করুন / click করুন',
+    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · আগের export করা .txt আবার import করা যাবে',
     stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
     copyAllBtnTxt: 'সব Text Copy', copyAllMergedBtnTxt: 'Merged Copy',
     copyClipBtnTxt: 'কপি', downloadBtnTxt: '.txt Download',
-    previewTitleTxt: '👁 Preview — পেজ', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
+    previewTitleTxt: '👁 Preview', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
     previewEmptyTxt: 'কোনো পেজ select করুন',
     textTitleTxt: '✏️ Text — পেজ',
     textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন।',
@@ -1296,6 +1327,11 @@ const i18n = {
     sc3: 'আগের / পরের page এ যান',
     sc4: 'Modal বন্ধ করুন',
     sc5: 'Screenshot বা image clipboard থেকে add করুন',
+    scc: 'Textarea এ selected text cut করুন (clipboard এ যাবে)',
+    scr: 'Clipboard paste → Save → Next (Lens ছাড়া)',
+    scz: 'Zoom in — বার বার চাপুন বাড়াতে',
+    scx: 'Zoom reset — original size এ ফেরা',
+    scpan: 'Zoom অবস্থায় image pan করুন',
     helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens এখন base64 দিয়ে সরাসরি খোলে — upload বা ISP block এর সমস্যা নেই।',
     helpIspTitle: 'Site ঢুকতে পারছেন না?',
     helpIspText: ' ISP block হতে পারে। Custom domain যোগ করুন Vercel Dashboard → Settings → Domains। Free subdomain পাবেন <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a> তে।',
@@ -1337,12 +1373,12 @@ const i18n = {
     how2Title: 'Direct Lens', how2Text: 'Pages open in Google Lens directly via base64 — no upload, no ISP block.',
     how3Title: 'Google Lens', how3Text: 'The link opens in Google Lens for text extraction.',
     how4Title: 'Copy & Paste', how4Text: 'Copy text from Lens and paste it here.',
-    uploadTitle: 'Drag image or PDF here / click to browse',
-    uploadSubNote: 'PDF pages are processed separately · large PDFs may be slower',
+    uploadTitle: 'Drag image, PDF or .txt here / click to browse',
+    uploadSubNote: 'PDF pages are processed separately · previously exported .txt files can be re-imported',
     stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
     copyAllBtnTxt: 'Copy All Text', copyAllMergedBtnTxt: 'Merged Copy',
     copyClipBtnTxt: 'Copy', downloadBtnTxt: '.txt Download',
-    previewTitleTxt: '👁 Preview — Page', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
+    previewTitleTxt: '👁 Preview', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
     previewEmptyTxt: 'Select a page to preview',
     textTitleTxt: '✏️ Text — Page',
     textPlaceholder: 'Copy text from Google Lens and paste here (Ctrl+V)...\n\nOr click the "Lens" button above.',
@@ -1372,6 +1408,11 @@ const i18n = {
     sc3: 'Previous / next page',
     sc4: 'Close this modal',
     sc5: 'Paste screenshot or image from clipboard',
+    scc: 'Cut selected text from textarea to clipboard',
+    scr: 'Paste from clipboard → Save → Next (no Lens)',
+    scz: 'Zoom in — press repeatedly to increase',
+    scx: 'Zoom reset — return to original size',
+    scpan: 'Pan image while zoomed',
     helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens opens via base64 directly — no upload, no ISP blocking.',
     helpIspTitle: "Can't access the site?",
     helpIspText: ' Your ISP may be blocking the Vercel domain. Add a custom domain in Vercel Dashboard → Settings → Domains. Free subdomains available at <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a>.',
@@ -1445,7 +1486,7 @@ function applyLanguage() {
   $('helpOk').textContent = t('helpOk');
   $('helpShortcutsTitle').textContent = t('helpShortcutsTitle');
   $('helpIspTitle').textContent = t('helpIspTitle');
-  ['sc1','sc2','sc3','sc4','sc5'].forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
+  ['sc1','sc2','sc3','sc4','sc5','scc','scr','scz','scx','scpan'].forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
   $('prevPage').title = t('prevPageTitle');
   $('nextPage').title = t('nextPageTitle');
   textArea.placeholder = t('textPlaceholder');
@@ -1508,6 +1549,9 @@ async function handleFiles(files) {
     if (file.type === 'application/pdf') {
       if (!clearedForPdf) { clearWorkspace(); clearedForPdf = true; }
       await loadPdf(file);
+    } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+      clearWorkspace();
+      await loadTxt(file);
     } else if (file.type.startsWith('image/')) {
       addPage(file.name, file, URL.createObjectURL(file));
     }
@@ -1516,6 +1560,71 @@ async function handleFiles(files) {
   renderAll();
   await uploadAllPages();
 }
+
+// ── TXT Re-import ─────────────────────────────────────────────────────────────
+// Splits a previously exported Textriva .txt back into pages.
+// Supports both Bangla (=== পেজ N — ...) and English (=== Page N — ...) headers.
+const TXT_PAGE_REGEX = /^===\s*(?:পেজ|Page)\s+(\d+)\s*[—-]\s*(.*?)\s*===/im;
+
+async function loadTxt(file) {
+  const raw = await file.text();
+  // Split on lines that look like page headers
+  const lines = raw.split('\n');
+  const pages = [];
+  let current = null;
+  for (const line of lines) {
+    const m = line.match(TXT_PAGE_REGEX);
+    if (m) {
+      if (current) pages.push(current);
+      current = { num: parseInt(m[1]), name: m[2].trim(), lines: [] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  if (current) pages.push(current);
+
+  if (pages.length === 0) {
+    // No headers found — treat whole file as single page
+    pages.push({ num: 1, name: file.name, lines: raw.split('\n') });
+  }
+
+  const placeholder = createTextPlaceholder();
+  for (const pg of pages) {
+    const text = pg.lines.join('\n').replace(/^\n+|\n+$/g, ''); // trim leading/trailing blank lines
+    addTxtPage(pg.name || file.name, text, placeholder);
+  }
+  toast(`📄 ${pages.length}টি পেজ import হয়েছে`, 'ok', 3000);
+}
+
+// Creates a 1×1 gray placeholder blob (used as image for txt-only pages)
+function createTextPlaceholder() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 800; canvas.height = 1100;
+  const ctx = canvas.getContext('2d');
+  // Lined paper look
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, 800, 1100);
+  ctx.strokeStyle = '#2a2a4a';
+  ctx.lineWidth = 1;
+  for (let y = 60; y < 1100; y += 32) { ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(760, y); ctx.stroke(); }
+  ctx.fillStyle = '#3a3a6a';
+  ctx.fillRect(60, 0, 2, 1100);
+  return canvas.toDataURL('image/png');
+}
+
+function addTxtPage(name, text, placeholderDataUrl) {
+  const id = Math.random().toString(36).slice(2);
+  // Convert dataURL to blob for consistency
+  const arr = placeholderDataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  const u8arr = new Uint8Array(bstr.length);
+  for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+  const blob = new Blob([u8arr], { type: mime });
+  const url = URL.createObjectURL(blob);
+  state.pages.push({ id, name, blob, url, status: 'done', remoteUrl: '', text, pdfPage: null, txtOnly: true });
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 async function loadPdf(file) {
   toast(t('pdfLoading', { name: file.name }), '', 2000);
@@ -1535,7 +1644,7 @@ async function loadPdf(file) {
       canvas.width = vp.width; canvas.height = vp.height;
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
-      addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob));
+      addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob), page);
       setSplitProgress(i, total);
     }
     setSplitProgress(total, total);
@@ -1546,9 +1655,9 @@ async function loadPdf(file) {
   }
 }
 
-function addPage(name, blob, url) {
+function addPage(name, blob, url, pdfPage) {
   const id = Math.random().toString(36).slice(2);
-  state.pages.push({ id, name, blob, url, status: 'pending', remoteUrl: '', text: '' });
+  state.pages.push({ id, name, blob, url, status: 'pending', remoteUrl: '', text: '', pdfPage: pdfPage || null });
 }
 
 function clearWorkspace() {
@@ -1583,8 +1692,11 @@ function renderStrip() {
     const el = document.createElement('div');
     el.className = `page-thumb${i === state.current ? ' active' : ''}${pg.status === 'done' ? ' done' : ''}${pg.status === 'uploading' ? ' uploading' : ''}${pg.status === 'error' ? ' error' : ''}`;
     el.dataset.i = i;
+    const thumbContent = pg.txtOnly
+      ? `<div class="pt-img" style="display:flex;align-items:center;justify-content:center;background:var(--card2);aspect-ratio:.7;font-size:1.4rem;color:var(--accent);">📄</div>`
+      : `<img class="pt-img" src="${pg.url}" alt="page ${i+1}"/>`;
     el.innerHTML = `
-      <img class="pt-img" src="${pg.url}" alt="page ${i+1}"/>
+      ${thumbContent}
       <div class="pt-foot">
         <span class="pt-num">#${i+1}</span>
         <span class="pt-badge ${pg.status}">${statusLabel(pg.status)}</span>
@@ -1598,9 +1710,7 @@ function renderStrip() {
     });
     el.querySelector('.pt-remove').addEventListener('click', e => {
       e.stopPropagation();
-      state.pages.splice(i, 1);
-      if (state.current >= state.pages.length) state.current = Math.max(0, state.pages.length - 1);
-      renderAll();
+      cutPage(i);
     });
     strip.appendChild(el);
   });
@@ -1639,7 +1749,34 @@ function renderWorkspace() {
   if (!pg) return;
   $('previewPageNum').textContent = state.current + 1;
   $('textPageNum').textContent = state.current + 1;
-  $('previewImgWrap').innerHTML = `<img src="${pg.url}" alt="page ${state.current+1}" style="max-width:100%;max-height:480px;object-fit:contain"/>`;
+  const total = state.pages.length;
+  const totalEl = $('previewPageTotal');
+  if (totalEl) totalEl.textContent = ` / ${total}`;
+  const wrap = $('previewImgWrap');
+  // Reset zoom on page change
+  zoomState.scale = 1; zoomState.tx = 0; zoomState.ty = 0;
+  zoomState.hiRes = false; zoomState.rendering = false;
+  wrap.classList.remove('zoomed');
+  if (pg.txtOnly) {
+    // Text-only page: show a rendered text preview instead of a image
+    const preview = pg.text ? pg.text.slice(0, 600) + (pg.text.length > 600 ? '…' : '') : '(no text)';
+    wrap.innerHTML = `
+      <div id="txtPreviewPanel" style="
+        width:100%;height:100%;min-height:240px;overflow:hidden;display:flex;flex-direction:column;
+        padding:1.2rem 1.4rem;box-sizing:border-box;
+        background:linear-gradient(160deg,#13131f 0%,#1a1a2e 100%);
+        color:var(--fg);font-family:var(--font-mono);font-size:.78rem;line-height:1.7;
+        border-left:3px solid var(--accent);
+      ">
+        <div style="font-size:.65rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:.7rem;opacity:.8;">
+          📄 TEXT PAGE ${state.current + 1}
+        </div>
+        <div style="white-space:pre-wrap;word-break:break-word;flex:1;overflow:hidden;color:var(--fg);opacity:.85;">${preview.replace(/</g,'&lt;')}</div>
+      </div>
+      <div class="zoom-badge" id="zoomBadge" style="opacity:0">—</div>`;
+  } else {
+    wrap.innerHTML = `<img id="previewZoomImg" src="${pg.url}" alt="page ${state.current+1}" style="max-width:100%;max-height:480px;object-fit:contain"/><div class="zoom-badge" id="zoomBadge">100%</div>`;
+  }
   textArea.value = pg.text || '';
   // Lens button always works via base64 direct
   const lensBtn = $('lensCurrentBtn');
@@ -1966,6 +2103,76 @@ async function openLens(i) {
 $('prevPage').onclick = () => { if (state.current > 0) { state.current--; renderAll(); } };
 $('nextPage').onclick = () => { if (state.current < state.pages.length - 1) { state.current++; renderAll(); } };
 
+// Cut page — remove current page, go to next (or prev if last)
+function cutPage(idx) {
+  const i = (idx !== undefined) ? idx : state.current;
+  if (!state.pages.length) return;
+  state.pages.splice(i, 1);
+  if (state.pages.length === 0) { state.current = 0; }
+  else { state.current = Math.min(i, state.pages.length - 1); }
+  toast('✂ Page removed', '', 1500);
+  renderAll();
+}
+$('cutPageBtn').onclick = () => cutPage();
+
+// Mouse wheel zoom on preview — smooth, pointer-aware
+$('previewImgWrap').addEventListener('wheel', e => {
+  if (!state.pages.length) return;
+  e.preventDefault();
+  const wrap = $('previewImgWrap');
+  const rect = wrap.getBoundingClientRect();
+  const px = e.clientX - rect.left - rect.width / 2;
+  const py = e.clientY - rect.top - rect.height / 2;
+  const delta = -e.deltaY * (e.deltaMode === 1 ? 30 : 1);
+  const factor = 1 + Math.min(Math.abs(delta), 200) / 600 * Math.sign(delta);
+  const newScale = Math.max(1, Math.min(ZOOM_MAX, zoomState.scale * factor));
+  if (newScale !== zoomState.scale) {
+    const scaleRatio = newScale / zoomState.scale;
+    zoomState.tx = px - scaleRatio * (px - zoomState.tx);
+    zoomState.ty = py - scaleRatio * (py - zoomState.ty);
+    zoomState.scale = parseFloat(newScale.toFixed(3));
+    if (zoomState.scale <= 1) { zoomState.scale = 1; zoomState.tx = 0; zoomState.ty = 0; }
+    applyZoom();
+  }
+}, { passive: false });
+
+// Drag-to-pan on preview (only when zoomed)
+{ 
+  let dragging = false, dragStartX = 0, dragStartY = 0, panStartTx = 0, panStartTy = 0;
+  const wrap = $('previewImgWrap');
+  wrap.addEventListener('mousedown', e => {
+    if (zoomState.scale <= 1) return;
+    dragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
+    panStartTx = zoomState.tx; panStartTy = zoomState.ty;
+    wrap.style.cursor = 'grabbing'; e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    zoomState.tx = panStartTx + (e.clientX - dragStartX);
+    zoomState.ty = panStartTy + (e.clientY - dragStartY);
+    applyZoom();
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    $('previewImgWrap').style.cursor = zoomState.scale > 1 ? 'move' : 'default';
+  });
+  // Touch pan
+  let touch0 = null;
+  wrap.addEventListener('touchstart', e => {
+    if (zoomState.scale <= 1 || e.touches.length !== 1) return;
+    touch0 = e.touches[0]; panStartTx = zoomState.tx; panStartTy = zoomState.ty;
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    if (!touch0 || e.touches.length !== 1) return;
+    e.preventDefault();
+    zoomState.tx = panStartTx + (e.touches[0].clientX - touch0.clientX);
+    zoomState.ty = panStartTy + (e.touches[0].clientY - touch0.clientY);
+    applyZoom();
+  }, { passive: false });
+  wrap.addEventListener('touchend', () => { touch0 = null; });
+}
+
 textArea.addEventListener('input', () => {
   const pg = state.pages[state.current];
   if (pg) pg.text = textArea.value;
@@ -1993,6 +2200,18 @@ $('quickSaveBtn').onclick = () => $('saveTxtBtn').click();
 $('clearTxtBtn').onclick = () => {
   textArea.value = '';
   textArea.dispatchEvent(new Event('input'));
+};
+
+$('cutTxtBtn').onclick = () => {
+  const start = textArea.selectionStart;
+  const end   = textArea.selectionEnd;
+  if (start === end) { toast('আগে text select করুন', '', 1500); return; }
+  const selected = textArea.value.slice(start, end);
+  navigator.clipboard.writeText(selected).catch(() => {});
+  textArea.value = textArea.value.slice(0, start) + textArea.value.slice(end);
+  textArea.selectionStart = textArea.selectionEnd = start;
+  textArea.dispatchEvent(new Event('input'));
+  toast('✂ Cut — clipboard এ গেছে', 'ok', 1500);
 };
 
 $('saveTxtBtn').onclick = () => {
@@ -2047,6 +2266,67 @@ $('allDlBtn').onclick = () => {
   a.download = `textriva_all_${Date.now()}.txt`; a.click();
 };
 
+// ── Preview Zoom System ──────────────────────────────────────────────────────
+
+function applyZoom() {
+  const wrap = $('previewImgWrap');
+  const img = document.getElementById('previewZoomImg');
+  const badge = document.getElementById('zoomBadge');
+  if (!img) return;
+  const { scale: s, tx, ty } = zoomState;
+  img.style.transformOrigin = '0 0';
+  img.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+  img.style.maxWidth  = 'none';
+  img.style.maxHeight = 'none';
+  if (badge) badge.textContent = Math.round(s * 100) + '%';
+  wrap.classList.toggle('zoomed', s > 1);
+  // Trigger hi-res re-render if PDF page available and zoom is high enough
+  if (s >= HIRES_THRESHOLD && !zoomState.hiRes && !zoomState.rendering) {
+    renderHiResPreview();
+  }
+  if (s < HIRES_THRESHOLD && zoomState.hiRes) {
+    restoreNormalPreview();
+  }
+}
+
+async function renderHiResPreview() {
+  const pg = state.pages[state.current];
+  if (!pg || !pg.pdfPage) return;
+  zoomState.rendering = true;
+  try {
+    const hiScale = Math.min(zoomState.scale * (parseFloat($('qualitySel').value) || 2.0), 8);
+    const vp = pg.pdfPage.getViewport({ scale: hiScale });
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width; canvas.height = vp.height;
+    await pg.pdfPage.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    const img = document.getElementById('previewZoomImg');
+    if (img && zoomState.scale >= HIRES_THRESHOLD) {
+      img.src = canvas.toDataURL('image/png'); // PNG = lossless, no jpeg artifacts
+      zoomState.hiRes = true;
+    }
+  } catch(e) { /* ignore */ }
+  zoomState.rendering = false;
+}
+
+function restoreNormalPreview() {
+  const pg = state.pages[state.current];
+  const img = document.getElementById('previewZoomImg');
+  if (img && pg) { img.src = pg.url; }
+  zoomState.hiRes = false;
+}
+
+function zoomIn() {
+  zoomState.scale = Math.min(ZOOM_MAX, parseFloat((zoomState.scale + ZOOM_STEP).toFixed(2)));
+  applyZoom();
+}
+function zoomReset() {
+  zoomState.scale = 1; zoomState.tx = 0; zoomState.ty = 0;
+  zoomState.hiRes = false; zoomState.rendering = false;
+  restoreNormalPreview();
+  applyZoom();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
   const inInput = e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT';
@@ -2059,8 +2339,25 @@ document.addEventListener('keydown', e => {
   // Esc or M → close modal
   if (e.key === 'Escape' || e.key === 'm' || e.key === 'M') { $('helpModal').classList.remove('open'); return; }
   if (inInput) return;
-  if (e.key === 'ArrowLeft')  { if (state.current > 0) { state.current--; renderAll(); } }
-  if (e.key === 'ArrowRight') { if (state.current < state.pages.length - 1) { state.current++; renderAll(); } }
+  if (e.key === 'ArrowLeft')  {
+    if (zoomState.scale > 1) { zoomState.tx += PAN_STEP; applyZoom(); return; }
+    if (state.current > 0) { state.current--; renderAll(); }
+  }
+  if (e.key === 'ArrowRight') {
+    if (zoomState.scale > 1) { zoomState.tx -= PAN_STEP; applyZoom(); return; }
+    if (state.current < state.pages.length - 1) { state.current++; renderAll(); }
+  }
+  if (e.key === 'ArrowUp')   { if (zoomState.scale > 1) { e.preventDefault(); zoomState.ty += PAN_STEP; applyZoom(); } return; }
+  if (e.key === 'ArrowDown') { if (zoomState.scale > 1) { e.preventDefault(); zoomState.ty -= PAN_STEP; applyZoom(); } return; }
+  // Z → Zoom in
+  if (e.key === 'z' || e.key === 'Z') { if (state.pages.length) zoomIn(); return; }
+  // X → Reset zoom
+  if (e.key === 'x' || e.key === 'X') { zoomReset(); return; }
+  // C → Cut selected text in textarea
+  if (e.key === 'c' || e.key === 'C') {
+    if (!inInput) { $('cutTxtBtn').click(); }
+    return;
+  }
   // L → open Lens for current page
   if (e.key === 'l' || e.key === 'L') { if (state.pages.length) openLens(state.current); }
   // R → Paste from clipboard + Save + Next
