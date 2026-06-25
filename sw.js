@@ -1,7 +1,6 @@
-// Textriva Service Worker — v1.1
-const CACHE = 'textriva-v2';
+// Textriva Service Worker — v1.2
+const CACHE = 'textriva-v3';
 
-// Files to cache on install (app shell)
 const SHELL = [
   '/',
   '/index.html',
@@ -33,13 +32,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Never intercept API calls — let them pass through
+  // Never intercept API calls
   if (url.pathname.startsWith('/api/')) return;
 
-  // External origins (Google Fonts, CDNs etc.) — network only, don't intercept
+  // External origins (Google Fonts, CDNs) — network only
   if (url.origin !== self.location.origin) return;
 
-  // Only handle GET requests
+  // Only handle GET
   if (e.request.method !== 'GET') return;
 
   e.respondWith(
@@ -48,7 +47,6 @@ self.addEventListener('fetch', e => {
 
       return fetch(e.request)
         .then(res => {
-          // Cache only valid responses
           if (res && res.status === 200 && res.type !== 'opaque') {
             const clone = res.clone();
             caches.open(CACHE).then(c => c.put(e.request, clone));
@@ -56,15 +54,10 @@ self.addEventListener('fetch', e => {
           return res;
         })
         .catch(() => {
-          // Offline fallback
           if (e.request.mode === 'navigate') {
             return caches.match('/index.html');
           }
-          // For other resources (images, SVGs etc.) — return empty 503
-          return new Response('', {
-            status: 503,
-            statusText: 'Offline',
-          });
+          return new Response('', { status: 503, statusText: 'Offline' });
         });
     })
   );
