@@ -1,39 +1,64 @@
-// Vercel Serverless Function — /api/upload
+// Cloudflare Worker Function — /api/upload
 // Receives { image: base64string } from browser
-// Stores via @vercel/blob (vercel-storage.com — never ISP-blocked)
-// Returns { success: true, url: "https://...vercel-storage.com/..." }
+// Uploads to imgbb using IMGBB_KEY secret (set in CF Dashboard → Settings → Variables → Encrypt)
+// Returns { success: true, url: "https://i.ibb.co/..." }
 //
 // Setup:
-//   1. Vercel Dashboard → Storage → Blob → Create Store
-//   2. vercel env add BLOB_READ_WRITE_TOKEN  (or paste in Dashboard → Settings → Env Vars)
-//   3. npm i @vercel/blob  (add to package.json)
+//   Cloudflare Dashboard → Workers → textriva → Settings → Variables
+//   → Add variable: IMGBB_KEY = your_api_key → click Encrypt → Save
 
-import { put } from '@vercel/blob';
+export async function onRequestPost(context) {
+  const { request, env } = context;
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  // CORS headers
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Content-Type': 'application/json',
+  };
 
   try {
-    const { image } = req.body;
-    if (!image) return res.status(400).json({ error: 'No image data' });
+    const { image } = await request.json();
+    if (!image) {
+      return new Response(JSON.stringify({ error: 'No image data' }), { status: 400, headers });
+    }
 
-    const buf = Buffer.from(image, 'base64');
-    const filename = `textriva/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+    // Upload to imgbb
+    const form = new FormData();
+    form.append('image', image); // base64 string, no prefix needed
+    form.append('expiration', '600'); // 10 min — enough for Google Lens, then auto-deleted
 
-    const blob = await put(filename, buf, {
-      access: 'public',
-      contentType: 'image/jpeg',
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${env.IMGBB_KEY}`, {
+      method: 'POST',
+      body: form,
     });
 
-    return res.status(200).json({ success: true, url: blob.url });
+    const data = await res.json();
+
+    if (!data.success) {
+      throw new Error(data.error?.message || 'imgbb upload failed');
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      url: data.data.url,
+    }), { status: 200, headers });
 
   } catch (err) {
-    console.error('Upload handler error:', err);
-    return res.status(500).json({ error: err.message || 'Internal server error' });
+    return new Response(JSON.stringify({ error: err.message || 'Internal server error' }), {
+      status: 500,
+      headers,
+    });
   }
+}
+
+// Handle CORS preflight
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

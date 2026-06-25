@@ -772,6 +772,54 @@ a { color:inherit; text-decoration:none }
 .flex   { display:flex }
 .gap-sm { gap:.4rem }
 .flex-1 { flex:1 }
+
+/* ── PWA Install Banner ── */
+#pwa-install-bar {
+  position: fixed;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1e3a5f, #0f172a);
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  padding: .6rem 1rem .6rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,.55);
+  z-index: 9999;
+  animation: pwa-slide-up .35s cubic-bezier(.22,1,.36,1);
+  white-space: nowrap;
+}
+@keyframes pwa-slide-up {
+  from { opacity:0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+#pwa-install-bar .pwa-icon { font-size:1.4rem; line-height:1; }
+#pwa-install-bar .pwa-text { color: var(--mid); font-size:.78rem; }
+#pwa-install-bar .pwa-text strong { color: var(--bright); font-size:.85rem; display:block; }
+#pwa-install-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: .38rem .85rem;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+#pwa-install-btn:hover { background: var(--accent-d); }
+#pwa-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 .2rem;
+  line-height: 1;
+}
+#pwa-dismiss-btn:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -1931,6 +1979,64 @@ document.addEventListener('paste', e => {
 // btn-icon style (not in CSS to avoid duplication)
 document.querySelectorAll('.btn-icon').forEach(b => {
   b.style.cssText = 'width:36px;height:36px;border-radius:var(--r-sm);background:var(--card);border:1px solid var(--line);color:var(--mid);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;';
+});
+</script>
+
+<!-- ── PWA Install Banner ── -->
+<div id="pwa-install-bar" class="hidden">
+  <span class="pwa-icon">📲</span>
+  <div class="pwa-text">
+    <strong>Textriva Install করুন</strong>
+    App হিসেবে ব্যবহার করুন
+  </div>
+  <button id="pwa-install-btn">Install</button>
+  <button id="pwa-dismiss-btn" title="Dismiss">&#x2715;</button>
+</div>
+
+<script>
+// ── Service Worker Registration ──────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[SW] Registered:', reg.scope))
+      .catch(err => console.warn('[SW] Failed:', err));
+  });
+}
+
+// ── PWA Install Prompt ───────────────────────────
+let _deferredPrompt = null;
+const installBar = document.getElementById('pwa-install-bar');
+const installBtn = document.getElementById('pwa-install-btn');
+const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+
+if (!isStandalone) {
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _deferredPrompt = e;
+    setTimeout(() => installBar.classList.remove('hidden'), 2000);
+  });
+}
+
+installBtn.addEventListener('click', async () => {
+  if (!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  const { outcome } = await _deferredPrompt.userChoice;
+  console.log('[PWA] Install outcome:', outcome);
+  _deferredPrompt = null;
+  installBar.classList.add('hidden');
+});
+
+dismissBtn.addEventListener('click', () => {
+  installBar.classList.add('hidden');
+  _deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  installBar.classList.add('hidden');
+  console.log('[PWA] App installed!');
 });
 </script>
 </body>
