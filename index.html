@@ -2,7 +2,7 @@
 <html lang="bn" data-theme="milki">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Textriva by A3KM Studio — Google Lens OCR Tool</title>
 <meta name="description" content="Upload images or PDFs, auto-send to Google Lens page by page, extract text. 100% free tool by A3KM Studio."/>
 <meta property="og:type" content="website"/>
@@ -13,7 +13,6 @@
 <meta name="twitter:title" content="Textriva by A3KM Studio — Google Lens OCR Tool"/>
 <meta name="twitter:description" content="Free OCR workflow with Google Lens for image and PDF pages."/>
 <meta name="twitter:image" content="/assets/brand/icon-180.svg"/>
-<link rel="icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg"/>
 <link rel="shortcut icon" href="/assets/brand/favicon.svg"/>
 <link rel="icon" type="image/svg+xml" sizes="32x32" href="/assets/brand/icon-32.svg"/>
@@ -24,7 +23,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
 <style>
 /* ══════════════════════════════════════════════
    DESIGN TOKENS
@@ -101,18 +99,15 @@
   --yellow-gl: rgba(245,166,35,.08);
   --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
   --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
-
   --social-bg: rgba(255,255,255,.8);
   --social-border: rgba(45,90,150,.35);
   --social-hover: rgba(36,83,157,.14);
   --social-shadow: 0 6px 16px rgba(16,38,72,.12);
-
   --ctl-bg: rgba(255,255,255,.85);
   --ctl-border: rgba(36,83,157,.25);
   --ctl-hover: rgba(36,83,157,.12);
   --ctl-active: rgba(36,83,157,.2);
   --ctl-shadow: 0 8px 20px rgba(16,38,72,.12);
-
   --modal-bg: linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,247,253,.98));
   --modal-border: rgba(45,90,150,.25);
   --modal-glow: rgba(36,83,157,.12);
@@ -138,18 +133,15 @@
   --yellow-gl: rgba(245,166,35,.08);
   --shadow:    0 2px 12px rgba(0,0,30,.08), 0 1px 3px rgba(0,0,30,.05);
   --shadow-lg: 0 8px 40px rgba(0,0,30,.12), 0 2px 8px rgba(0,0,30,.06);
-
   --social-bg: rgba(255,250,238,.85);
   --social-border: rgba(95,87,72,.35);
   --social-hover: rgba(47,184,96,.12);
   --social-shadow: 0 6px 16px rgba(32,28,20,.12);
-
   --ctl-bg: rgba(255,250,238,.9);
   --ctl-border: rgba(95,87,72,.3);
   --ctl-hover: rgba(47,184,96,.12);
   --ctl-active: rgba(47,184,96,.18);
   --ctl-shadow: 0 8px 20px rgba(32,28,20,.12);
-
   --modal-bg: linear-gradient(180deg, rgba(255,253,246,.98), rgba(243,237,220,.98));
   --modal-border: rgba(95,87,72,.28);
   --modal-glow: rgba(47,184,96,.12);
@@ -160,9 +152,9 @@
 ══════════════════════════════════════════════ */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
 html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased }
-body { 
-  background: var(--paper); 
-  color: var(--text); 
+body {
+  background: var(--paper);
+  color: var(--text);
   font-family: var(--font-body);
   min-height: 100vh;
   display: flex;
@@ -189,29 +181,16 @@ a { color:inherit; text-decoration:none }
   box-shadow: 0 6px 18px rgba(0,0,0,.16);
   transition: background .3s, border-color .3s, box-shadow .3s;
 }
-[data-theme="light"] .hdr {
-  background: rgba(241,245,253,.9);
-  box-shadow: 0 6px 16px rgba(16,38,72,.08);
-}
-[data-theme="milki"] .hdr {
-  background: rgba(247,241,226,.92);
-  box-shadow: 0 6px 16px rgba(32,28,20,.08);
-}
+[data-theme="light"] .hdr { background: rgba(241,245,253,.9); box-shadow: 0 6px 16px rgba(16,38,72,.08); }
+[data-theme="milki"] .hdr { background: rgba(247,241,226,.92); box-shadow: 0 6px 16px rgba(32,28,20,.08); }
 .hdr-inner {
-  max-width: 1100px; margin: 0 auto;
-  padding: 0 1.25rem;
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 1.5rem;
   height: 58px;
   display: flex; align-items:center; justify-content:space-between; gap:1rem;
 }
-.logo {
-  display:flex; align-items:center; gap:10px;
-}
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .logo-mark {
   width:36px; height:36px;
   background: linear-gradient(145deg, #0f1a33, #1b2f56);
@@ -221,167 +200,57 @@ a { color:inherit; text-decoration:none }
   box-shadow: 0 4px 14px var(--accent-gm);
   flex-shrink:0;
 }
-[data-theme="milki"] .logo-mark {
-  background: linear-gradient(145deg, #18140f, #214428);
-}
-.logo-mark img {
-  width: 100%;
-  height: 100%;
-  border-radius:10px;
-  object-fit:cover;
-}
+[data-theme="milki"] .logo-mark { background: linear-gradient(145deg, #18140f, #214428); }
+.logo-mark img { width: 100%; height: 100%; border-radius:10px; object-fit:cover; }
 .logo-wordmark {
   font-family: var(--font-display);
-  font-size: 1.26rem;
-  font-weight: 700;
-  letter-spacing: .01em;
-  line-height: 1;
-  display: block;
+  font-size: 1.26rem; font-weight: 700; letter-spacing: .01em; line-height: 1; display: block;
   color: #8ab4ff;
   text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34);
 }
-.logo-tag {
-  font-size:.68rem; color:var(--dim);
-  font-family: var(--font-body);
-  letter-spacing:.02em;
-}
-[data-theme="light"] .logo-wordmark {
-  color: #24539d;
-  text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 8px rgba(36,83,157,.2);
-}
-[data-theme="milki"] .logo-wordmark {
-  color: #2f7a4c;
-  text-shadow: 0 1px 0 rgba(255,252,242,.82), 0 2px 8px rgba(36,92,64,.2);
-}
-[data-theme="light"] .logo-tag,
-[data-theme="milki"] .logo-tag {
-  color: #3f4f6d;
-}
-[data-theme="milki"] .logo-tag {
-  color: #5f5748;
-}
-[data-theme="light"] .ftr-wordmark,
-[data-theme="milki"] .ftr-wordmark {
-  filter:
-    drop-shadow(0 1px 0 rgba(255,255,255,.35))
-    drop-shadow(0 2px 6px rgba(8,16,32,.22))
-    saturate(1.12)
-    contrast(1.22)
-    brightness(.86);
-}
+.logo-tag { font-size:.68rem; color:var(--dim); font-family: var(--font-body); letter-spacing:.02em; }
+[data-theme="light"] .logo-wordmark { color: #24539d; text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 8px rgba(36,83,157,.2); }
+[data-theme="milki"] .logo-wordmark { color: #2f7a4c; text-shadow: 0 1px 0 rgba(255,252,242,.82), 0 2px 8px rgba(36,92,64,.2); }
+[data-theme="light"] .logo-tag, [data-theme="milki"] .logo-tag { color: #3f4f6d; }
+[data-theme="milki"] .logo-tag { color: #5f5748; }
 .hdr-right { display:flex; align-items:center; gap:.6rem }
 .hdr-ctl-group {
-  display:flex;
-  align-items:center;
-  gap:.22rem;
-  padding:.16rem;
+  display:flex; align-items:center; gap:.22rem; padding:.16rem;
   border-radius:999px;
-  background: var(--ctl-bg);
-  border: 1px solid var(--ctl-border);
+  background: var(--ctl-bg); border: 1px solid var(--ctl-border);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--ctl-shadow);
 }
 .hdr-ctl {
-  width:44px; height:44px;
-  border-radius:999px;
-  background: transparent;
-  border:1px solid transparent;
-  color: var(--mid);
-  font-size:16px;
+  width:44px; height:44px; border-radius:999px;
+  background: transparent; border:1px solid transparent;
+  color: var(--mid); font-size:16px;
   display:flex; align-items:center; justify-content:center;
-  flex-direction: column;
-  gap: 2px;
-  padding: 5px 6px 6px;
+  flex-direction: column; gap: 2px; padding: 5px 6px 6px;
   transition: transform .2s ease, color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
-.hdr-ctl-ico {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.hdr-ctl-ico svg {
-  width: 17px;
-  height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.hdr-ctl-label {
-  font-size: .54rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--dim);
-  line-height: 1;
-}
-.hdr-ctl:hover {
-  color: var(--accent);
-  background: var(--ctl-hover);
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
+.hdr-ctl-ico { display:flex; align-items:center; justify-content:center; }
+.hdr-ctl-ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hdr-ctl-label { font-size: .54rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); line-height: 1; }
+.hdr-ctl:hover { color: var(--accent); background: var(--ctl-hover); border-color: var(--accent); transform: translateY(-1px); }
 .hdr-ctl:hover .hdr-ctl-label { color: var(--accent); }
-.hdr-ctl:active {
-  transform: translateY(0);
-  background: var(--ctl-active);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-}
-.hdr-ctl.hdr-ctl-lang {
-  width:auto;
-  min-width: 58px;
-  padding: 5px 8px 6px;
-}
+.hdr-ctl:active { transform: translateY(0); background: var(--ctl-active); }
+.hdr-ctl.hdr-ctl-lang { width:auto; min-width: 58px; padding: 5px 8px 6px; }
 .hdr-ctl-badge {
-  font-size: .56rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--text);
-  background: rgba(51,74,104,.6);
-  border: 1px solid var(--line2);
-  border-radius: 999px;
-  padding: 1px 6px;
-  line-height: 1.2;
+  font-size: .56rem; font-weight: 700; letter-spacing: .04em;
+  color: var(--text); background: rgba(51,74,104,.6);
+  border: 1px solid var(--line2); border-radius: 999px;
+  padding: 1px 6px; line-height: 1.2;
 }
-.chip {
-  font-size:.68rem; font-weight:700;
-  padding:3px 9px; border-radius:20px;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-}
+.chip { font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:20px; letter-spacing:.03em; text-transform:uppercase; }
 .chip-free { background:var(--green-gl); color:var(--green); border:1px solid currentColor }
-.chip-lens { 
-  background: linear-gradient(90deg, var(--accent-gl), var(--accent-gm));
-  border:1px solid var(--line2); color:var(--mid);
-}
-.btn-icon {
-  width:36px; height:36px;
-  border-radius:var(--r-sm);
-  background:var(--card); border:1px solid var(--line);
-  color:var(--mid); font-size:16px;
-  display:flex; align-items:center; justify-content:center;
-  transition:all .2s;
-}
-.btn-icon:hover { background:var(--accent-gl); border-color:var(--accent); color:var(--accent) }
-.sr-only {
-  position:absolute;
-  width:1px; height:1px;
-  padding:0; margin:-1px;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
-  white-space:nowrap; border:0;
-}
-#langBtn {
-  min-width: 42px;
-  padding: 0 .45rem;
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .03em;
-}
+.chip-lens { background: linear-gradient(90deg, var(--accent-gl), var(--accent-gm)); border:1px solid var(--line2); color:var(--mid); }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+#langBtn { min-width: 42px; padding: 0 .45rem; font-size: .68rem; font-weight: 700; letter-spacing: .03em; }
 
 /* ══════════════════════════════════════════════
-   MAIN LAYOUT
+   MAIN LAYOUT — wider container
 ══════════════════════════════════════════════ */
-.wrap { max-width:1100px; width:100%; flex:1; margin:0 auto; padding:1.5rem 1.25rem 4rem }
+.wrap { max-width: 1400px; width:100%; flex:1; margin:0 auto; padding:1.5rem 1.5rem 4rem }
 
 /* ══════════════════════════════════════════════
    HERO UPLOAD
@@ -391,31 +260,21 @@ a { color:inherit; text-decoration:none }
   border: 2px dashed var(--line2);
   border-radius: var(--r-lg);
   padding: 3.5rem 2rem;
-  text-align:center;
-  cursor:pointer;
+  text-align:center; cursor:pointer;
   transition:all .25s;
-  background: var(--card);
-  overflow:hidden;
+  background: var(--card); overflow:hidden;
 }
 .upload-area::before {
-  content:'';
-  position:absolute; inset:0;
+  content:''; position:absolute; inset:0;
   background: radial-gradient(ellipse 60% 50% at 50% 120%, var(--accent-gl) 0%, transparent 70%);
   pointer-events:none;
 }
-.upload-area:hover, .upload-area.over {
-  border-color:var(--accent);
-  background:var(--accent-gl);
-  transform:scale(1.003);
-}
-.upload-area input {
-  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
-}
+.upload-area:hover, .upload-area.over { border-color:var(--accent); background:var(--accent-gl); transform:scale(1.003); }
+.upload-area input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 .upload-icon {
   width:72px; height:72px; margin:0 auto 1.25rem;
   background: linear-gradient(135deg, var(--accent-gl), var(--accent-gm));
-  border:1px solid var(--line2);
-  border-radius:20px;
+  border:1px solid var(--line2); border-radius:20px;
   display:flex; align-items:center; justify-content:center; font-size:30px;
   transition:transform .25s;
 }
@@ -425,52 +284,29 @@ a { color:inherit; text-decoration:none }
 .upload-sub strong { color:var(--mid) }
 
 /* ══════════════════════════════════════════════
-   PAGE STRIP (thumbnail row)
+   PAGE STRIP
 ══════════════════════════════════════════════ */
 .strip-wrap { margin-top:1.25rem }
-.strip-hdr {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:.75rem;
-}
+.strip-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
 .strip-label { font-size:.8rem; color:var(--mid); font-family:var(--font-body); font-weight:600 }
 .strip-label b { color:var(--accent) }
 .strip-actions { display:flex; gap:.4rem }
-
-.strip {
-  display:flex; gap:.5rem;
-  overflow-x:auto; padding-bottom:.5rem;
-  scrollbar-width:thin;
-}
+.strip { display:flex; gap:.5rem; overflow-x:auto; padding-bottom:.5rem; scrollbar-width:thin; }
 .page-thumb {
-  flex-shrink:0;
-  width:82px;
-  border-radius:var(--r-sm);
-  border:2px solid var(--line);
-  background:var(--card);
-  cursor:pointer;
-  transition:all .2s;
-  position:relative;
-  overflow:hidden;
+  flex-shrink:0; width:82px;
+  border-radius:var(--r-sm); border:2px solid var(--line);
+  background:var(--card); cursor:pointer; transition:all .2s;
+  position:relative; overflow:hidden;
 }
 .page-thumb:hover { border-color:var(--accent); transform:translateY(-2px) }
 .page-thumb.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-gm) }
 .page-thumb.done { border-color:var(--green) }
 .page-thumb.uploading { border-color:var(--yellow) }
-.page-thumb .pt-img {
-  width:100%; aspect-ratio:.7;
-  object-fit:cover; display:block;
-  background:var(--card2);
-}
-.page-thumb .pt-foot {
-  padding:3px 5px;
-  border-top:1px solid var(--line);
-  display:flex; align-items:center; justify-content:space-between;
-}
+.page-thumb.error { border-color:var(--red) }
+.page-thumb .pt-img { width:100%; aspect-ratio:.7; object-fit:cover; display:block; background:var(--card2); }
+.page-thumb .pt-foot { padding:3px 5px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
 .page-thumb .pt-num { font-size:.6rem; color:var(--dim); font-family:var(--font-mono) }
-.page-thumb .pt-badge {
-  font-size:.55rem; font-weight:700; padding:1px 4px; border-radius:3px;
-  text-transform:uppercase; letter-spacing:.04em;
-}
+.page-thumb .pt-badge { font-size:.55rem; font-weight:700; padding:1px 4px; border-radius:3px; text-transform:uppercase; letter-spacing:.04em; }
 .pt-badge.pending   { background:var(--yellow-gl); color:var(--yellow) }
 .pt-badge.uploading { background:var(--yellow-gl); color:var(--yellow) }
 .pt-badge.ready     { background:var(--accent-gl); color:var(--accent) }
@@ -493,72 +329,76 @@ a { color:inherit; text-decoration:none }
 @keyframes scan { from{transform:scaleX(0.1)} to{transform:scaleX(1)} }
 
 /* ══════════════════════════════════════════════
+   TWO-PHASE PROGRESS BAR (NEW)
+══════════════════════════════════════════════ */
+.progress-block {
+  margin-top:.75rem;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r); padding:.9rem 1.1rem;
+  display:none; flex-direction:column; gap:.55rem;
+}
+.progress-block.show { display:flex }
+.progress-phase {
+  display:flex; flex-direction:column; gap:.3rem;
+}
+.progress-phase-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:.72rem;
+}
+.progress-phase-label { color:var(--mid); font-weight:600; display:flex; align-items:center; gap:.4rem; }
+.progress-phase-label .phase-ico { font-size:.85rem; }
+.progress-phase-pct { color:var(--dim); font-family:var(--font-mono); font-size:.68rem; }
+.progress-bar-wrap { height:5px; background:var(--line); border-radius:3px; overflow:hidden; }
+.progress-bar { height:100%; border-radius:3px; transition:width .35s ease; }
+.progress-bar.split-bar { background: linear-gradient(90deg, var(--yellow), #f59e0b); }
+.progress-bar.upload-bar { background: linear-gradient(90deg, var(--accent), #60a5fa); }
+.progress-bar.upload-bar.error { background: linear-gradient(90deg, var(--red), #f87171); }
+.progress-phase.dim-phase .progress-phase-label,
+.progress-phase.dim-phase .progress-phase-pct { opacity: .4; }
+.progress-phase.dim-phase .progress-bar-wrap { opacity: .35; }
+.progress-detail { font-size:.7rem; color:var(--dim); font-family:var(--font-body); margin-top:.1rem; }
+
+/* ══════════════════════════════════════════════
    ACTION ROW
 ══════════════════════════════════════════════ */
-.action-row {
-  display:flex; flex-wrap:wrap; gap:.6rem; align-items:center;
-  margin-top:1rem;
-}
+.action-row { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-top:1rem; }
 .btn {
   display:inline-flex; align-items:center; gap:.4rem;
   padding:.55rem 1.1rem;
   border-radius:var(--r-sm);
   font-size:.82rem; font-weight:600;
   border:1.5px solid transparent;
-  transition:all .2s;
-  letter-spacing:-.01em;
+  transition:all .2s; letter-spacing:-.01em;
 }
 .btn:disabled { opacity:.45; cursor:not-allowed }
-.btn-primary {
-  background:var(--accent); color:#fff;
-  box-shadow:0 2px 10px var(--accent-gm);
-}
-.btn-primary:hover:not(:disabled) {
-  background:var(--accent-d);
-  box-shadow:0 4px 18px var(--accent-gm);
-  transform:translateY(-1px);
-}
-.btn-secondary {
-  background:var(--card); color:var(--mid);
-  border-color:var(--line);
-}
+.btn-primary { background:var(--accent); color:#fff; box-shadow:0 2px 10px var(--accent-gm); }
+.btn-primary:hover:not(:disabled) { background:var(--accent-d); box-shadow:0 4px 18px var(--accent-gm); transform:translateY(-1px); }
+.btn-secondary { background:var(--card); color:var(--mid); border-color:var(--line); }
 .btn-secondary:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-gl) }
-.btn-success {
-  background:var(--green-gl); color:var(--green); border-color:var(--green);
+.btn-success { background:var(--green-gl); color:var(--green); border-color:var(--green); }
+.btn-danger { background:var(--red-gl); color:var(--red); border-color:var(--red); }
+.btn-warning { background:var(--yellow-gl); color:var(--yellow); border-color:var(--yellow); }
+.btn-warning:hover:not(:disabled) { background:rgba(245,166,35,.22); border-color:var(--yellow); transform:translateY(-1px); }
+
+/* Retry button pulse animation */
+@keyframes pulse-warn {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,.0); }
+  50% { box-shadow: 0 0 0 6px rgba(245,166,35,.25); }
 }
-.btn-danger {
-  background:var(--red-gl); color:var(--red); border-color:var(--red);
-}
+.btn-warning.has-errors { animation: pulse-warn 2s ease-in-out infinite; }
 
 /* ══════════════════════════════════════════════
-   UPLOAD PROGRESS
-══════════════════════════════════════════════ */
-.upl-progress {
-  margin-top:.75rem;
-  background:var(--card); border:1px solid var(--line);
-  border-radius:var(--r-sm); padding:.7rem 1rem;
-  font-size:.75rem; color:var(--mid);
-  display:none;
-}
-.upl-progress.show { display:flex; align-items:center; gap:.7rem }
-.upl-bar-wrap { flex:1; height:4px; background:var(--line); border-radius:2px; overflow:hidden }
-.upl-bar { height:100%; background:var(--accent); border-radius:2px; transition:width .4s ease }
-
-/* ══════════════════════════════════════════════
-   MAIN WORKSPACE
+   WORKSPACE
 ══════════════════════════════════════════════ */
 .workspace {
   margin-top:1.5rem;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap:1rem;
   min-height:420px;
 }
-@media (max-width:700px) {
-  .workspace { grid-template-columns:1fr }
-}
+@media (max-width:800px) { .workspace { grid-template-columns:1fr } }
 
-/* ── Preview Panel ── */
 .preview-panel {
   background:var(--card); border:1px solid var(--line);
   border-radius:var(--r-lg); overflow:hidden;
@@ -570,27 +410,17 @@ a { color:inherit; text-decoration:none }
   display:flex; align-items:center; justify-content:space-between;
   flex-wrap:wrap; gap:.4rem;
 }
-.panel-title {
-  font-size:.8rem; font-weight:700; color:var(--mid);
-  font-family:var(--font-display); letter-spacing:.01em;
-}
+.panel-title { font-size:.8rem; font-weight:700; color:var(--mid); font-family:var(--font-display); letter-spacing:.01em; }
 .panel-title b { color:var(--accent) }
 .preview-img-wrap {
   flex:1; display:flex; align-items:center; justify-content:center;
   background:var(--ink); position:relative; overflow:hidden;
   min-height:240px;
 }
-.preview-img-wrap img {
-  max-width:100%; max-height:480px;
-  object-fit:contain; display:block;
-}
-.preview-empty {
-  color:var(--dim); text-align:center; padding:3rem 2rem;
-  font-size:.82rem;
-}
-.preview-empty .big { font-size:2.5rem; margin-bottom:.75rem }
+.preview-img-wrap img { max-width:100%; max-height:480px; object-fit:contain; display:block; }
+.preview-empty { color:var(--dim); text-align:center; padding:3rem 2rem; font-size:.82rem; }
+.preview-empty .big { font-size:2.5rem; margin-bottom:.75rem; }
 
-/* ── Text Panel ── */
 .text-panel {
   background:var(--card); border:1px solid var(--line);
   border-radius:var(--r-lg); overflow:hidden;
@@ -598,27 +428,19 @@ a { color:inherit; text-decoration:none }
 }
 .txt-body { flex:1; display:flex; flex-direction:column; padding:.8rem }
 .txt-body textarea {
-  flex:1;
-  width:100%; min-height:280px;
-  background:var(--card2);
-  border:1px solid var(--line);
-  border-radius:var(--r-sm);
-  color:var(--text);
-  font-size:.78rem; line-height:1.8;
-  padding:.75rem;
-  resize:vertical;
-  transition:border-color .2s;
+  flex:1; width:100%; min-height:280px;
+  background:var(--card2); border:1px solid var(--line);
+  border-radius:var(--r-sm); color:var(--text);
+  font-size:.78rem; line-height:1.8; padding:.75rem;
+  resize:vertical; transition:border-color .2s;
 }
 .txt-body textarea:focus { border-color:var(--accent); outline:none }
 .txt-body textarea::placeholder { color:var(--dim) }
-.txt-foot {
-  display:flex; align-items:center; gap:.5rem;
-  padding:.6rem 0 0; flex-wrap:wrap;
-}
+.txt-foot { display:flex; align-items:center; gap:.5rem; padding:.6rem 0 0; flex-wrap:wrap; }
 .txt-stats { font-size:.7rem; color:var(--dim); font-family:var(--font-mono); flex:1 }
 
 /* ══════════════════════════════════════════════
-   LENS LAUNCH SECTION
+   LENS GRID
 ══════════════════════════════════════════════ */
 .lens-launch {
   margin-top:1rem;
@@ -629,19 +451,11 @@ a { color:inherit; text-decoration:none }
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom:.75rem; flex-wrap:wrap; gap:.5rem;
 }
-.ll-title {
-  font-size:.82rem; font-weight:700;
-  display:flex; align-items:center; gap:.5rem;
-}
-.g-logo { font-weight:800; font-size:.88rem; letter-spacing:-.02em }
+.ll-title { font-size:.82rem; font-weight:700; display:flex; align-items:center; gap:.5rem; }
+.g-logo { font-weight:800; font-size:.88rem; letter-spacing:-.02em; }
 .g-b{color:#4a90f0}.g-r{color:#e85555}.g-y{color:#f5a623}.g-g{color:#2fb860}
-.ll-sub { font-size:.72rem; color:var(--dim); margin-top:.15rem }
-
-.lens-pages-grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap:.6rem;
-}
+.ll-sub { font-size:.72rem; color:var(--dim); margin-top:.15rem; }
+.lens-pages-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:.6rem; }
 .lens-page-card {
   background:var(--card2); border:1px solid var(--line);
   border-radius:var(--r-sm); padding:.6rem .75rem;
@@ -650,8 +464,9 @@ a { color:inherit; text-decoration:none }
 }
 .lens-page-card.active-page { border-color:var(--accent); background:var(--accent-gl) }
 .lens-page-card.card-done { border-color:var(--green); background:var(--green-gl) }
+.lens-page-card.card-error { border-color:var(--red); background:var(--red-gl) }
 .lpc-num { font-size:.65rem; color:var(--dim); font-family:var(--font-mono) }
-.lpc-name { font-size:.72rem; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.lpc-name { font-size:.72rem; color:var(--text); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .lpc-status { font-size:.65rem; font-weight:700 }
 .lpc-status.pending   { color:var(--yellow) }
 .lpc-status.uploading { color:var(--yellow) }
@@ -663,12 +478,31 @@ a { color:inherit; text-decoration:none }
   font-size:.68rem; font-weight:600;
   background:var(--accent); color:#fff;
   display:flex; align-items:center; gap:3px;
-  justify-content:center;
-  transition:all .2s; border:none; cursor:pointer;
+  justify-content:center; transition:all .2s; border:none; cursor:pointer;
 }
 .lpc-btn:hover { background:var(--accent-d); transform:translateY(-1px) }
 .lpc-btn:disabled { opacity:.4; cursor:not-allowed }
 .lpc-btn.done-btn { background:var(--green-gl); color:var(--green); border:1px solid var(--green) }
+.lpc-btn.retry-btn { background:var(--red-gl); color:var(--red); border:1px solid var(--red) }
+.lpc-btn.retry-btn:hover { background:rgba(232,85,85,.22) }
+
+/* ══════════════════════════════════════════════
+   UPLOAD STATUS BANNER (NEW — shows when some failed)
+══════════════════════════════════════════════ */
+.upload-status-banner {
+  display:none;
+  margin-top:.75rem;
+  padding:.65rem 1rem;
+  border-radius:var(--r-sm);
+  font-size:.78rem; font-weight:500;
+  align-items:center; gap:.75rem;
+  border:1px solid;
+}
+.upload-status-banner.show { display:flex; }
+.upload-status-banner.banner-ok { background:var(--green-gl); border-color:var(--green); color:var(--green); }
+.upload-status-banner.banner-warn { background:var(--yellow-gl); border-color:var(--yellow); color:var(--yellow); }
+.upload-status-banner.banner-err { background:var(--red-gl); border-color:var(--red); color:var(--red); }
+.banner-text { flex:1 }
 
 /* ══════════════════════════════════════════════
    ALL RESULTS
@@ -686,15 +520,12 @@ a { color:inherit; text-decoration:none }
 }
 .results-meta { font-size:.78rem; color:var(--dim); font-family:var(--font-body) }
 .results-meta b { color:var(--green) }
-.results-body {
-  padding:1rem 1.25rem;
-}
+.results-body { padding:1rem 1.25rem; }
 .all-textarea {
   width:100%; min-height:200px; max-height:500px;
   background:var(--card2); border:1px solid var(--line);
-  border-radius:var(--r-sm);
-  color:var(--text); font-size:.78rem; line-height:1.8;
-  padding:.75rem; resize:vertical;
+  border-radius:var(--r-sm); color:var(--text);
+  font-size:.78rem; line-height:1.8; padding:.75rem; resize:vertical;
 }
 .all-textarea:focus { border-color:var(--accent); outline:none }
 
@@ -712,10 +543,8 @@ a { color:inherit; text-decoration:none }
 }
 .how-num {
   width:28px; height:28px; flex-shrink:0;
-  background:var(--accent-gl); color:var(--accent);
-  border:1px solid var(--accent);
-  border-radius:50%;
-  font-family:var(--font-mono); font-size:.75rem; font-weight:700;
+  background:var(--accent-gl); color:var(--accent); border:1px solid var(--accent);
+  border-radius:50%; font-family:var(--font-mono); font-size:.75rem; font-weight:700;
   display:flex; align-items:center; justify-content:center;
 }
 .how-txt p { font-size:.8rem; font-weight:600; color:var(--text); margin-bottom:.15rem; font-family:var(--font-display) }
@@ -724,11 +553,7 @@ a { color:inherit; text-decoration:none }
 /* ══════════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════════ */
-.toasts {
-  position:fixed; bottom:1.25rem; right:1.25rem;
-  z-index:9999; display:flex; flex-direction:column; gap:.4rem;
-  pointer-events:none;
-}
+.toasts { position:fixed; bottom:1.25rem; right:1.25rem; z-index:9999; display:flex; flex-direction:column; gap:.4rem; pointer-events:none; }
 .toast {
   background:var(--card); border:1px solid var(--line);
   border-radius:var(--r-sm); padding:.6rem 1rem;
@@ -740,6 +565,7 @@ a { color:inherit; text-decoration:none }
 }
 .toast.ok  { border-color:var(--green); color:var(--green) }
 .toast.err { border-color:var(--red); color:var(--red) }
+.toast.warn { border-color:var(--yellow); color:var(--yellow) }
 .toast.out { animation:fadeOut .3s ease forwards }
 @keyframes slideRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
 @keyframes fadeOut    { to{opacity:0;transform:translateX(24px)} }
@@ -755,84 +581,45 @@ a { color:inherit; text-decoration:none }
 }
 .modal-bg.open { display:flex }
 .modal {
-  background: var(--modal-bg);
-  border:1px solid var(--modal-border);
+  background: var(--modal-bg); border:1px solid var(--modal-border);
   border-radius:var(--r-lg); max-width:520px; width:100%;
   box-shadow: 0 16px 44px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.2);
-  position: relative;
-  animation:slideUp .3s ease;
+  position: relative; animation:slideUp .3s ease;
 }
 .modal::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: .8;
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .8;
 }
 .modal-hdr {
   padding:1rem 1.25rem; border-bottom:1px solid var(--line);
   display:flex; align-items:center; justify-content:space-between;
   background: radial-gradient(120% 120% at 10% 10%, var(--modal-glow), transparent 60%);
 }
-.modal-title {
-  font-size:.95rem;
-  font-weight:700;
-  color:var(--bright);
-  font-family:var(--font-display);
-  display:flex;
-  align-items:center;
-  gap:.5rem;
-}
-.modal-title-ico svg {
-  width:18px;
-  height:18px;
-  fill:none;
-  stroke:currentColor;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
+.modal-title { font-size:.95rem; font-weight:700; color:var(--bright); font-family:var(--font-display); display:flex; align-items:center; gap:.5rem; }
+.modal-title-ico svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .modal-body { padding:1.25rem }
-.modal-ftr {
-  padding:.75rem 1.25rem; border-top:1px solid var(--line);
-  display:flex; gap:.5rem; justify-content:flex-end;
-}
+.modal-ftr { padding:.75rem 1.25rem; border-top:1px solid var(--line); display:flex; gap:.5rem; justify-content:flex-end; }
 .modal-close {
-  width:32px; height:32px;
-  border-radius:10px;
-  background: var(--card2);
-  border:1px solid var(--line2);
-  color: var(--mid);
-  display:flex; align-items:center; justify-content:center;
-  transition: all .2s;
+  width:32px; height:32px; border-radius:10px;
+  background: var(--card2); border:1px solid var(--line2);
+  color: var(--mid); display:flex; align-items:center; justify-content:center; transition: all .2s;
 }
-.modal-close:hover {
-  background: var(--accent-gl);
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.modal-close:hover { background: var(--accent-gl); border-color: var(--accent); color: var(--accent); }
 .step-row { display:flex; gap:.75rem; margin-bottom:.9rem; align-items:flex-start }
 .step-n {
   width:24px; height:24px; flex-shrink:0;
   background: linear-gradient(145deg, var(--accent), var(--accent-d));
-  color:#fff;
-  border-radius:50%; font-size:.72rem; font-weight:700;
+  color:#fff; border-radius:50%; font-size:.72rem; font-weight:700;
   box-shadow: 0 4px 10px rgba(0,0,0,.2);
   display:flex; align-items:center; justify-content:center;
 }
 .step-t { font-size:.8rem; color:var(--mid); line-height:1.55 }
 .step-t strong { color:var(--text) }
 .help-tip {
-  background: var(--yellow-gl);
-  border: 1px solid var(--yellow);
-  border-radius: var(--r-sm);
-  padding: .7rem .9rem;
-  font-size: .75rem;
-  color: var(--mid);
-  margin-top: .5rem;
+  background: var(--yellow-gl); border: 1px solid var(--yellow);
+  border-radius: var(--r-sm); padding: .7rem .9rem;
+  font-size: .75rem; color: var(--mid); margin-top: .5rem;
 }
-
 @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
 @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
@@ -851,213 +638,49 @@ a { color:inherit; text-decoration:none }
    FOOTER
 ══════════════════════════════════════════════ */
 .ftr {
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.015), transparent 34%),
-    linear-gradient(180deg, var(--card), var(--card2));
+  margin-top: 1.5rem; border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.015), transparent 34%), linear-gradient(180deg, var(--card), var(--card2));
   position: relative;
 }
 .ftr::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: .8;
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: .8;
 }
-.ftr-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1.15rem 1.25rem .95rem;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: .75rem;
-}
-.ftr-col {
-  border: 1px solid var(--line);
-  background: var(--card2);
-  border-radius: var(--r);
-  padding: .78rem .84rem;
-}
-.ftr-col-primary {
-  background: linear-gradient(180deg, var(--card2), var(--card));
-  border-color: var(--accent-gm);
-  box-shadow: 0 8px 22px rgba(0,0,0,.12);
-}
-.ftr-kicker {
-  font-size: .61rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: .22rem;
-}
-.ftr-title {
-  font-family:var(--font-display);
-  font-size: .9rem;
-  color: var(--bright);
-  font-weight: 700;
-  margin-bottom: .32rem;
-}
-.ftr-brand {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  margin-bottom: .34rem;
-}
-.ftr-a3km-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  object-fit: contain;
-  background: var(--ink);
-  border: 1px solid var(--line2);
-}
-.ftr-wordmark {
-  width: 120px;
-  height: auto;
-  display: block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.2));
-}
-.ftr-text {
-  font-size: .76rem;
-  color: var(--dim);
-  line-height: 1.58;
-}
-.ftr-owner-list {
-  margin-top: .35rem;
-  display: grid;
-  gap: .2rem;
-  list-style: none;
-}
-.ftr-owner-list li {
-  font-size: .72rem;
-  color: var(--mid);
-}
-.ftr-social {
-  margin-top: .45rem;
-  display: flex;
-  gap: .4rem;
-  align-items: center;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
+.ftr-inner { max-width: 1400px; margin: 0 auto; padding: 1.15rem 1.5rem .95rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.ftr-col { border: 1px solid var(--line); background: var(--card2); border-radius: var(--r); padding: .78rem .84rem; }
+.ftr-col-primary { background: linear-gradient(180deg, var(--card2), var(--card)); border-color: var(--accent-gm); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+.ftr-kicker { font-size: .61rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .22rem; }
+.ftr-title { font-family:var(--font-display); font-size: .9rem; color: var(--bright); font-weight: 700; margin-bottom: .32rem; }
+.ftr-brand { display: flex; align-items: center; gap: .55rem; margin-bottom: .34rem; }
+.ftr-a3km-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; background: var(--ink); border: 1px solid var(--line2); }
+.ftr-text { font-size: .76rem; color: var(--dim); line-height: 1.58; }
+.ftr-owner-list { margin-top: .35rem; display: grid; gap: .2rem; list-style: none; }
+.ftr-owner-list li { font-size: .72rem; color: var(--mid); }
+.ftr-social { margin-top: .45rem; display: flex; gap: .4rem; align-items: center; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 .ftr-social::-webkit-scrollbar { display: none; }
 .ftr-social a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  color: var(--mid);
-  border: 1px solid var(--social-border);
-  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; color: var(--mid);
+  border: 1px solid var(--social-border); border-radius: 50%;
   background: radial-gradient(120% 120% at 20% 20%, var(--social-bg), transparent 70%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--social-shadow);
-  transition: transform .2s ease, border-color .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
+  transition: transform .2s ease, border-color .2s ease, color .2s ease, background .2s ease;
+  flex-shrink: 0;
 }
-.ftr-social .ftr-logo-icon {
-  padding: 0;
-  overflow: hidden;
-}
-.ftr-social .ftr-logo-icon img {
-  width: 82%;
-  height: 82%;
-  object-fit: contain;
-  filter: none;
-}
-.ftr-mail-btn {
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255,65,65,.18), rgba(120,0,0,.28));
-  border-color: rgba(255,70,70,.5);
-  color: #ff4a4a;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 6px 16px rgba(120,0,0,.25);
-}
-.ftr-mail-btn .ftr-social-ico {
-  width: 22px;
-  height: 22px;
-}
-.ftr-mail-btn:hover {
-  background: linear-gradient(180deg, rgba(255,65,65,.26), rgba(120,0,0,.38));
-  border-color: rgba(255,110,110,.7);
-}
-.ftr-social a:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: radial-gradient(120% 120% at 20% 20%, var(--social-hover), transparent 70%);
-  transform: translateY(-2px);
-}
-.ftr-social a:active {
-  transform: translateY(0);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-}
-.ftr-social-ico {
-  width: 19px;
-  height: 19px;
-  display: block;
-  fill: currentColor;
-}
-.ftr-wordmark-text {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-  color: #8ab4ff;
-  text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34);
-}
-[data-theme="light"] .ftr-wordmark-text {
-  color: #24539d;
-  text-shadow: 0 1px 0 rgba(255,255,255,.85), 0 2px 8px rgba(36,83,157,.2);
-}
-[data-theme="milki"] .ftr-wordmark-text {
-  color: #2f7a4c;
-  text-shadow: 0 1px 0 rgba(255,252,242,.82), 0 2px 8px rgba(36,92,64,.2);
-}
-.ftr-meta {
-  margin-top: .4rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .28rem;
-}
-.ftr-badge {
-  font-size: .62rem;
-  padding: .16rem .4rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--mid);
-  background: var(--accent-gl);
-}
-.ftr-links a:hover,
-.ftr-social a:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-gl);
-}
-.ftr-bottom {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: .62rem 1.25rem .92rem;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .6rem;
-  flex-wrap: wrap;
-  font-size: .7rem;
-  color: var(--dim);
-}
-.ftr-bottom-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .55rem;
-}
-.ftr-bottom a {
-  color: var(--accent);
-}
+.ftr-social .ftr-logo-icon { padding: 0; overflow: hidden; }
+.ftr-social .ftr-logo-icon img { width: 82%; height: 82%; object-fit: contain; }
+.ftr-mail-btn { border-radius: 12px; background: linear-gradient(180deg, rgba(255,65,65,.18), rgba(120,0,0,.28)); border-color: rgba(255,70,70,.5); color: #ff4a4a; }
+.ftr-social a:hover { color: var(--accent); border-color: var(--accent); background: radial-gradient(120% 120% at 20% 20%, var(--social-hover), transparent 70%); transform: translateY(-2px); }
+.ftr-social a:active { transform: translateY(0); }
+.ftr-social-ico { width: 19px; height: 19px; display: block; fill: currentColor; }
+.ftr-wordmark-text { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; color: #8ab4ff; text-shadow: 0 1px 0 rgba(0,0,0,.34), 0 3px 10px rgba(24,74,160,.34); }
+[data-theme="light"] .ftr-wordmark-text { color: #24539d; }
+[data-theme="milki"] .ftr-wordmark-text { color: #2f7a4c; }
+.ftr-meta { margin-top: .4rem; display: flex; flex-wrap: wrap; gap: .28rem; }
+.ftr-badge { font-size: .62rem; padding: .16rem .4rem; border-radius: 999px; border: 1px solid var(--line); color: var(--mid); background: var(--accent-gl); }
+.ftr-bottom { max-width: 1400px; margin: 0 auto; padding: .62rem 1.5rem .92rem; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; font-size: .7rem; color: var(--dim); }
+.ftr-bottom-links { display: flex; flex-wrap: wrap; gap: .55rem; }
+.ftr-bottom a { color: var(--accent); }
 [data-theme="light"] .ftr-text { color: #4f6285; }
 [data-theme="light"] .ftr-bottom { color: #4f6285; }
 [data-theme="milki"] .ftr-text { color: #5f5748; }
@@ -1070,110 +693,38 @@ a { color:inherit; text-decoration:none }
 [data-theme="milki"] .ftr-owner-list li { color: #5b5244; }
 
 /* ══════════════════════════════════════════════
-   RESPONSIVE (MOBILE FIRST POLISH)
+   RESPONSIVE
 ══════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .hdr-inner {
-    height: auto;
-    min-height: 58px;
-    padding-top: .55rem;
-    padding-bottom: .55rem;
-    flex-wrap: wrap;
-  }
-  .wrap {
-    padding: 1rem .8rem 2rem;
-  }
-  .how-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .upload-area {
-    padding: 2.3rem 1rem;
-  }
-  .action-row .btn,
-  .lens-launch-hdr > .btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .results-hdr {
-    padding: .7rem .8rem;
-  }
-  .results-body {
-    padding: .7rem .8rem;
-  }
-  .ftr-inner {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 1000px) {
+  .hdr-inner, .ftr-inner, .ftr-bottom, .wrap { max-width: 100%; padding-left: 1.1rem; padding-right: 1.1rem; }
+  .how-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .upload-area { padding: 2.3rem 1rem; }
+  .action-row .btn { width: 100%; justify-content: center; }
+  .ftr-inner { grid-template-columns: 1fr; }
 }
-
 @media (max-width: 640px) {
   .logo-wordmark { font-size: 1.1rem; }
-  .logo-tag { font-size: .64rem; }
-  .chip { font-size: .62rem; }
-  .btn-icon { width: 40px; height: 40px; }
-  .hdr-ctl { width: 42px; height: 42px; }
-  .hdr-ctl.hdr-ctl-lang { min-width: 56px; }
-  .btn {
-    min-height: 44px;
-    font-size: .9rem;
-    padding: .62rem .9rem;
-  }
-  .strip-actions {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .45rem;
-  }
-  .how-strip {
-    grid-template-columns: 1fr;
-    gap: .55rem;
-  }
-  .workspace {
-    gap: .7rem;
-    margin-top: 1rem;
-  }
-  .panel-hdr {
-    padding: .55rem .7rem;
-  }
-  .txt-body {
-    padding: .55rem;
-  }
-  .txt-body textarea,
-  .all-textarea {
-    font-size: 16px;
-    line-height: 1.65;
-  }
-  .txt-foot .btn {
-    flex: 1;
-    justify-content: center;
-  }
-  #saveTxtBtn {
-    flex: 1.2;
-  }
-  .lens-pages-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .ftr-inner {
-    grid-template-columns: 1fr;
-    gap: .8rem;
-    padding: 1rem .8rem;
-  }
-  .ftr-col {
-    min-height: 0;
-  }
-  .ftr-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: .75rem .8rem calc(1rem + env(safe-area-inset-bottom));
-  }
-  .toasts {
-    left: .7rem;
-    right: .7rem;
-    bottom: calc(.7rem + env(safe-area-inset-bottom));
-  }
-  .toast {
-    min-width: 0;
-    max-width: 100%;
-  }
+  .hdr-inner { height: 52px; min-height: 52px; padding: 0 .7rem; flex-wrap: nowrap; }
+  .chip-free, .chip-lens, #statsChip { display: none; }
+  .hdr-ctl-group { gap: .12rem; padding: .12rem; }
+  .hdr-ctl { width: 38px; height: 38px; flex-direction: row; padding: 0; gap: 0; }
+  .hdr-ctl.hdr-ctl-lang { min-width: 38px; }
+  .hdr-ctl-label, .hdr-ctl-badge { display: none; }
+  .how-strip { display: none; }
+  .btn { min-height: 44px; font-size: .9rem; padding: .62rem .9rem; }
+  .strip-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+  .workspace { gap: .7rem; margin-top: 1rem; }
+  .panel-hdr { padding: .55rem .7rem; }
+  .txt-body { padding: .55rem; }
+  .txt-body textarea, .all-textarea { font-size: 16px; line-height: 1.65; }
+  .txt-foot .btn { flex: 1; justify-content: center; }
+  #saveTxtBtn { flex: 1.2; }
+  .lens-pages-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ftr-inner { grid-template-columns: 1fr; gap: .8rem; padding: 1rem .8rem; }
+  .ftr-bottom { flex-direction: column; align-items: flex-start; padding: .75rem .8rem calc(1rem + env(safe-area-inset-bottom)); }
+  .toasts { left: .7rem; right: .7rem; bottom: calc(.7rem + env(safe-area-inset-bottom)); }
+  .toast { min-width: 0; max-width: 100%; }
+  .progress-block { padding: .7rem .8rem; }
 }
 
 /* ══════════════════════════════════════════════
@@ -1184,7 +735,6 @@ a { color:inherit; text-decoration:none }
 .flex   { display:flex }
 .gap-sm { gap:.4rem }
 .flex-1 { flex:1 }
-
 </style>
 </head>
 <body>
@@ -1210,23 +760,14 @@ a { color:inherit; text-decoration:none }
         </button>
         <button class="hdr-ctl hdr-ctl-lang" id="langBtn" title="Language mode" aria-label="Language mode">
           <span class="hdr-ctl-ico">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M3 12h18"/>
-              <path d="M12 3a12 12 0 0 1 0 18"/>
-              <path d="M12 3a12 12 0 0 0 0 18"/>
-            </svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a12 12 0 0 1 0 18"/><path d="M12 3a12 12 0 0 0 0 18"/></svg>
           </span>
           <span class="hdr-ctl-label">Lang</span>
           <span class="hdr-ctl-badge" id="langBtnBadge">EB</span>
         </button>
         <button class="hdr-ctl" id="helpBtn" title="How it works" aria-label="How it works">
           <span class="hdr-ctl-ico">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-2 2.4-2 4"/>
-              <path d="M12 17h.01"/>
-            </svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-2 2.4-2 4"/><path d="M12 17h.01"/></svg>
           </span>
           <span class="hdr-ctl-label">Help</span>
         </button>
@@ -1238,36 +779,12 @@ a { color:inherit; text-decoration:none }
 <!-- ═══════════ MAIN ═══════════ -->
 <main class="wrap">
 
-  <!-- HOW IT WORKS (collapsible info) -->
+  <!-- HOW IT WORKS -->
   <div class="how-strip" id="howStrip">
-    <div class="how-card">
-      <div class="how-num">1</div>
-      <div class="how-txt">
-        <p id="how1Title">Upload করুন</p>
-        <small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small>
-      </div>
-    </div>
-    <div class="how-card">
-      <div class="how-num">2</div>
-      <div class="how-txt">
-        <p id="how2Title">Auto-Upload</p>
-        <small id="how2Text">প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small>
-      </div>
-    </div>
-    <div class="how-card">
-      <div class="how-num">3</div>
-      <div class="how-txt">
-        <p id="how3Title">Google Lens</p>
-        <small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small>
-      </div>
-    </div>
-    <div class="how-card">
-      <div class="how-num">4</div>
-      <div class="how-txt">
-        <p id="how4Title">Copy & Paste</p>
-        <small id="how4Text">Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small>
-      </div>
-    </div>
+    <div class="how-card"><div class="how-num">1</div><div class="how-txt"><p id="how1Title">Upload করুন</p><small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small></div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-txt"><p id="how2Title">Auto-Upload</p><small id="how2Text">প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে</small></div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-txt"><p id="how3Title">Google Lens</p><small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small></div></div>
+    <div class="how-card"><div class="how-num">4</div><div class="how-txt"><p id="how4Title">Copy & Paste</p><small id="how4Text">Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small></div></div>
   </div>
 
   <!-- UPLOAD ZONE -->
@@ -1277,7 +794,7 @@ a { color:inherit; text-decoration:none }
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
       <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
-      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে</span>
+      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে</span>
     </div>
   </div>
 
@@ -1285,17 +802,37 @@ a { color:inherit; text-decoration:none }
   <div id="stripWrap" class="strip-wrap hidden">
     <div class="strip-hdr">
       <div class="strip-label"><span id="stripLabelPrefix">পেজ:</span> <b id="pageCount">0</b> <span id="stripLabelSuffix">টি লোড হয়েছে</span></div>
-      <div class="strip-actions">
-      </div>
+      <div class="strip-actions"></div>
     </div>
     <div class="strip" id="strip"></div>
   </div>
 
-  <!-- UPLOAD PROGRESS -->
-  <div class="upl-progress" id="uplProgress">
-    <span id="uplLabel">Uploading...</span>
-    <div class="upl-bar-wrap"><div class="upl-bar" id="uplBar" style="width:0%"></div></div>
-    <span id="uplPct">0%</span>
+  <!-- TWO-PHASE PROGRESS BLOCK -->
+  <div class="progress-block" id="progressBlock">
+    <!-- Phase 1: PDF Split -->
+    <div class="progress-phase" id="splitPhase">
+      <div class="progress-phase-hdr">
+        <span class="progress-phase-label"><span class="phase-ico">📄</span> <span id="splitPhaseLabel">PDF splitting</span></span>
+        <span class="progress-phase-pct" id="splitPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar split-bar" id="splitBar" style="width:0%"></div></div>
+      <div class="progress-detail" id="splitDetail"></div>
+    </div>
+    <!-- Phase 2: Upload -->
+    <div class="progress-phase" id="uploadPhase">
+      <div class="progress-phase-hdr">
+        <span class="progress-phase-label"><span class="phase-ico">☁️</span> <span id="uploadPhaseLabel">Uploading</span></span>
+        <span class="progress-phase-pct" id="uploadPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar upload-bar" id="uploadBar" style="width:0%"></div></div>
+      <div class="progress-detail" id="uploadDetail"></div>
+    </div>
+  </div>
+
+  <!-- UPLOAD STATUS BANNER -->
+  <div class="upload-status-banner" id="uploadBanner">
+    <span class="banner-text" id="bannerText"></span>
+    <button class="btn btn-warning" id="retryFailedBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryBtnTxt">Retry</span></button>
   </div>
 
   <!-- ACTION ROW -->
@@ -1305,7 +842,7 @@ a { color:inherit; text-decoration:none }
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
   </div>
 
-  <!-- WORKSPACE (preview + text editor) -->
+  <!-- WORKSPACE -->
   <div class="workspace hidden" id="workspace">
     <!-- Preview -->
     <div class="preview-panel">
@@ -1318,10 +855,7 @@ a { color:inherit; text-decoration:none }
         </div>
       </div>
       <div class="preview-img-wrap" id="previewImgWrap">
-        <div class="preview-empty">
-          <div class="big">🖼</div>
-          <p id="previewEmptyTxt">কোনো পেজ select করুন</p>
-        </div>
+        <div class="preview-empty"><div class="big">🖼</div><p id="previewEmptyTxt">কোনো পেজ select করুন</p></div>
       </div>
     </div>
 
@@ -1336,7 +870,7 @@ a { color:inherit; text-decoration:none }
         </div>
       </div>
       <div class="txt-body">
-        <textarea id="textArea" placeholder="Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...&#10;&#10;অথবা উপরের 'Lens' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।"></textarea>
+        <textarea id="textArea" placeholder="Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...&#10;&#10;অথবা উপরের 'Lens' বাটন চাপুন।"></textarea>
         <div class="txt-foot">
           <span class="txt-stats" id="txtStats">0 chars · 0 words</span>
           <button class="btn btn-secondary" id="clearTxtBtn" style="padding:.3rem .7rem;font-size:.72rem">✕ Clear</button>
@@ -1346,7 +880,7 @@ a { color:inherit; text-decoration:none }
     </div>
   </div>
 
-  <!-- LENS GRID (all pages at once) -->
+  <!-- LENS GRID -->
   <div id="lensSection" class="lens-launch hidden">
     <div class="lens-launch-hdr">
       <div>
@@ -1354,7 +888,7 @@ a { color:inherit; text-decoration:none }
           <span class="g-logo"><span class="g-b">G</span><span class="g-r">o</span><span class="g-y">o</span><span class="g-b">g</span><span class="g-g">l</span><span class="g-r">e</span></span>
           <span id="lensSectionTitleTxt">&nbsp;Lens — সব পেজ</span>
         </div>
-        <div class="ll-sub" id="lensSectionSubTxt">প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।</div>
+        <div class="ll-sub" id="lensSectionSubTxt">প্রতিটা পেজের জন্য আলাদা Lens বাটন।</div>
       </div>
     </div>
     <div class="lens-pages-grid" id="lensGrid"></div>
@@ -1383,7 +917,6 @@ a { color:inherit; text-decoration:none }
 <footer class="ftr">
   <div class="ftr-inner">
     <div class="ftr-col ftr-col-primary">
-      <div class="ftr-kicker hidden" id="ftrKicker1">Textriva OCR Studio</div>
       <div class="ftr-brand">
         <img src="/assets/brand/textriva-monogram.svg" alt="Textriva Logo" class="ftr-a3km-logo"/>
         <span class="ftr-wordmark-text" aria-label="Textriva">Textriva</span>
@@ -1434,9 +967,7 @@ a { color:inherit; text-decoration:none }
   <div class="ftr-bottom">
     <span id="ftrBottomText">© Textriva • OCR tool developed by Md Akhinoor Islam</span>
     <span class="ftr-bottom-links">
-      <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrBottomContact" class="hidden">Contact</a>
       <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Projects%20Code/websites/websites-listing.html" target="_blank" rel="noopener" id="ftrBottomPortfolio">Websites &amp; Tools</a>
-      <a href="https://a3kmstudio.vercel.app" target="_blank" rel="noopener" id="ftrBottomStudio" class="hidden">A3KM Studio</a>
     </span>
   </div>
 </footer>
@@ -1446,39 +977,19 @@ a { color:inherit; text-decoration:none }
   <div class="modal">
     <div class="modal-hdr">
       <div class="modal-title">
-        <span class="modal-title-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M20 20l-3.5-3.5" />
-          </svg>
-        </span>
+        <span class="modal-title-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
         <span id="helpModalTitle">কীভাবে ব্যবহার করবেন</span>
       </div>
       <button class="modal-close" id="helpClose">✕</button>
     </div>
     <div class="modal-body">
-      <div class="step-row">
-        <div class="step-n">1</div>
-        <div class="step-t" id="helpStep1"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div>
-      </div>
-      <div class="step-row">
-        <div class="step-n">2</div>
-        <div class="step-t" id="helpStep2"><strong>"সব Upload করুন"</strong> বাটন চাপুন। প্রতিটা page imgbb.com এ upload হবে এবং public link তৈরি হবে।</div>
-      </div>
-      <div class="step-row">
-        <div class="step-n">3</div>
-        <div class="step-t" id="helpStep3"><strong>"Google Lens এ সব খুলুন"</strong> বাটন চাপুন। প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div>
-      </div>
-      <div class="step-row">
-        <div class="step-n">4</div>
-        <div class="step-t" id="helpStep4"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div>
-      </div>
-      <div class="step-row">
-        <div class="step-n">5</div>
-        <div class="step-t" id="helpStep5"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div>
-      </div>
+      <div class="step-row"><div class="step-n">1</div><div class="step-t" id="helpStep1"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div></div>
+      <div class="step-row"><div class="step-n">2</div><div class="step-t" id="helpStep2"><strong>Auto-upload হবে।</strong> প্রতিটা page imgbb.com এ upload হবে। Failed হলে "Retry" button আসবে।</div></div>
+      <div class="step-row"><div class="step-n">3</div><div class="step-t" id="helpStep3"><strong>Lens button চাপুন।</strong> প্রতিটা page এর জন্য Google Lens নতুন tab এ খুলবে।</div></div>
+      <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div></div>
+      <div class="step-row"><div class="step-n">5</div><div class="step-t" id="helpStep5"><strong>"Save & Next"</strong> চাপুন। পরের page এ চলে যাবে। শেষে সব text একসাথে পাবেন।</div></div>
       <div id="helpTip" class="help-tip">
-        💡 <strong style="color:var(--yellow)">Tip:</strong> প্রতিটা page এর Lens tab খোলার পর সেটা বন্ধ না করে রাখতে পারেন। Lens নিজেই text highlight করে — শুধু "Copy text" করুন।
+        💡 <strong style="color:var(--yellow)">Tip:</strong> imgbb.com block হলে ISP বা network এর কারণে হতে পারে। VPN বা অন্য network থেকে চেষ্টা করুন। Page successfully upload হলে Lens button সবুজ হবে।
       </div>
     </div>
     <div class="modal-ftr">
@@ -1491,9 +1002,6 @@ a { color:inherit; text-decoration:none }
 <div class="toasts" id="toasts"></div>
 
 <script type="module">
-// ══════════════════════════════════════════
-// PDF.js setup
-// ══════════════════════════════════════════
 import * as pdfjs from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
 pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
 
@@ -1501,33 +1009,92 @@ pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pd
 // STATE
 // ══════════════════════════════════════════
 const state = {
-  pages: [],     // { id, name, blob, url, status:'pending'|'uploading'|'ready'|'done'|'error', remoteUrl:'', text:'' }
-  current: 0,    // active page index
+  pages: [],
+  current: 0,
+  uploading: false,
 };
-const isMobileDevice = () =>
-  window.matchMedia('(max-width: 900px)').matches ||
-  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const isMobile = () => window.matchMedia('(max-width:900px)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 // ══════════════════════════════════════════
 // DOM REFS
 // ══════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const uploadArea   = $('uploadArea');
-const fileInput    = $('fileInput');
-const stripWrap    = $('stripWrap');
-const strip        = $('strip');
-const pageCount    = $('pageCount');
-const uplProgress  = $('uplProgress');
-const uplBar       = $('uplBar');
-const uplLabel     = $('uplLabel');
-const uplPct       = $('uplPct');
-const actionRow    = $('actionRow');
-const workspace    = $('workspace');
-const lensSection  = $('lensSection');
-const lensGrid     = $('lensGrid');
+const uploadArea    = $('uploadArea');
+const fileInput     = $('fileInput');
+const stripWrap     = $('stripWrap');
+const strip         = $('strip');
+const pageCount     = $('pageCount');
+const progressBlock = $('progressBlock');
+const actionRow     = $('actionRow');
+const workspace     = $('workspace');
+const lensSection   = $('lensSection');
+const lensGrid      = $('lensGrid');
 const resultsSection = $('resultsSection');
-const textArea     = $('textArea');
-const allTextarea  = $('allTextarea');
+const textArea      = $('textArea');
+const allTextarea   = $('allTextarea');
+const uploadBanner  = $('uploadBanner');
+const bannerText    = $('bannerText');
+const retryFailedBtn = $('retryFailedBtn');
+
+// ══════════════════════════════════════════
+// PROGRESS HELPERS
+// ══════════════════════════════════════════
+function showProgress() { progressBlock.classList.add('show'); }
+function hideProgress() { progressBlock.classList.remove('show'); }
+
+function setSplitProgress(cur, total) {
+  const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
+  $('splitBar').style.width = pct + '%';
+  $('splitPct').textContent = pct + '%';
+  $('splitDetail').textContent = total > 0 ? `${t('pageWord')} ${cur} / ${total}` : '';
+  // dim upload phase while splitting
+  $('uploadPhase').classList.toggle('dim-phase', cur < total);
+}
+
+function setUploadProgress(cur, total, hasErrors) {
+  const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
+  $('uploadBar').style.width = pct + '%';
+  $('uploadPct').textContent = pct + '%';
+  $('uploadDetail').textContent = total > 0 ? `${cur} / ${total}` : '';
+  $('uploadBar').classList.toggle('error', hasErrors && cur === total);
+  $('splitPhase').classList.remove('dim-phase');
+  $('uploadPhase').classList.remove('dim-phase');
+}
+
+function resetProgress() {
+  setSplitProgress(0, 0);
+  setUploadProgress(0, 0, false);
+}
+
+// ══════════════════════════════════════════
+// UPLOAD STATUS BANNER
+// ══════════════════════════════════════════
+function updateBanner() {
+  const errors = state.pages.filter(p => p.status === 'error');
+  const ready  = state.pages.filter(p => p.status === 'ready' || p.status === 'done');
+  const total  = state.pages.length;
+
+  if (total === 0) { uploadBanner.classList.remove('show'); return; }
+
+  if (errors.length === 0 && ready.length === total) {
+    uploadBanner.className = 'upload-status-banner show banner-ok';
+    bannerText.textContent = t('allUploadComplete');
+    retryFailedBtn.classList.add('hidden');
+    setTimeout(() => uploadBanner.classList.remove('show'), 4000);
+    return;
+  }
+
+  if (errors.length > 0) {
+    uploadBanner.className = 'upload-status-banner show banner-err';
+    bannerText.textContent = t('uploadFailedSome', { n: errors.length, total });
+    retryFailedBtn.classList.remove('hidden');
+    retryFailedBtn.classList.add('has-errors');
+    $('retryBtnTxt').textContent = t('retryN', { n: errors.length });
+    return;
+  }
+
+  uploadBanner.classList.remove('show');
+}
 
 // ══════════════════════════════════════════
 // THEME + LANGUAGE
@@ -1541,228 +1108,152 @@ const themeColorMeta = $('themeColorMeta');
 const themeOrder = ['dark', 'light', 'milki'];
 const langOrder = ['eb', 'en'];
 const themeUi = {
-  dark: {
-    icon:
-      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/>' +
-      '</svg>',
-    title: 'Dark theme active',
-    color: '#0f172a',
-  },
-  light: {
-    icon:
-      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<circle cx="12" cy="12" r="4"/>' +
-      '<path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>' +
-      '</svg>',
-    title: 'Light theme active',
-    color: '#eef3fb',
-  },
-  milki: {
-    icon:
-      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<path d="M12 2.5c3.5 4.5 6.5 7.7 6.5 11A6.5 6.5 0 1 1 5.5 13.5c0-3.3 3-6.5 6.5-11z"/>' +
-      '</svg>',
-    title: 'Milki theme active',
-    color: '#f8f3e5',
-  },
+  dark:  { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/></svg>', title: 'Dark theme', color: '#0f172a' },
+  light: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>', title: 'Light theme', color: '#eef3fb' },
+  milki: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.5 4.5 6.5 7.7 6.5 11A6.5 6.5 0 1 1 5.5 13.5c0-3.3 3-6.5 6.5-11z"/></svg>', title: 'Milki theme', color: '#f8f3e5' },
 };
 const langUi = {
-  eb: { btn: 'EB', title: 'Language: English + Bangla mixed' },
-  en: { btn: 'EN', title: 'Language: Full English' },
+  eb: { btn: 'EB', title: 'English + Bangla' },
+  en: { btn: 'EN', title: 'Full English' },
 };
+
+// ══════════════════════════════════════════
+// i18n — all strings
+// ══════════════════════════════════════════
 const i18n = {
   eb: {
-    chipFree: 'Free',
-    chipNoApi: 'No API',
-    how1Title: 'Upload করুন',
-    how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
-    how2Title: 'Upload',
-    how2Text: '“সব Upload করুন” চাপলে প্রতিটি page imgbb.com এ upload হবে — free shareable link তৈরি হবে',
-    how3Title: 'Google Lens',
-    how3Text: 'সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে',
-    how4Title: 'Copy & Paste',
-    how4Text: 'Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন',
+    chipFree: 'Free', chipNoApi: 'No API',
+    how1Title: 'Upload করুন', how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
+    how2Title: 'Auto-Upload', how2Text: 'প্রতিটি page upload হবে — link তৈরি হবে',
+    how3Title: 'Google Lens', how3Text: 'সেই link দিয়ে Google Lens খুলবে',
+    how4Title: 'Copy & Paste', how4Text: 'Lens থেকে text copy করে এখানে paste করুন',
     uploadTitle: 'ছবি বা PDF drag করুন / click করুন',
-    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে',
-    stripLabelPrefix: 'পেজ:',
-    stripLabelSuffix: 'টি লোড হয়েছে',
-    copyAllBtnTxt: 'সব Text Copy',
-    copyAllMergedBtnTxt: 'Merged Copy',
-    copyClipBtnTxt: 'কপি',
-    downloadBtnTxt: '.txt Download',
-    previewTitleTxt: '👁 Preview — পেজ',
-    prevPageTitle: 'আগের পেজ',
-    nextPageTitle: 'পরের পেজ',
+    uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে',
+    stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
+    copyAllBtnTxt: 'সব Text Copy', copyAllMergedBtnTxt: 'Merged Copy',
+    copyClipBtnTxt: 'কপি', downloadBtnTxt: '.txt Download',
+    previewTitleTxt: '👁 Preview — পেজ', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
     previewEmptyTxt: 'কোনো পেজ select করুন',
     textTitleTxt: '✏️ Text — পেজ',
-    textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন — Google Lens খুলবে — সেখান থেকে text select করে copy করুন — এখানে paste করুন।',
+    textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন।',
     lensSectionTitleTxt: 'Lens — সব পেজ',
-    lensSectionSubTxt: 'প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ সাধারণত একবারে ১টা tab খোলা ভালো কাজ করে।',
+    lensSectionSubTxt: 'প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ একবারে ১টা tab খোলা ভালো।',
     allExtractedTitleTxt: '📋 All Extracted Text',
-    allCopyBtnTxt: 'Copy All',
-    allDlBtnTxt: 'Download',
+    allCopyBtnTxt: 'Copy All', allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
-    ftrKicker1: '',
-    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
-    ftrBadge1: 'Free Workflow',
-    ftrBadge2: 'Page-wise OCR',
-    ftrBadge3: 'Lens-based',
-    ftrKicker2: 'Developer',
-    ftrText2: 'Undergraduate Student',
+    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages.',
+    ftrBadge1: 'Free Workflow', ftrBadge2: 'Page-wise OCR', ftrBadge3: 'Lens-based',
+    ftrKicker2: 'Developer', ftrText2: 'Undergraduate Student',
     ftrOwnerLine1: 'Khulna University of Engineering & Technology (KUET)',
     ftrOwnerLine2: 'Department of Energy Science and Engineering',
     ftrOwnerLine3: 'Owner of A3KM Studio',
-    ftrLinkEmail: 'Email',
-    ftrLinkPortfolioMid: '',
-    ftrKicker3: 'Connect',
-    ftrTitle3: 'Social & Community',
+    ftrKicker3: 'Connect', ftrTitle3: 'Social & Community',
     ftrText3: 'Follow updates and reach out for collaboration or project ideas.',
     ftrBottomText: '© Textriva • OCR tool developed by Md Akhinoor Islam',
-    ftrBottomContact: 'Contact',
     ftrBottomPortfolio: 'Websites & Tools',
-    ftrBottomStudio: 'A3KM Studio',
     helpModalTitle: 'দ্রুত গাইড',
-    helpStep1: '<strong>ছবি বা PDF দিন।</strong> PDF হলে প্রতিটা পেজ আলাদা হয়ে যাবে।',
-    helpStep2: '<strong>“সব Upload করুন”</strong> চাপুন। প্রতিটা পেজ imgbb.com এ যাবে এবং একটা public link তৈরি হবে।',
-    helpStep3: '<strong>“Lens-এ সব খুলুন”</strong> চাপুন। প্রতিটা পেজের জন্য Google Lens আলাদা ট্যাবে খুলবে।',
-    helpStep4: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, তারপর এখানে ফিরে এসে পেস্ট করুন।',
-    helpStep5: '<strong>“Save & Next”</strong> চাপুন। পরের পেজে যাবে, শেষে সব টেক্সট একসাথে পাবেন।',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> ট্যাবগুলো খোলা রাখলে দ্রুত কাজ হয়। Lens নিজেই টেক্সট হাইলাইট করে — শুধু "Copy text" দিন।',
+    helpStep1: '<strong>ছবি বা PDF দিন।</strong> PDF হলে প্রতিটা পেজ আলাদা হয়ে যাবে।',
+    helpStep2: '<strong>Auto-upload হবে।</strong> Failed হলে "Retry" button আসবে।',
+    helpStep3: '<strong>Lens button চাপুন।</strong> প্রতিটা পেজের জন্য Google Lens আলাদা ট্যাবে খুলবে।',
+    helpStep4: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, তারপর এখানে পেস্ট করুন।',
+    helpStep5: '<strong>"Save & Next"</strong> চাপুন। পরের পেজে যাবে।',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> imgbb.com block হলে VPN বা অন্য network থেকে চেষ্টা করুন।',
     helpOk: 'বুঝেছি ✓',
-    pageWord: 'পেজ',
-    doneWord: 'done',
+    pageWord: 'পেজ', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
     pageBlock: '=== পেজ {num} — {name} ===',
-    statusPending: '⏳ Pending',
-    statusUploading: '⬆️ Upload',
-    statusReady: '✅ Ready',
-    statusDone: '✓ Done',
-    statusError: '❌ Error',
-    lpcDone: '✓ Done',
-    lpcOpen: '🔍 Open Lens',
-    pdfLoading: '📄 PDF loading: {name}',
-    pdfLoaded: '✅ {total} pages loaded from PDF',
+    statusPending: '⏳ Pending', statusUploading: '⬆️ Upload',
+    statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
+    lpcDone: '✓ Done', lpcOpen: '🔍 Lens', lpcRetry: '↺ Retry',
+    pdfLoading: '📄 PDF loading: {name}', pdfLoaded: '✅ {total} pages loaded',
     pdfError: 'PDF load error: {error}',
     pageUploaded: '✅ পেজ {num} uploaded!',
-    pageUploadFailed: '❌ পেজ {num} upload failed: {error}',
-    allUploadedAlready: 'সব pages already uploaded! Lens বাটন চাপুন।',
-    uploadingPage: 'Uploading পেজ {num} / {total}...',
-    uploadingIdle: 'Uploading...',
+    pageUploadFailed: '❌ পেজ {num} failed: {error}',
+    allUploadedAlready: 'সব pages already uploaded!',
     allUploadComplete: '✅ সব pages upload complete!',
-    uploadFirst: '⬆️ আগে "সব Upload করুন" চাপুন!',
-    popupBlocked: '🚫 Popup blocked! Browser এ popup allow করুন তারপর আবার চেষ্টা করুন।',
-    lensOpened: '🔍 পেজ {num} Google Lens এ খুলেছে! Text copy করে এখানে paste করুন।',
-    mobileLensNote: '📱 Mobile mode: একবারে ১টা Lens tab খুলবে। পরেরগুলো grid এর Lens button থেকে খুলুন।',
-    lensOpeningAll: '🚀 {count}টি পেজ Lens এ খুলছে!',
-    pastedOk: '✓ Paste হয়েছে!',
-    pasteManual: 'Ctrl+V দিয়ে manually paste করুন',
-    copyFailed: 'Copy করা যায়নি! Browser permission দিন।',
-    pageSaved: '✅ পেজ {num} saved!',
-    allPagesDone: '🎉 সব pages complete!',
+    uploadFailedSome: '❌ {n}/{total} pages upload failed — retry করুন',
+    retryN: '↺ Retry {n} টি',
+    splitPhaseLabel: '📄 PDF splitting',
+    uploadPhaseLabel: '☁️ Uploading',
+    popupBlocked: '🚫 Popup blocked! Browser এ popup allow করুন।',
+    lensOpened: '🔍 পেজ {num} Lens এ খুলেছে!',
+    pastedOk: '✓ Paste হয়েছে!', pasteManual: 'Ctrl+V দিয়ে paste করুন',
+    copyFailed: 'Copy করা যায়নি!',
+    pageSaved: '✅ পেজ {num} saved!', allPagesDone: '🎉 সব pages complete!',
     noText: 'কোনো text নেই!',
-    copiedAllText: '✓ সব text copied!',
-    copiedMergedText: '✓ merged text copied!',
-    copied: '✓ Copied!',
+    copiedAllText: '✓ সব text copied!', copiedMergedText: '✓ merged text copied!', copied: '✓ Copied!',
     clearConfirm: 'সব pages মুছে ফেলবেন?',
     pasteReminder: '💡 Text paste হয়েছে — "Save & Next" চাপুন',
+    retryingPage: '↺ পেজ {num} retry করছে...',
+    retryComplete: '✅ Retry complete!',
   },
   en: {
-    chipFree: 'Free',
-    chipNoApi: 'No API',
-    how1Title: 'Upload',
-    how1Text: 'Upload image (JPG/PNG/WEBP) or PDF — PDFs are split page by page.',
-    how2Title: 'Upload',
-    how2Text: 'Click “Upload All” to send each page to imgbb.com and get a free shareable link.',
-    how3Title: 'Google Lens',
-    how3Text: 'The link opens in Google Lens, which extracts text automatically.',
-    how4Title: 'Copy & Paste',
-    how4Text: 'Copy text from Lens and paste it here — collect all pages together.',
+    chipFree: 'Free', chipNoApi: 'No API',
+    how1Title: 'Upload', how1Text: 'Upload image or PDF — PDFs are split page by page.',
+    how2Title: 'Upload', how2Text: 'Each page uploads automatically. Failed pages can be retried.',
+    how3Title: 'Google Lens', how3Text: 'The link opens in Google Lens for text extraction.',
+    how4Title: 'Copy & Paste', how4Text: 'Copy text from Lens and paste it here.',
     uploadTitle: 'Drag image or PDF here / click to browse',
     uploadSubNote: 'PDF pages are processed separately · large PDFs may be slower',
-    stripLabelPrefix: 'Pages:',
-    stripLabelSuffix: 'loaded',
-    copyAllBtnTxt: 'Copy All Text',
-    copyAllMergedBtnTxt: 'Merged Copy',
-    copyClipBtnTxt: 'Copy',
-    downloadBtnTxt: '.txt Download',
-    previewTitleTxt: '👁 Preview — Page',
-    prevPageTitle: 'Previous page',
-    nextPageTitle: 'Next page',
+    stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
+    copyAllBtnTxt: 'Copy All Text', copyAllMergedBtnTxt: 'Merged Copy',
+    copyClipBtnTxt: 'Copy', downloadBtnTxt: '.txt Download',
+    previewTitleTxt: '👁 Preview — Page', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
     previewEmptyTxt: 'Select a page to preview',
     textTitleTxt: '✏️ Text — Page',
-    textPlaceholder: 'Copy text from Google Lens and paste it here (Ctrl+V)...\n\nOr click the "Lens" button above, open Google Lens, copy selected text, then paste here.',
+    textPlaceholder: 'Copy text from Google Lens and paste here (Ctrl+V)...\n\nOr click the "Lens" button above.',
     lensSectionTitleTxt: 'Lens — All Pages',
-    lensSectionSubTxt: 'Each page has its own Lens button. On mobile, opening one tab at a time usually works best.',
+    lensSectionSubTxt: 'Each page has its own Lens button. On mobile, one tab at a time works best.',
     allExtractedTitleTxt: '📋 All Extracted Text',
-    allCopyBtnTxt: 'Copy All',
-    allDlBtnTxt: 'Download',
-    allTextareaPlaceholder: 'All extracted text across pages will appear here...',
-    ftrKicker1: '',
-    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.',
-    ftrBadge1: 'Free Workflow',
-    ftrBadge2: 'Page-wise OCR',
-    ftrBadge3: 'Lens-based',
-    ftrKicker2: 'Developer',
-    ftrText2: 'Undergraduate Student',
+    allCopyBtnTxt: 'Copy All', allDlBtnTxt: 'Download',
+    allTextareaPlaceholder: 'All extracted text appears here...',
+    ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages.',
+    ftrBadge1: 'Free Workflow', ftrBadge2: 'Page-wise OCR', ftrBadge3: 'Lens-based',
+    ftrKicker2: 'Developer', ftrText2: 'Undergraduate Student',
     ftrOwnerLine1: 'Khulna University of Engineering & Technology (KUET)',
     ftrOwnerLine2: 'Department of Energy Science and Engineering',
     ftrOwnerLine3: 'Owner of A3KM Studio',
-    ftrLinkEmail: 'Email',
-    ftrLinkPortfolioMid: '',
-    ftrKicker3: 'Connect',
-    ftrTitle3: 'Social & Community',
+    ftrKicker3: 'Connect', ftrTitle3: 'Social & Community',
     ftrText3: 'Follow updates and reach out for collaboration or project ideas.',
     ftrBottomText: '© Textriva • OCR tool developed by Md Akhinoor Islam',
-    ftrBottomContact: 'Contact',
     ftrBottomPortfolio: 'Websites & Tools',
-    ftrBottomStudio: 'A3KM Studio',
     helpModalTitle: 'Quick guide',
-    helpStep1: '<strong>Upload an image or PDF.</strong> PDFs are split into pages automatically.',
-    helpStep2: '<strong>Select “Upload All”.</strong> Each page is uploaded to imgbb.com and a public link is created.',
-    helpStep3: '<strong>Select “Open all in Lens”.</strong> Google Lens opens one page per tab.',
-    helpStep4: '<strong>In the Lens tab,</strong> select the text, copy it, then return here and paste.',
-    helpStep5: '<strong>Select “Save & Next”.</strong> Repeat until all pages are done; the full text is compiled below.',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Keep Lens tabs open to move faster. Lens highlights text for you — just use “Copy text”.',
+    helpStep1: '<strong>Upload an image or PDF.</strong> PDFs split into pages automatically.',
+    helpStep2: '<strong>Auto-upload runs.</strong> A "Retry" button appears for any failed pages.',
+    helpStep3: '<strong>Click Lens.</strong> Google Lens opens one page per tab.',
+    helpStep4: '<strong>In the Lens tab,</strong> select the text, copy it, then paste here.',
+    helpStep5: '<strong>Click "Save & Next".</strong> Repeat for all pages.',
+    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> If imgbb.com is blocked by your ISP, try a VPN or different network.',
     helpOk: 'Got it ✓',
-    pageWord: 'page',
-    doneWord: 'done',
+    pageWord: 'page', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
     pageBlock: '=== Page {num} — {name} ===',
-    statusPending: '⏳ Pending',
-    statusUploading: '⬆️ Uploading',
-    statusReady: '✅ Ready',
-    statusDone: '✓ Done',
-    statusError: '❌ Error',
-    lpcDone: '✓ Done',
-    lpcOpen: '🔍 Open Lens',
-    pdfLoading: '📄 PDF loading: {name}',
-    pdfLoaded: '✅ {total} pages loaded from PDF',
+    statusPending: '⏳ Pending', statusUploading: '⬆️ Uploading',
+    statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
+    lpcDone: '✓ Done', lpcOpen: '🔍 Open Lens', lpcRetry: '↺ Retry upload',
+    pdfLoading: '📄 Loading PDF: {name}', pdfLoaded: '✅ {total} pages loaded',
     pdfError: 'PDF load error: {error}',
     pageUploaded: '✅ Page {num} uploaded!',
-    pageUploadFailed: '❌ Page {num} upload failed: {error}',
-    allUploadedAlready: 'All pages are already uploaded. Click Lens.',
-    uploadingPage: 'Uploading page {num} / {total}...',
-    uploadingIdle: 'Uploading...',
-    allUploadComplete: '✅ All pages uploaded successfully!',
-    uploadFirst: '⬆️ Click "Upload All" first!',
-    popupBlocked: '🚫 Popup blocked! Allow popups in your browser and try again.',
-    lensOpened: '🔍 Page {num} opened in Google Lens! Copy text and paste it here.',
-    mobileLensNote: '📱 Mobile mode: one Lens tab opens at a time. Open the rest from the grid.',
-    lensOpeningAll: '🚀 Opening {count} pages in Lens!',
-    pastedOk: '✓ Pasted!',
-    pasteManual: 'Use Ctrl+V to paste manually',
-    copyFailed: 'Copy failed. Allow clipboard permissions.',
-    pageSaved: '✅ Page {num} saved!',
-    allPagesDone: '🎉 All pages completed!',
+    pageUploadFailed: '❌ Page {num} failed: {error}',
+    allUploadedAlready: 'All pages already uploaded!',
+    allUploadComplete: '✅ All pages uploaded!',
+    uploadFailedSome: '❌ {n} of {total} pages failed — click Retry',
+    retryN: '↺ Retry {n}',
+    splitPhaseLabel: '📄 PDF splitting',
+    uploadPhaseLabel: '☁️ Uploading',
+    popupBlocked: '🚫 Popup blocked! Allow popups in your browser.',
+    lensOpened: '🔍 Page {num} opened in Lens!',
+    pastedOk: '✓ Pasted!', pasteManual: 'Use Ctrl+V to paste',
+    copyFailed: 'Copy failed.',
+    pageSaved: '✅ Page {num} saved!', allPagesDone: '🎉 All pages done!',
     noText: 'No text available!',
-    copiedAllText: '✓ All text copied!',
-    copiedMergedText: '✓ Merged text copied!',
-    copied: '✓ Copied!',
-    clearConfirm: 'Do you want to clear all pages?',
+    copiedAllText: '✓ All text copied!', copiedMergedText: '✓ Merged text copied!', copied: '✓ Copied!',
+    clearConfirm: 'Clear all pages?',
     pasteReminder: '💡 Text pasted — click "Save & Next"',
+    retryingPage: '↺ Retrying page {num}...',
+    retryComplete: '✅ Retry complete!',
   },
 };
 let currentLang = 'eb';
@@ -1773,139 +1264,59 @@ function t(key, vars = {}) {
   return Object.entries(vars).reduce((out, [k, v]) => out.replaceAll(`{${k}}`, String(v)), base);
 }
 
-function readSaved(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function saveSetting(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // ignore storage errors
-  }
-}
-
-function clearWorkspace() {
-  state.pages = [];
-  state.current = 0;
-  resultsSection.classList.add('hidden');
-  $('statsChip').classList.add('hidden');
-  renderAll();
-}
+function readSaved(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function saveSetting(key, value) { try { localStorage.setItem(key, value); } catch {} }
 
 function syncThemeButton() {
   const theme = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
   html.dataset.theme = theme;
-  if (themeBtnIcon) {
-    themeBtnIcon.innerHTML = themeUi[theme].icon;
-  }
+  if (themeBtnIcon) themeBtnIcon.innerHTML = themeUi[theme].icon;
   themeBtn.title = themeUi[theme].title;
-  themeBtn.setAttribute('aria-label', themeUi[theme].title);
   themeColorMeta?.setAttribute('content', themeUi[theme].color);
 }
 function syncLangButton() {
-  currentLang = langUi[currentLang] ? currentLang : 'eb';
-  if (langBtnBadge) {
-    langBtnBadge.textContent = langUi[currentLang].btn;
-  }
+  if (langBtnBadge) langBtnBadge.textContent = langUi[currentLang].btn;
   langBtn.title = langUi[currentLang].title;
-  langBtn.setAttribute('aria-label', langUi[currentLang].title);
 }
 function applyLanguage() {
   html.lang = currentLang === 'en' ? 'en' : 'bn';
-  $('chipFree').textContent = t('chipFree');
-  $('chipNoApi').textContent = t('chipNoApi');
-  $('how1Title').textContent = t('how1Title');
-  $('how1Text').textContent = t('how1Text');
-  $('how2Title').textContent = t('how2Title');
-  $('how2Text').textContent = t('how2Text');
-  $('how3Title').textContent = t('how3Title');
-  $('how3Text').textContent = t('how3Text');
-  $('how4Title').textContent = t('how4Title');
-  $('how4Text').textContent = t('how4Text');
-  $('uploadTitle').textContent = t('uploadTitle');
-  $('uploadSubNote').textContent = t('uploadSubNote');
-  $('stripLabelPrefix').textContent = t('stripLabelPrefix');
-  $('stripLabelSuffix').textContent = t('stripLabelSuffix');
-  $('copyAllBtnTxt').textContent = t('copyAllBtnTxt');
-  $('copyAllMergedBtnTxt').textContent = t('copyAllMergedBtnTxt');
-  $('copyClipBtnTxt').textContent = t('copyClipBtnTxt');
-  $('copyClipBtn').title = t('copyClipBtnTxt');
-  $('copyClipBtn').setAttribute('aria-label', t('copyClipBtnTxt'));
-  $('downloadBtnTxt').textContent = t('downloadBtnTxt');
-  $('previewTitleTxt').textContent = t('previewTitleTxt');
+  const ids = ['chipFree','chipNoApi','how1Title','how1Text','how2Title','how2Text','how3Title','how3Text','how4Title','how4Text',
+    'uploadTitle','uploadSubNote','stripLabelPrefix','stripLabelSuffix','copyAllBtnTxt','copyAllMergedBtnTxt',
+    'copyClipBtnTxt','downloadBtnTxt','previewTitleTxt','previewEmptyTxt','textTitleTxt',
+    'lensSectionTitleTxt','lensSectionSubTxt','allExtractedTitleTxt','allCopyBtnTxt','allDlBtnTxt',
+    'ftrText1','ftrBadge1','ftrBadge2','ftrBadge3','ftrKicker2','ftrText2','ftrOwnerLine1','ftrOwnerLine2','ftrOwnerLine3',
+    'ftrKicker3','ftrTitle3','ftrText3','ftrBottomText','ftrBottomPortfolio'];
+  ids.forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
+  const htmlIds = ['helpStep1','helpStep2','helpStep3','helpStep4','helpStep5','helpTip'];
+  htmlIds.forEach(id => { const el = $(id); if (el) el.innerHTML = t(id); });
+  $('helpModalTitle').textContent = t('helpModalTitle');
+  $('helpOk').textContent = t('helpOk');
   $('prevPage').title = t('prevPageTitle');
   $('nextPage').title = t('nextPageTitle');
-  $('previewEmptyTxt').textContent = t('previewEmptyTxt');
-  $('textTitleTxt').textContent = t('textTitleTxt');
   textArea.placeholder = t('textPlaceholder');
-  $('lensSectionTitleTxt').textContent = ` ${t('lensSectionTitleTxt')}`;
-  $('lensSectionSubTxt').textContent = t('lensSectionSubTxt');
-  $('allExtractedTitleTxt').textContent = t('allExtractedTitleTxt');
-  $('allCopyBtnTxt').textContent = t('allCopyBtnTxt');
-  $('allDlBtnTxt').textContent = t('allDlBtnTxt');
   allTextarea.placeholder = t('allTextareaPlaceholder');
-  $('ftrKicker1').textContent = t('ftrKicker1');
-  $('ftrText1').textContent = t('ftrText1');
-  $('ftrBadge1').textContent = t('ftrBadge1');
-  $('ftrBadge2').textContent = t('ftrBadge2');
-  $('ftrBadge3').textContent = t('ftrBadge3');
-  $('ftrKicker2').textContent = t('ftrKicker2');
-  $('ftrText2').textContent = t('ftrText2');
-  $('ftrOwnerLine1').textContent = t('ftrOwnerLine1');
-  $('ftrOwnerLine2').textContent = t('ftrOwnerLine2');
-  $('ftrOwnerLine3').textContent = t('ftrOwnerLine3');
-  const ftrEmail = $('ftrLinkEmail');
-  if (ftrEmail) {
-    const ftrEmailLabel = t('ftrLinkEmail');
-    ftrEmail.setAttribute('aria-label', ftrEmailLabel);
-    ftrEmail.setAttribute('title', ftrEmailLabel);
-  }
-  $('ftrKicker3').textContent = t('ftrKicker3');
-  $('ftrTitle3').textContent = t('ftrTitle3');
-  $('ftrText3').textContent = t('ftrText3');
-  $('ftrBottomText').textContent = t('ftrBottomText');
-  $('ftrBottomContact').textContent = t('ftrBottomContact');
-  $('ftrBottomPortfolio').textContent = t('ftrBottomPortfolio');
-  $('ftrBottomStudio').textContent = t('ftrBottomStudio');
-  $('helpModalTitle').textContent = t('helpModalTitle');
-  $('helpStep1').innerHTML = t('helpStep1');
-  $('helpStep2').innerHTML = t('helpStep2');
-  $('helpStep3').innerHTML = t('helpStep3');
-  $('helpStep4').innerHTML = t('helpStep4');
-  $('helpStep5').innerHTML = t('helpStep5');
-  $('helpTip').innerHTML = t('helpTip');
-  $('helpOk').textContent = t('helpOk');
-  uplLabel.textContent = t('uploadingIdle');
+  $('lensSectionTitleTxt').textContent = ' ' + t('lensSectionTitleTxt');
+  $('splitPhaseLabel').textContent = t('splitPhaseLabel');
+  $('uploadPhaseLabel').textContent = t('uploadPhaseLabel');
   updateTxtStats();
   renderAll();
 }
+
 themeBtn.onclick = () => {
-  const current = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
-  const next = themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length];
-  html.dataset.theme = next;
-  saveSetting('textriva-theme', next);
-  syncThemeButton();
+  const cur = themeUi[html.dataset.theme] ? html.dataset.theme : 'dark';
+  const next = themeOrder[(themeOrder.indexOf(cur) + 1) % themeOrder.length];
+  html.dataset.theme = next; saveSetting('textriva-theme', next); syncThemeButton();
 };
 langBtn.onclick = () => {
   const next = langOrder[(langOrder.indexOf(currentLang) + 1) % langOrder.length];
-  currentLang = next;
-  saveSetting('textriva-lang', next);
-  syncLangButton();
-  applyLanguage();
+  currentLang = next; saveSetting('textriva-lang', next); syncLangButton(); applyLanguage();
 };
+
 const savedTheme = readSaved('textriva-theme');
-const defaultTheme = 'light';
-html.dataset.theme = themeUi[savedTheme] ? savedTheme : defaultTheme;
-if (!savedTheme) saveSetting('textriva-theme', defaultTheme);
+html.dataset.theme = themeUi[savedTheme] ? savedTheme : 'light';
+if (!savedTheme) saveSetting('textriva-theme', 'light');
 currentLang = langUi[readSaved('textriva-lang')] ? readSaved('textriva-lang') : 'eb';
-syncThemeButton();
-syncLangButton();
-applyLanguage();
+syncThemeButton(); syncLangButton(); applyLanguage();
 
 // ══════════════════════════════════════════
 // HELP MODAL
@@ -1913,25 +1324,25 @@ applyLanguage();
 $('helpBtn').onclick = () => $('helpModal').classList.add('open');
 $('helpClose').onclick = () => $('helpModal').classList.remove('open');
 $('helpOk').onclick = () => $('helpModal').classList.remove('open');
-$('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open') };
+$('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').classList.remove('open'); };
 
 // ══════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════
-function toast(msg, type='', dur=3000) {
+function toast(msg, type = '', dur = 3000) {
   const el = document.createElement('div');
-  el.className = `toast${type ? ' '+type : ''}`;
+  el.className = `toast${type ? ' ' + type : ''}`;
   el.textContent = msg;
   $('toasts').appendChild(el);
-  setTimeout(() => { el.classList.add('out'); setTimeout(()=>el.remove(), 400) }, dur);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, dur);
 }
 
 // ══════════════════════════════════════════
-// UPLOAD HANDLER
+// FILE HANDLING
 // ══════════════════════════════════════════
-uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('over') });
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('over'); });
 uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('over'));
-uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('over'); handleFiles(e.dataTransfer.files) });
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('over'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 async function handleFiles(files) {
@@ -1939,10 +1350,7 @@ async function handleFiles(files) {
   let clearedForPdf = false;
   for (const file of arr) {
     if (file.type === 'application/pdf') {
-      if (!clearedForPdf) {
-        clearWorkspace();
-        clearedForPdf = true;
-      }
+      if (!clearedForPdf) { clearWorkspace(); clearedForPdf = true; }
       await loadPdf(file);
     } else if (file.type.startsWith('image/')) {
       addPage(file.name, file, URL.createObjectURL(file));
@@ -1955,11 +1363,15 @@ async function handleFiles(files) {
 
 async function loadPdf(file) {
   toast(t('pdfLoading', { name: file.name }), '', 2000);
+  showProgress();
+  setSplitProgress(0, 1); // show activity immediately
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: buf }).promise;
     const total = pdf.numPages;
     for (let i = 1; i <= total; i++) {
+      setSplitProgress(i - 1, total);
+      $('splitDetail').textContent = `${t('pageWord')} ${i} / ${total} rendering...`;
       const page = await pdf.getPage(i);
       const vp = page.getViewport({ scale: 2.0 });
       const canvas = document.createElement('canvas');
@@ -1967,20 +1379,32 @@ async function loadPdf(file) {
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
       addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob));
+      setSplitProgress(i, total);
     }
+    setSplitProgress(total, total);
     toast(t('pdfLoaded', { total }), 'ok');
-  } catch(e) {
+  } catch (e) {
     toast(t('pdfError', { error: e.message }), 'err');
+    hideProgress();
   }
 }
 
 function addPage(name, blob, url) {
   const id = Math.random().toString(36).slice(2);
-  state.pages.push({ id, name, blob, url, status:'pending', remoteUrl:'', text:'' });
+  state.pages.push({ id, name, blob, url, status: 'pending', remoteUrl: '', text: '' });
+}
+
+function clearWorkspace() {
+  state.pages = []; state.current = 0;
+  resultsSection.classList.add('hidden');
+  $('statsChip').classList.add('hidden');
+  uploadBanner.classList.remove('show');
+  resetProgress(); hideProgress();
+  renderAll();
 }
 
 // ══════════════════════════════════════════
-// RENDER ALL
+// RENDER
 // ══════════════════════════════════════════
 function renderAll() {
   const has = state.pages.length > 0;
@@ -1989,7 +1413,6 @@ function renderAll() {
   workspace.classList.toggle('hidden', !has);
   lensSection.classList.toggle('hidden', !has);
   if (!has) return;
-
   pageCount.textContent = state.pages.length;
   renderStrip();
   renderLensGrid();
@@ -2001,7 +1424,7 @@ function renderStrip() {
   strip.innerHTML = '';
   state.pages.forEach((pg, i) => {
     const el = document.createElement('div');
-    el.className = `page-thumb${i === state.current ? ' active' : ''}${pg.status === 'done' ? ' done' : ''}${pg.status === 'uploading' ? ' uploading' : ''}`;
+    el.className = `page-thumb${i === state.current ? ' active' : ''}${pg.status === 'done' ? ' done' : ''}${pg.status === 'uploading' ? ' uploading' : ''}${pg.status === 'error' ? ' error' : ''}`;
     el.dataset.i = i;
     el.innerHTML = `
       <img class="pt-img" src="${pg.url}" alt="page ${i+1}"/>
@@ -2014,39 +1437,44 @@ function renderStrip() {
     `;
     el.addEventListener('click', e => {
       if (e.target.classList.contains('pt-remove')) return;
-      state.current = i;
-      renderAll();
+      state.current = i; renderAll();
     });
     el.querySelector('.pt-remove').addEventListener('click', e => {
       e.stopPropagation();
       state.pages.splice(i, 1);
-      if (state.current >= state.pages.length) state.current = Math.max(0, state.pages.length-1);
+      if (state.current >= state.pages.length) state.current = Math.max(0, state.pages.length - 1);
       renderAll();
     });
     strip.appendChild(el);
   });
-  // scroll active into view
   const active = strip.querySelector('.active');
-  if (active) active.scrollIntoView({ inline:'nearest', behavior:'smooth' });
+  if (active) active.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
 }
 
 function renderLensGrid() {
   lensGrid.innerHTML = '';
   state.pages.forEach((pg, i) => {
     const el = document.createElement('div');
-    el.className = `lens-page-card${i === state.current ? ' active-page' : ''}${pg.status === 'done' ? ' card-done' : ''}`;
+    const isError = pg.status === 'error';
+    el.className = `lens-page-card${i === state.current ? ' active-page' : ''}${pg.status === 'done' ? ' card-done' : ''}${isError ? ' card-error' : ''}`;
     el.id = `lpc-${pg.id}`;
     const canLens = pg.status === 'ready' || pg.status === 'done';
-    const btnClass = pg.status === 'done' ? 'done-btn' : '';
+    let btnClass = '', btnLabel = t('lpcOpen');
+    if (pg.status === 'done') { btnClass = 'done-btn'; btnLabel = t('lpcDone'); }
+    if (isError) { btnClass = 'retry-btn'; btnLabel = t('lpcRetry'); }
     el.innerHTML = `
       <div class="lpc-num">PAGE ${i+1}</div>
       <div class="lpc-name" title="${pg.name}">${pg.name}</div>
       <div class="lpc-status ${pg.status}">${statusLabel(pg.status)}</div>
-      <button class="lpc-btn ${btnClass}" data-i="${i}" ${!canLens ? 'disabled' : ''}>
-        ${pg.status === 'done' ? t('lpcDone') : t('lpcOpen')}
+      <button class="lpc-btn ${btnClass}" data-i="${i}" ${(!canLens && !isError) ? 'disabled' : ''}>
+        ${btnLabel}
       </button>
     `;
-    el.querySelector('.lpc-btn').addEventListener('click', () => openLens(i));
+    const btn = el.querySelector('.lpc-btn');
+    btn.addEventListener('click', () => {
+      if (isError) { retryPage(i); }
+      else { openLens(i); }
+    });
     lensGrid.appendChild(el);
   });
 }
@@ -2056,29 +1484,28 @@ function renderWorkspace() {
   if (!pg) return;
   $('previewPageNum').textContent = state.current + 1;
   $('textPageNum').textContent = state.current + 1;
-
-  // preview image
   $('previewImgWrap').innerHTML = `<img src="${pg.url}" alt="page ${state.current+1}" style="max-width:100%;max-height:480px;object-fit:contain"/>`;
-
-  // textarea
   textArea.value = pg.text || '';
+  // Update lens button state
+  const lensBtn = $('lensCurrentBtn');
+  if (pg.status === 'error') {
+    lensBtn.textContent = '↺ Retry Upload';
+    lensBtn.onclick = () => retryPage(state.current);
+  } else {
+    lensBtn.textContent = '🔍 Lens';
+    lensBtn.onclick = () => openLens(state.current);
+  }
   updateTxtStats();
 }
 
 function updateTxtStats() {
-  const textVal = textArea.value;
-  const words = textVal.trim() ? textVal.trim().split(/\s+/).length : 0;
-  $('txtStats').textContent = t('txtStats', { chars: textVal.length, words });
+  const v = textArea.value;
+  const words = v.trim() ? v.trim().split(/\s+/).length : 0;
+  $('txtStats').textContent = t('txtStats', { chars: v.length, words });
 }
 
 function statusLabel(s) {
-  return {
-    pending: t('statusPending'),
-    uploading: t('statusUploading'),
-    ready: t('statusReady'),
-    done: t('statusDone'),
-    error: t('statusError'),
-  }[s] || s;
+  return { pending: t('statusPending'), uploading: t('statusUploading'), ready: t('statusReady'), done: t('statusDone'), error: t('statusError') }[s] || s;
 }
 
 function updateStats() {
@@ -2086,9 +1513,7 @@ function updateStats() {
   const chip = $('statsChip');
   chip.classList.remove('hidden');
   chip.textContent = `${done}/${state.pages.length} ${t('doneWord')}`;
-
-  // results section
-  const texts = state.pages.map((p,i)=>p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean);
+  const texts = state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean);
   if (texts.length) {
     resultsSection.classList.remove('hidden');
     const full = texts.join('\n\n');
@@ -2107,10 +1532,8 @@ function updateStats() {
 }
 
 // ══════════════════════════════════════════
-// IMAGE UPLOAD — via /api/upload proxy (no CORS issues)
-// blob → base64 → POST /api/upload → imgbb.com (server-side)
+// IMAGE UPLOAD — /api/upload → imgbb (server-side, no CORS)
 // ══════════════════════════════════════════
-
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -2127,7 +1550,7 @@ async function compressBlob(blob, maxKB = 3500) {
     const url = URL.createObjectURL(blob);
     img.onload = () => {
       URL.revokeObjectURL(url);
-      const scale = blob.size > 8*1024*1024 ? 0.55 : blob.size > 5*1024*1024 ? 0.72 : 0.85;
+      const scale = blob.size > 8 * 1024 * 1024 ? 0.55 : blob.size > 5 * 1024 * 1024 ? 0.72 : 0.85;
       const canvas = document.createElement('canvas');
       canvas.width = Math.round(img.width * scale);
       canvas.height = Math.round(img.height * scale);
@@ -2139,110 +1562,142 @@ async function compressBlob(blob, maxKB = 3500) {
   });
 }
 
-async function uploadImage(blob) {
-  const compressed = await compressBlob(blob);
-  const b64 = await blobToBase64(compressed);
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image: b64 }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Server error ${res.status}`);
+// Exponential backoff retry for upload
+async function uploadImageWithRetry(blob, maxAttempts = 3) {
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const compressed = await compressBlob(blob);
+      const b64 = await blobToBase64(compressed);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: b64 }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Server error ${res.status}`);
+      }
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Upload failed');
+      return data.url;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts) {
+        // exponential backoff: 1s, 2s, 4s
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+      }
+    }
   }
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || 'Upload failed');
-  return data.url;
+  throw lastErr;
 }
 
 async function uploadPage(i) {
   const pg = state.pages[i];
   if (!pg || pg.status === 'ready' || pg.status === 'done') return;
   pg.status = 'uploading';
-  renderStrip();
-  renderLensGrid();
+  renderStrip(); renderLensGrid();
   try {
-    const url = await uploadImage(pg.blob);
+    const url = await uploadImageWithRetry(pg.blob);
     pg.remoteUrl = url;
     pg.status = 'ready';
-    toast(t('pageUploaded', { num: i+1 }), 'ok', 2000);
-  } catch(e) {
+    toast(t('pageUploaded', { num: i + 1 }), 'ok', 2000);
+  } catch (e) {
     pg.status = 'error';
     pg.remoteUrl = '';
-    toast(t('pageUploadFailed', { num: i+1, error: e.message }), 'err', 4000);
-    console.error('Upload error page', i+1, e);
+    toast(t('pageUploadFailed', { num: i + 1, error: e.message }), 'err', 4000);
   }
-  renderStrip();
-  renderLensGrid();
+  renderStrip(); renderLensGrid();
+  if (state.current === i) renderWorkspace();
   updateStats();
 }
 
-async function uploadAllPages() {
-  const pending = state.pages.filter(p => p.status === 'pending' || p.status === 'error');
-  if (!pending.length) { toast(t('allUploadedAlready'), 'ok'); return }
-  uplProgress.classList.add('show');
+async function uploadAllPages(onlyErrors = false) {
+  if (state.uploading) return;
+  const targets = state.pages.filter((p, i) => {
+    if (onlyErrors) return p.status === 'error';
+    return p.status === 'pending' || p.status === 'error';
+  });
+  if (!targets.length) { toast(t('allUploadedAlready'), 'ok'); return; }
+
+  state.uploading = true;
+  showProgress();
+  uploadBanner.classList.remove('show');
+
   let done = 0;
-  for (let i = 0; i < state.pages.length; i++) {
-    const pg = state.pages[i];
-    if (pg.status !== 'pending' && pg.status !== 'error') { done++; continue; }
-    uplLabel.textContent = t('uploadingPage', { num: i+1, total: state.pages.length });
-    const pct = Math.round((done/state.pages.length)*100);
-    uplBar.style.width = pct + '%';
-    uplPct.textContent = pct + '%';
+  const total = state.pages.length;
+  const toProcess = state.pages.map((p, i) => ({ p, i })).filter(({ p }) => onlyErrors ? p.status === 'error' : (p.status === 'pending' || p.status === 'error'));
+
+  for (const { p, i } of toProcess) {
+    $('uploadPhaseLabel').textContent = t('uploadPhaseLabel') + ` — ${t('pageWord')} ${i + 1}`;
     await uploadPage(i);
     done++;
-    uplBar.style.width = Math.round((done/state.pages.length)*100) + '%';
-    uplPct.textContent = Math.round((done/state.pages.length)*100) + '%';
+    const uploaded = state.pages.filter(x => x.status === 'ready' || x.status === 'done').length;
+    const errors   = state.pages.filter(x => x.status === 'error').length;
+    setUploadProgress(uploaded + errors, total, errors > 0);
   }
-  uplProgress.classList.remove('show');
-  uplLabel.textContent = t('uploadingIdle');
-  uplBar.style.width = '0%';
-  uplPct.textContent = '0%';
-  toast(t('allUploadComplete'), 'ok');
+
+  state.uploading = false;
+  $('uploadPhaseLabel').textContent = t('uploadPhaseLabel');
+
+  const finalErrors = state.pages.filter(p => p.status === 'error').length;
+  if (finalErrors === 0) {
+    toast(t('allUploadComplete'), 'ok');
+    hideProgress();
+  } else {
+    toast(t('uploadFailedSome', { n: finalErrors, total }), 'warn', 5000);
+  }
+  updateBanner();
 }
 
+// Per-page retry from lens grid
+async function retryPage(i) {
+  const pg = state.pages[i];
+  if (!pg || pg.status === 'uploading') return;
+  toast(t('retryingPage', { num: i + 1 }), '', 2000);
+  pg.status = 'pending';
+  renderStrip(); renderLensGrid();
+  showProgress();
+  await uploadPage(i);
+  hideProgress();
+  updateBanner();
+  if (state.pages.filter(p => p.status === 'error').length === 0) {
+    toast(t('retryComplete'), 'ok');
+  }
+}
+
+// Retry all failed button
+retryFailedBtn.onclick = () => uploadAllPages(true);
 
 // ══════════════════════════════════════════
-// GOOGLE LENS OPEN
+// GOOGLE LENS
 // ══════════════════════════════════════════
 function openLens(i) {
   const pg = state.pages[i];
   if (!pg) return;
   if (!pg.remoteUrl) {
-    toast(t('uploadFirst'), 'err', 3000);
+    toast(t('pageUploadFailed', { num: i + 1, error: 'not uploaded yet' }), 'err', 3000);
     return;
   }
-  // Google Lens URL with image URL parameter — direct URL load
   const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(pg.remoteUrl)}`;
-  const win = isMobileDevice()
+  const win = isMobile()
     ? window.open(lensUrl, '_blank')
-    : window.open(lensUrl, `lens_page_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
-  if (!win) {
-    // Popup blocked fallback
-    toast(t('popupBlocked'), 'err', 5000);
-    return;
-  }
-  state.current = i;
-  renderAll();
-  toast(t('lensOpened', { num: i+1 }), 'ok', 4000);
+    : window.open(lensUrl, `lens_pg_${i+1}`, 'width=1200,height=820,scrollbars=yes,resizable=yes');
+  if (!win) { toast(t('popupBlocked'), 'err', 5000); return; }
+  state.current = i; renderAll();
+  toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
 }
 
 // ══════════════════════════════════════════
 // WORKSPACE INTERACTIONS
 // ══════════════════════════════════════════
-$('prevPage').onclick = () => {
-  if (state.current > 0) { state.current--; renderAll() }
-};
-$('nextPage').onclick = () => {
-  if (state.current < state.pages.length-1) { state.current++; renderAll() }
-};
+$('prevPage').onclick = () => { if (state.current > 0) { state.current--; renderAll(); } };
+$('nextPage').onclick = () => { if (state.current < state.pages.length - 1) { state.current++; renderAll(); } };
 
 textArea.addEventListener('input', () => {
   const pg = state.pages[state.current];
   if (pg) pg.text = textArea.value;
-  updateTxtStats();
-  updateStats();
+  updateTxtStats(); updateStats();
 });
 
 $('pasteClipBtn').onclick = async () => {
@@ -2251,28 +1706,17 @@ $('pasteClipBtn').onclick = async () => {
     textArea.value = clipText;
     textArea.dispatchEvent(new Event('input'));
     toast(t('pastedOk'), 'ok', 2000);
-  } catch {
-    toast(t('pasteManual'), '', 2000);
-  }
+  } catch { toast(t('pasteManual'), '', 2000); }
 };
 
 $('copyClipBtn').onclick = async () => {
   const text = textArea.value;
-  if (!text.trim()) {
-    toast(t('noText'), '', 2000);
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(text);
-    toast(t('copied'), 'ok', 2000);
-  } catch {
-    toast(t('copyFailed'), '', 2000);
-  }
+  if (!text.trim()) { toast(t('noText'), '', 2000); return; }
+  try { await navigator.clipboard.writeText(text); toast(t('copied'), 'ok', 2000); }
+  catch { toast(t('copyFailed'), '', 2000); }
 };
 
 $('quickSaveBtn').onclick = () => $('saveTxtBtn').click();
-
-$('lensCurrentBtn').onclick = () => openLens(state.current);
 
 $('clearTxtBtn').onclick = () => {
   textArea.value = '';
@@ -2283,98 +1727,69 @@ $('saveTxtBtn').onclick = () => {
   const pg = state.pages[state.current];
   if (!pg) return;
   pg.text = textArea.value.trim();
-  pg.status = pg.text ? 'done' : pg.status;
-  toast(t('pageSaved', { num: state.current+1 }), 'ok', 2000);
-  if (state.current < state.pages.length-1) {
-    state.current++;
-    renderAll();
-  } else {
-    renderAll();
-    toast(t('allPagesDone'), 'ok', 3000);
-  }
+  if (pg.text) pg.status = 'done';
+  toast(t('pageSaved', { num: state.current + 1 }), 'ok', 2000);
+  if (state.current < state.pages.length - 1) { state.current++; renderAll(); }
+  else { renderAll(); toast(t('allPagesDone'), 'ok', 3000); }
 };
 
 // ══════════════════════════════════════════
 // COPY / DOWNLOAD
 // ══════════════════════════════════════════
 async function copyText(txt) {
-  try {
-    await navigator.clipboard.writeText(txt);
-    return true;
-  } catch {
-    // fallback
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch {
     const ta = document.createElement('textarea');
-    ta.value = txt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    return true;
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); return true;
   }
 }
-
 function buildAllText() {
-  return state.pages
-    .map((p,i)=> p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null)
-    .filter(Boolean)
-    .join('\n\n');
+  return state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean).join('\n\n');
 }
-
 function buildMergedText() {
-  return state.pages
-    .map(p => (p.text || '').trim())
-    .filter(Boolean)
-    .join('\n\n');
+  return state.pages.map(p => (p.text || '').trim()).filter(Boolean).join('\n\n');
 }
 
 $('copyAllBtn').onclick = async () => {
   const fullText = buildAllText();
-  if (!fullText) { toast(t('noText'), 'err'); return }
-  await copyText(fullText);
-  toast(t('copiedAllText'), 'ok');
+  if (!fullText) { toast(t('noText'), 'err'); return; }
+  await copyText(fullText); toast(t('copiedAllText'), 'ok');
 };
-
 $('copyAllMergedBtn').onclick = async () => {
-  const mergedText = buildMergedText();
-  if (!mergedText) { toast(t('noText'), 'err'); return }
-  await copyText(mergedText);
-  toast(t('copiedMergedText'), 'ok');
+  const m = buildMergedText();
+  if (!m) { toast(t('noText'), 'err'); return; }
+  await copyText(m); toast(t('copiedMergedText'), 'ok');
 };
-
 $('downloadBtn').onclick = () => {
   const fullText = buildAllText();
-  if (!fullText) { toast(t('noText'), 'err'); return }
+  if (!fullText) { toast(t('noText'), 'err'); return; }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([fullText], {type:'text/plain;charset=utf-8'}));
-  a.download = `textriva_${Date.now()}.txt`;
-  a.click();
+  a.href = URL.createObjectURL(new Blob([fullText], { type: 'text/plain;charset=utf-8' }));
+  a.download = `textriva_${Date.now()}.txt`; a.click();
 };
-
-$('allCopyBtn').onclick = async () => {
-  await copyText(allTextarea.value);
-  toast(t('copied'), 'ok');
-};
-
+$('allCopyBtn').onclick = async () => { await copyText(allTextarea.value); toast(t('copied'), 'ok'); };
 $('allDlBtn').onclick = () => {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([allTextarea.value], {type:'text/plain;charset=utf-8'}));
-  a.download = `textriva_all_${Date.now()}.txt`;
-  a.click();
+  a.href = URL.createObjectURL(new Blob([allTextarea.value], { type: 'text/plain;charset=utf-8' }));
+  a.download = `textriva_all_${Date.now()}.txt`; a.click();
 };
 
-
-// keyboard shortcuts
+// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowLeft') { if(state.current>0){state.current--;renderAll()} }
-  if (e.key === 'ArrowRight') { if(state.current<state.pages.length-1){state.current++;renderAll()} }
+  if (e.key === 'ArrowLeft') { if (state.current > 0) { state.current--; renderAll(); } }
+  if (e.key === 'ArrowRight') { if (state.current < state.pages.length - 1) { state.current++; renderAll(); } }
 });
 
-// Paste on textarea auto-save reminder
+// Paste reminder
 textArea.addEventListener('paste', () => {
-  setTimeout(() => {
-    toast(t('pasteReminder'), '', 3000);
-  }, 100);
+  setTimeout(() => toast(t('pasteReminder'), '', 3000), 100);
+});
+
+// btn-icon style (not in CSS to avoid duplication)
+document.querySelectorAll('.btn-icon').forEach(b => {
+  b.style.cssText = 'width:36px;height:36px;border-radius:var(--r-sm);background:var(--card);border:1px solid var(--line);color:var(--mid);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;';
 });
 </script>
 </body>
