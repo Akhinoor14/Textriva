@@ -35,7 +35,7 @@ vercel --prod
 3. Click "Google Lens এ সব খুলুন" → Lens opens per page
 4. In Lens: text auto-highlighted → copy it
 5. Paste back in Textriva → "Save & Next"
-6. Download or copy all text at the end.
+6. Download or copy all text at the end
 
 ---
 
