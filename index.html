@@ -900,7 +900,7 @@ a { color:inherit; text-decoration:none }
     <div class="how-card"><div class="how-num">1</div><div class="how-txt"><p id="how1Title">Upload করুন</p><small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small></div></div>
     <div class="how-card"><div class="how-num">2</div><div class="how-txt"><p id="how2Title">Direct Lens</p><small id="how2Text">Upload ছাড়াই Google Lens এ সরাসরি page পাঠানো যাবে — ISP block নেই</small></div></div>
     <div class="how-card"><div class="how-num">3</div><div class="how-txt"><p id="how3Title">Google Lens</p><small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small></div></div>
-    <div class="how-card"><div class="how-num">4</div><div class="how-txt"><p id="how4Title">Copy & Paste</p><small id="how4Text">Lens থেকে text copy করে এখানে paste করুন — সব page একসাথে পাবেন</small></div></div>
+    <div class="how-card"><div class="how-num">4</div><div class="how-txt"><p id="how4Title">K দিয়ে সব চালান</p><small id="how4Text">Upload করুন, Lens থেকে copy করুন, তারপর শুধু K চাপুন — সব page নিজে manage হবে</small></div></div>
   </div>
 
   <!-- UPLOAD ZONE -->
@@ -1106,7 +1106,7 @@ a { color:inherit; text-decoration:none }
       <div class="step-row"><div class="step-n">1</div><div class="step-t" id="helpStep1"><strong>Image বা PDF upload করুন।</strong> PDF হলে সব page আলাদা হয়ে যাবে।</div></div>
       <div class="step-row"><div class="step-n">2</div><div class="step-t" id="helpStep2"><strong>Lens button চাপুন।</strong> Upload ছাড়াই সরাসরি Google Lens এ যাবে।</div></div>
       <div class="step-row"><div class="step-n">3</div><div class="step-t" id="helpStep3"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div></div>
-      <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Ctrl+Enter</strong> বা <strong>"Save & Next"</strong> চাপুন। পরের page এ যাবে।</div></div>
+      <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Upload-এর পর K চাপুন।</strong> প্রথমবার প্রথম page-এর Lens খুলবে; Lens থেকে copy করে ফিরে এসে প্রতিবার K চাপলেই paste, save, next ও পরের Lens হবে।</div></div>
 
       <div class="help-shortcuts-title" id="helpShortcutsTitle">⌨️ Keyboard Shortcuts</div>
       <div class="shortcut-grid" id="helpShortcutsGrid">
@@ -1121,7 +1121,7 @@ a { color:inherit; text-decoration:none }
         <kbd>L</kbd>             <span id="sc1">Current page Google Lens এ খুলুন</span>
         <kbd>Ctrl+Enter</kbd>    <span id="sc2">Text save করুন, পরের page এ যান</span>
         <kbd>R</kbd>             <span id="scr">Clipboard paste → Save → Next (Lens ছাড়া)</span>
-        <kbd>Space</kbd> / <kbd>F</kbd> / <kbd>K</kbd> <span id="sc6">🔥 Paste + Save + Next + Lens — full auto workflow</span>
+        <kbd>K</kbd> <span id="sc6">🔥 Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow</span>
 
         <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Preview Zoom</div>
         <kbd>Z</kbd>             <span id="scz">Zoom in (বার বার চাপুন বাড়াতে)</span>
@@ -1165,6 +1165,9 @@ const state = {
   pages: [],
   current: 0,
   uploading: false,
+  sourceFileName: '',
+  kWorkflowStarted: false,
+  kWorkflowComplete: false,
 };
 const zoomState = { scale: 1, tx: 0, ty: 0, hiRes: false, rendering: false };
 const ZOOM_STEP = 0.4;
@@ -1291,7 +1294,7 @@ const i18n = {
     how1Title: 'Upload করুন', how1Text: 'Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে',
     how2Title: 'Direct Lens', how2Text: 'Upload ছাড়াই Lens এ সরাসরি পাঠানো হবে',
     how3Title: 'Google Lens', how3Text: 'সেই link দিয়ে Google Lens খুলবে',
-    how4Title: 'Copy & Paste', how4Text: 'Lens থেকে text copy করে এখানে paste করুন',
+    how4Title: 'K দিয়ে সব চালান', how4Text: 'Upload করুন, Lens থেকে copy করুন, তারপর শুধু K চাপুন — সব page নিজে manage হবে',
     uploadTitle: 'ছবি, PDF বা .txt drag করুন / click করুন',
     uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · আগের export করা .txt আবার import করা যাবে',
     stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
@@ -1320,7 +1323,7 @@ const i18n = {
     helpStep1: '<strong>ছবি বা PDF দিন।</strong> PDF হলে প্রতিটা পেজ আলাদা হয়ে যাবে।',
     helpStep2: '<strong>Lens button চাপুন।</strong> Upload ছাড়াই সরাসরি Google Lens এ যাবে।',
     helpStep3: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, এখানে পেস্ট করুন।',
-    helpStep4: '<strong>Ctrl+Enter</strong> বা <strong>"Save & Next"</strong> চাপুন। পরের পেজে যাবে।',
+    helpStep4: '<strong>Upload-এর পর K চাপুন।</strong> প্রথমবার প্রথম page-এর Lens খুলবে; Lens থেকে copy করে ফিরে এসে প্রতিবার K চাপলেই paste, save, next ও পরের Lens হবে।',
     helpShortcutsTitle: '⌨️ কীবোর্ড শর্টকাট',
     sc1: 'Current page Google Lens এ খুলুন',
     sc2: 'Text save করুন, পরের page এ যান',
@@ -1329,6 +1332,7 @@ const i18n = {
     sc5: 'Screenshot বা image clipboard থেকে add করুন',
     scc: 'Textarea এ selected text cut করুন (clipboard এ যাবে)',
     scr: 'Clipboard paste → Save → Next (Lens ছাড়া)',
+    sc6: '🔥 Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow',
     scz: 'Zoom in — বার বার চাপুন বাড়াতে',
     scx: 'Zoom reset — original size এ ফেরা',
     scpan: 'Zoom অবস্থায় image pan করুন',
@@ -1372,7 +1376,7 @@ const i18n = {
     how1Title: 'Upload', how1Text: 'Upload image or PDF — PDFs are split page by page.',
     how2Title: 'Direct Lens', how2Text: 'Pages open in Google Lens directly via base64 — no upload, no ISP block.',
     how3Title: 'Google Lens', how3Text: 'The link opens in Google Lens for text extraction.',
-    how4Title: 'Copy & Paste', how4Text: 'Copy text from Lens and paste it here.',
+    how4Title: 'Run it with K', how4Text: 'Upload, copy from Lens, then press K — every page is managed automatically.',
     uploadTitle: 'Drag image, PDF or .txt here / click to browse',
     uploadSubNote: 'PDF pages are processed separately · previously exported .txt files can be re-imported',
     stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
@@ -1401,7 +1405,7 @@ const i18n = {
     helpStep1: '<strong>Upload an image or PDF.</strong> PDFs split into pages automatically.',
     helpStep2: '<strong>Click Lens.</strong> Pages open in Google Lens directly — no upload needed.',
     helpStep3: '<strong>In the Lens tab,</strong> select the text, copy it, then paste here.',
-    helpStep4: '<strong>Press Ctrl+Enter</strong> or <strong>"Save & Next"</strong> to move to the next page.',
+    helpStep4: '<strong>Press K after uploading.</strong> The first press opens Lens for page 1; then each K pastes, saves, moves next, and opens the next Lens.',
     helpShortcutsTitle: '⌨️ Keyboard Shortcuts',
     sc1: 'Open current page in Google Lens',
     sc2: 'Save text and go to next page',
@@ -1410,6 +1414,7 @@ const i18n = {
     sc5: 'Paste screenshot or image from clipboard',
     scc: 'Cut selected text from textarea to clipboard',
     scr: 'Paste from clipboard → Save → Next (no Lens)',
+    sc6: '🔥 Open the first Lens after upload; then K runs paste + save + next + Lens',
     scz: 'Zoom in — press repeatedly to increase',
     scx: 'Zoom reset — return to original size',
     scpan: 'Pan image while zoomed',
@@ -1486,7 +1491,7 @@ function applyLanguage() {
   $('helpOk').textContent = t('helpOk');
   $('helpShortcutsTitle').textContent = t('helpShortcutsTitle');
   $('helpIspTitle').textContent = t('helpIspTitle');
-  ['sc1','sc2','sc3','sc4','sc5','scc','scr','scz','scx','scpan'].forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
+  ['sc1','sc2','sc3','sc4','sc5','scc','scr','sc6','scz','scx','scpan'].forEach(id => { const el = $(id); if (el) el.textContent = t(id); });
   $('prevPage').title = t('prevPageTitle');
   $('nextPage').title = t('nextPageTitle');
   textArea.placeholder = t('textPlaceholder');
@@ -1544,6 +1549,11 @@ fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 async function handleFiles(files) {
   const arr = Array.from(files);
+  if (arr.length) {
+    state.kWorkflowStarted = false;
+    state.kWorkflowComplete = false;
+  }
+  if (arr[0]) state.sourceFileName = arr[0].name;
   let clearedForPdf = false;
   for (const file of arr) {
     if (file.type === 'application/pdf') {
@@ -1662,6 +1672,8 @@ function addPage(name, blob, url, pdfPage) {
 
 function clearWorkspace() {
   state.pages = []; state.current = 0;
+  state.kWorkflowStarted = false;
+  state.kWorkflowComplete = false;
   resultsSection.classList.add('hidden');
   $('statsChip').classList.add('hidden');
   uploadBanner.classList.remove('show');
@@ -2241,6 +2253,11 @@ function buildAllText() {
 function buildMergedText() {
   return state.pages.map(p => (p.text || '').trim()).filter(Boolean).join('\n\n');
 }
+function getDownloadFileName() {
+  const sourceName = state.sourceFileName || 'textriva';
+  const baseName = sourceName.replace(/\.[^/.]+$/, '') || 'textriva';
+  return `${baseName}.txt`;
+}
 
 $('copyAllBtn').onclick = async () => {
   const fullText = buildAllText();
@@ -2257,13 +2274,13 @@ $('downloadBtn').onclick = () => {
   if (!fullText) { toast(t('noText'), 'err'); return; }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([fullText], { type: 'text/plain;charset=utf-8' }));
-  a.download = `textriva_${Date.now()}.txt`; a.click();
+  a.download = getDownloadFileName(); a.click();
 };
 $('allCopyBtn').onclick = async () => { await copyText(allTextarea.value); toast(t('copied'), 'ok'); };
 $('allDlBtn').onclick = () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([allTextarea.value], { type: 'text/plain;charset=utf-8' }));
-  a.download = `textriva_all_${Date.now()}.txt`; a.click();
+  a.download = getDownloadFileName(); a.click();
 };
 
 // ── Preview Zoom System ──────────────────────────────────────────────────────
@@ -2371,21 +2388,42 @@ document.addEventListener('keydown', e => {
       setTimeout(() => $('saveTxtBtn').click(), 200);
     }).catch(() => toast(t('pasteManual'), '', 2000));
   }
-  // K / F / Space → Paste + Save + Next + Auto Lens (full workflow shortcut)
-  if (e.key === 'k' || e.key === 'K' || e.key === 'f' || e.key === 'F' || e.key === ' ') {
+  // K → Start Lens on page 1, then paste + save + next + Auto Lens
+  if (e.key === 'k' || e.key === 'K') {
     e.preventDefault();
     if (!state.pages.length) return;
+    if (state.kWorkflowComplete) {
+      toast('✅ সব page-এর OCR শেষ — আর K চাপার দরকার নেই।', 'ok', 3000);
+      return;
+    }
+    if (!state.kWorkflowStarted) {
+      state.kWorkflowStarted = true;
+      state.current = 0;
+      renderAll();
+      toast('🔍 প্রথম page-এর Lens খুলছে — OCR copy করে ফিরে এসে K চাপুন।', 'ok', 3000);
+      openLens(0);
+      return;
+    }
     navigator.clipboard.readText().then(clipText => {
+      if (!clipText.trim()) {
+        toast('Clipboard-এ OCR text নেই — Lens থেকে text copy করে আবার K চাপুন।', 'warn', 3000);
+        return;
+      }
       // 1. Paste
       textArea.value = clipText;
       textArea.dispatchEvent(new Event('input'));
       // 2. Save current page
       const pg = state.pages[state.current];
       if (pg) { pg.text = textArea.value.trim(); if (pg.text) pg.status = 'done'; }
+      if (state.current >= state.pages.length - 1) {
+        state.kWorkflowComplete = true;
+        renderAll();
+        toast('🎉 শেষ page-ও save হয়েছে — সব OCR complete!', 'ok', 3500);
+        return;
+      }
       toast('✅ Paste → Save → Next → Lens 🚀', 'ok', 2000);
       // 3. Move to next page
-      const nextIdx = state.current < state.pages.length - 1 ? state.current + 1 : state.current;
-      state.current = nextIdx;
+      state.current++;
       renderAll();
       // 4. Auto open Lens for next page (small delay so renderAll settles)
       setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
@@ -2415,6 +2453,7 @@ document.addEventListener('paste', e => {
   const blob = imgItem.getAsFile();
   if (!blob) return;
   const name = `clipboard-${Date.now()}.png`;
+  state.sourceFileName = name;
   addPage(name, blob, URL.createObjectURL(blob));
   renderAll();
   uploadAllPages();
