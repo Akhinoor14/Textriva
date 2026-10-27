@@ -2355,7 +2355,9 @@ document.addEventListener('keydown', e => {
   }
   // Esc or M → close modal
   if (e.key === 'Escape' || e.key === 'm' || e.key === 'M') { $('helpModal').classList.remove('open'); return; }
-  if (inInput) return;
+  // K is intentionally global: file input or textarea focus must not block
+  // the OCR workflow shortcut after returning from Google Lens.
+  if (inInput && !(e.key === 'k' || e.key === 'K')) return;
   if (e.key === 'ArrowLeft')  {
     if (zoomState.scale > 1) { zoomState.tx += PAN_STEP; applyZoom(); return; }
     if (state.current > 0) { state.current--; renderAll(); }
