@@ -29,42 +29,46 @@ self.addEventListener('activate', e => {
 });
 
 // ── Fetch: network-first for the app shell, cache-first for static assets ──
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
+async function handleFetch(request) {
+  const url = new URL(request.url);
+  const isAppShell = request.mode === 'navigate' || url.pathname === '/index.html';
 
-  // Never intercept API calls
-  if (url.pathname.startsWith('/api/')) return;
+  if (isAppShell) {
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const clone = response.clone();
+        caches.open(CACHE).then(cache => cache.put(request, clone));
+      }
+      return response;
+    } catch {
+      return (await caches.match(request)) || caches.match('/index.html');
+    }
+  }
 
-  // External origins (Google Fonts, CDNs) — network only
-  if (url.origin !== self.location.origin) return;
+  const cached = await caches.match(request);
+  if (cached) return cached;
 
-  // Only handle GET
-  if (e.request.method !== 'GET') return;
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const clone = response.clone();
+      caches.open(CACHE).then(cache => cache.put(request, clone));
+    }
+    return response;
+  } catch {
+    return new Response('', { status: 503, statusText: 'Offline' });
+  }
+}
 
-  e.respondWith(
-    (e.request.mode === 'navigate' || url.pathname === '/index.html'
-      ? fetch(e.request)
-          .then(res => {
-            if (res && res.status === 200 && res.type !== 'opaque') {
-              const clone = res.clone();
-              caches.open(CACHE).then(c => c.put(e.request, clone));
-            }
-            return res;
-          })
-          .catch(() => caches.match(e.request).then(cached => cached || caches.match('/index.html')))
-      : caches.match(e.request).then(cached => {
-          if (cached) return cached;
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
 
-          return fetch(e.request)
-            .then(res => {
-              if (res && res.status === 200 && res.type !== 'opaque') {
-                const clone = res.clone();
-                caches.open(CACHE).then(c => c.put(e.request, clone));
-              }
-              return res;
-            })
-            .catch(() => new Response('', { status: 503, statusText: 'Offline' }));
-        })
-    )
-  );
+  if (
+    event.request.method !== 'GET' ||
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith('/api/')
+  ) return;
+
+  event.respondWith(handleFetch(event.request));
 });
