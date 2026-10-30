@@ -1,5 +1,5 @@
-// Textriva Service Worker — v1.3
-const CACHE = 'textriva-v4';
+// Textriva Service Worker — v1.6 (Phase 1: duplicate protection)
+const CACHE = 'textriva-v12';
 
 const SHELL = [
   '/',
