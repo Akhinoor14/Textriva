@@ -1,5 +1,5 @@
-// Textriva Service Worker — v1.6 (Phase 1: duplicate protection)
-const CACHE = 'textriva-v12';
+// Textriva Service Worker — v1.7 (Phase 9: share target + offline CDN cache)
+const CACHE = 'textriva-v15';
 
 const SHELL = [
   '/',
@@ -22,7 +22,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== 'textriva-share').map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -61,8 +61,47 @@ async function handleFetch(request) {
   }
 }
 
+// ── Web Share Target: POST /share-target → park the files in a cache, redirect to the app ──
+const SHARE_CACHE = 'textriva-share';
+async function handleShare(request) {
+  try {
+    const form = await request.formData();
+    const files = form.getAll('files').filter(f => f && typeof f === 'object' && 'size' in f);
+    const cache = await caches.open(SHARE_CACHE);
+    for (const k of await cache.keys()) await cache.delete(k);
+    let i = 0;
+    for (const f of files) {
+      await cache.put('/__share/' + (i++), new Response(f, { headers: { 'x-name': encodeURIComponent(f.name || 'shared'), 'content-type': f.type || 'application/octet-stream' } }));
+    }
+    return Response.redirect('/?shared=' + files.length, 303);
+  } catch (e) {
+    return Response.redirect('/', 303);
+  }
+}
+
+// CDN libraries (pdf.js, JSZip, Tesseract, fonts) are cached after the first online use so the app also starts offline.
+const CDN_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+async function handleCdn(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok || response.type === 'opaque') { const clone = response.clone(); caches.open(CACHE).then(c => c.put(request, clone)); }
+    return response;
+  } catch { return new Response('', { status: 503, statusText: 'Offline' }); }
+}
+
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  if (event.request.method === 'POST' && url.origin === self.location.origin && url.pathname === '/share-target') {
+    event.respondWith(handleShare(event.request));
+    return;
+  }
+  if (event.request.method === 'GET' && CDN_HOSTS.includes(url.hostname)) {
+    event.respondWith(handleCdn(event.request));
+    return;
+  }
 
   if (
     event.request.method !== 'GET' ||

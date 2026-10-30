@@ -19,8 +19,9 @@ export async function bootApp(opts) {
   w.fetch = async () => { throw new Error('no network in tests'); };
   let src = getModuleSource()
     .replace(/^import \* as pdfjs from [^\n]*\n/m, 'const pdfjs = { GlobalWorkerOptions: {} };\n')
+    .replace(/const GOOGLE_CLIENT_ID = '[^']*';/, opts.drive ? "const GOOGLE_CLIENT_ID = 'test-client';" : "const GOOGLE_CLIENT_ID = '';")
     // expose internals for the test
-    + '\n;window.__app = { state, openTextTools, undoBulk, saveNow, searchLibrary, runLibSearch, renderAll, openLib, localList, openLocalProject, toggleBookmark, gotoPage, applyTextChanges, resetWorkspaceState, newId, movePage, rotatePages, cropPages, splitSpreads, undoPageEdit, movePagesToProject, mergeProjectIntoCurrent, imgIO, setEnhance, lensCopyBlob, syncSig, openPageTools, setPageBlob, localLoad, cutPage };';
+    + '\n;window.__app = { state, openTextTools, undoBulk, saveNow, searchLibrary, runLibSearch, renderAll, openLib, localList, openLocalProject, toggleBookmark, gotoPage, applyTextChanges, resetWorkspaceState, newId, movePage, rotatePages, cropPages, splitSpreads, undoPageEdit, movePagesToProject, mergeProjectIntoCurrent, imgIO, setEnhance, lensCopyBlob, syncSig, openPageTools, setPageBlob, localLoad, cutPage, runOcr, ocrIO, pagesForOcr, sanitizeOcr, cleanOcrText, refreshFlags, openOcrDlg, hashStr, undoPage, ocrIsLowConf, gdrive, syncToDrive, openDriveProject, queueDriveSync, refreshDriveChip, planMerge, matchPagesForMerge, applyMerge, openSyncConflict, freeUpSpace, isFreeable, storageMeterHtml, deviceId, mergeProjectIntoCurrent, dbDeleteProject, planPdfPages, stripWindow, renderStrip, consumeSharedFiles, scanName, isOffline, handleFiles, STRIP_VIRT_MIN, PDF_WARN_PAGES };';
   w.eval(src);
   return w;
 }
@@ -29,7 +30,7 @@ export function addPages(w, texts, name) {
   const { state, newId } = w.__app;
   state.sourceFileName = name || 'book.pdf';
   state.projectId = newId();
-  state.proj = { createdAt: Date.now(), driveFolderId: null, driveMetaId: null, driveTextId: null, lastSig: '' };
+  state.proj = { createdAt: Date.now(), driveFolderId: null, driveMetaId: null, driveTextId: null, driveRev: '', lastSig: '' };
   state.pages.length = 0; state.current = 0;
   texts.forEach((t, i) => {
     const blob = new w.Blob([new Uint8Array([1, 2, 3, i])], { type: 'image/jpeg' });

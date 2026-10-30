@@ -438,3 +438,57 @@ npm test
 **Manual test (Phase 3 acceptance):** (1) Open a 10+ page PDF; rotate page 3 by 90°, press Lens on it → Lens receives the upright image. (2) Drag page 5 before page 2 (mouse), then on a phone long-press + drag; refresh → same order; open from Drive → same order. (3) Crop one page with the drawn rectangle and again with the sliders over pages `2-4`. (4) Split a two-page spread scan (also RTL); check text/bookmark stays on the first half; ↩ Undo restores. (5) Turn on *Enhance for Lens*, open Lens → text should be easier to read; the page preview stays unchanged. (6) Move pages `4-6` to a new project, open it, search a word from them in the Library; use *➕ Merge into open* to bring them back. (7) Edit a page while its upload is running → Lens must show the edited image.
 
 **Resume point:** next in §6 order is **Phase 7 — Replace imgbb with own temporary storage** (then Phase 6 auto-OCR, then Phases 8–10).
+
+
+---
+
+### ⛔ Phase 7 — Own temporary storage (R2) — **DROPPED by the owner (2026-10-30)**
+imgbb stays the primary image host. Nothing for Phase 7 is in the code. Do not add R2 unless the owner asks again.
+
+---
+
+### 🟢 Phase 6 — Optional OCR engine — **CODE COMPLETE (2026-10-30); manual browser test pending**
+
+**Code (`index.html`, block `PHASE 6 — OPTIONAL OCR ENGINE`, before Phase 3):** `ocrIO` seam (lazy Tesseract.js 5.1.1 from cdnjs, one worker per run), `runOcr(indices, opts)`, `pagesForOcr`, `sanitizeOcr`, dialog `openOcrDlg` (button `#ocrBtn`), `lowconf` flag in `refreshFlags`. Page field `ocr = {engine:'tesseract', conf, hash}` persisted everywhere `flags/reviewed` are (IndexedDB, Drive, JSON, ZIP backup). `vercel.json` CSP widened; `sw.js` → `textriva-v13`.
+
+**Deviations / not done:** vision-LLM engine NOT built (paid provider — ask owner first); engine choice is a per-device setting, not per project; `ocr` info expires automatically when the page text changes.
+
+**Checks:** `npm test` all pass (7 new tests in `tests/phase6.test.mjs`); `node --check` OK. **Not run in a real browser** — Tesseract itself (download of `ben` data, accuracy) is untested.
+
+**Manual test:** (1) Open a Bangla PDF, 🤖 Auto-OCR… → Start on 3 pages: first run downloads language data; text appears, ⚠️ on blurry pages. (2) Review → Redo with Lens → paste → ⚠️ gone. (3) Redo mode overwrites, ↩ Undo restores. (4) Reload / Library / Drive: confidence flag persists. (5) Stop button halts after the current page.
+
+**Resume point:** Phase 8 — Sync & multi-device hardening.
+
+
+---
+
+### 🟢 Phase 8 — Sync & multi-device hardening — **CODE COMPLETE (found already in the code at the start of the Phase 9 session; logged 2026-10-30); manual 2-browser test pending**
+
+**Code (`index.html`, block `PHASE 8 — SYNC HARDENING`):** `deviceId/newRev` (revision stamped in the Drive folder `appProperties`), pure `matchPagesForMerge/planMerge`, conflict detection inside `syncToDrive` (silent sync never overwrites; `state.syncConflict`), conflict dialog (`openSyncConflict`: Use Drive / Use this device / Merge page-by-page), `refreshDriveChip` (modes `conflict`, `reconnect`), silent token refresh (`scheduleTokenRefresh/silentTokenRefresh`), storage meter + `freeUpSpace` in the Library. `sw.js` → v14. 13 tests in `tests/phase8.test.mjs` against `_fakedrive.mjs` (incl. conflict scenario, no duplicate folder on network error, free-up-space round trip).
+
+**Deviation:** per-page incremental sync / `texts.json` split (optional in the plan) was **not** done.
+
+**Manual test (acceptance):** open the same Drive project in two browsers, edit page 1 in A and page 2 in B, let both sync → the second one shows ⚠️ Sync conflict; *Merge* keeps both edits with no data loss. Let the token expire → ☁️ Reconnect chip appears.
+
+---
+
+### 🟢 Phase 9 — PWA, mobile, performance — **CODE COMPLETE (2026-10-30); manual phone test pending**
+
+**Code (`index.html`, block `PHASE 9 — PWA, MOBILE, PERFORMANCE`, right after `loadPdf`; `sw.js` → `textriva-v15`; `site.webmanifest`):**
+- **Offline:** `isOffline()`, `online`/`offline` listeners (`onNetBack/onNetLost`), chip mode `offline`, `queueDriveSync` does nothing while offline (the unsynced signature keeps the queue implicit). SW now caches `cdnjs.cloudflare.com`, `fonts.googleapis.com`, `fonts.gstatic.com` GETs (cache-first) so the module's top-level pdf.js import no longer kills the app offline.
+- **Web Share Target:** manifest `share_target` (POST `/share-target`, multipart `files`); SW `handleShare` stores files in cache `textriva-share` (kept across SW upgrades) and 303-redirects to `/?shared=N`; page calls `consumeSharedFiles()` → `handleFiles`.
+- **Camera:** `#cameraBtn` + hidden `#cameraInput` (`capture="environment"`), files renamed `scan-<time>.jpg`.
+- **Large PDFs:** `loadPdf` renders sequentially, frees canvas + `page.cleanup()`, yields every `PDF_YIELD_EVERY` pages; `pdfPagesToLoad/planPdfPages` ask for a page range above `PDF_WARN_PAGES` (300).
+- **Virtualised strip:** `stripWindow()` (pure) + windowed `renderStrip()` with spacers from `STRIP_VIRT_MIN` (150) pages; below that the strip is unchanged. Thumbs got `loading="lazy" decoding="async"`.
+
+**Deviations / things to know (ask Mou if any should change):**
+1. **True lazy PDF rendering was not built.** Pages are still rendered up-front (one at a time, memory released each time) because every other feature expects a real image blob per page; making that on-demand would touch the whole page model. The range prompt above 300 pages is the safety valve instead.
+2. Web Share Target works only for the installed PWA on Android/Chrome (not iOS). If the SW is not active, `/share-target` 404s on the static host.
+3. Offline start depends on the first visit having been **online** (the SW caches CDN files lazily). Tesseract language data is cached by Tesseract itself, not by the SW.
+4. Thumbnail virtualisation, camera capture, share target and the memory behaviour were **not run in a real browser/phone** — only jsdom.
+
+**Checks:** `npm test` → **175/175** (8 new in `tests/phase9.test.mjs`); `node --check` on the module script and `sw.js` OK.
+
+**Manual test:** see README → "Performance test plan (300-page PDF)". Plus: share 3 photos from the gallery → pages appear; 📷 Scan page → new page appended; airplane mode → app still opens.
+
+**Resume point:** Phase 10 — Code health (split into ES modules, a11y, ARCHITECTURE.md, CONTRIBUTING.md). Run the full suite before and after; behaviour must stay identical.

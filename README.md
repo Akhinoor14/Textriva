@@ -164,3 +164,29 @@ Any change to a page image resets its Lens link, Drive file id and saved-blob fl
 
 See **TEXTRIVA_PLAN.md → §7 Progress Log** for the phase-by-phase changelog and
 where to resume work if you're handing this off to another AI/developer.
+
+
+## 🤖 Phase 6 — Optional Auto-OCR (Tesseract)
+
+- Button **🤖 Auto-OCR…** opens a dialog: page range, *Auto* (only pages without text) or *Redo* (overwrite, undoable), language (বাংলা+English / বাংলা / English).
+- **Google Lens stays the default**, and **imgbb stays the image host** — nothing changes unless you press Start.
+- Tesseract.js `5.1.1` is pinned and lazy-loaded from cdnjs only on first Start; the language data is fetched from `tessdata.projectnaptha.com` and cached by the browser. `vercel.json` CSP was widened for exactly this (`cdn.jsdelivr.net`, `tessdata.projectnaptha.com`, `'wasm-unsafe-eval'`).
+- Each OCR'd page stores `ocr = {engine, conf, hash}` (IndexedDB, Drive `project.json`, JSON/ZIP backups). Confidence below 70 gives the ⚠️ *Low OCR confidence* flag; after a run Review mode opens on those pages (→ **Redo with Lens**). If the text changes later, the OCR info stops applying (hash check).
+- **Not implemented:** the paid vision-LLM engine (needs a provider decision) and a per-project engine setting (the dialog remembers the last choice on this device).
+
+
+## ☁️ Sync hardening (Phase 8)
+
+- **Conflict detection:** every successful Drive sync stamps the folder with a revision (`device-id` + time). If another device saved first, silent auto-sync **pauses and never overwrites**; a **⚠️ Sync conflict** chip appears → dialog: *Use Drive* / *Use this device* / *Merge page by page* (one-sided edits merge automatically; pages edited on both sides ask which text to keep).
+- **Reconnect chip:** when the Google token expires, the app tries a silent refresh; if that needs a click, a **☁️ Reconnect** chip appears (only on a device that signed in before).
+- **Storage meter + Free up space** (Library): deletes the image blobs of *finished, Drive-synced* projects but keeps their text; opening such a project re-downloads the images from Drive.
+- Not done (marked optional in the plan): per-page incremental sync / split `texts.json` — `project.json` is still sent whole.
+
+## 📱 PWA, mobile & performance (Phase 9)
+
+- **Offline:** Library and editing already work from IndexedDB. The service worker now also caches the CDN libraries (pdf.js, JSZip, Tesseract, fonts) after their first online use, so the app **starts offline**. While offline the Drive chip shows **📴 Offline — sync queued**; auto-sync resumes when the browser fires `online` (a *Back online* toast).
+- **Web Share Target:** after installing the PWA on Android/Chrome, share images or a PDF from the gallery/Files app → **Textriva**. The service worker parks the files in a cache (`textriva-share`) and the app imports them on start. (iOS Safari does not support Web Share Target.)
+- **📷 Scan page:** opens the phone camera (`capture="environment"`); each photo is appended as a page named `scan-<time>.jpg`.
+- **Big PDFs:** pages are rendered **one at a time** (concurrency 1), each canvas is released straight after encoding, and the UI yields every 5 pages. Above **300 pages** the app asks: load all, or choose a range (e.g. `1-100, 150-200`). Constants: `PDF_WARN_PAGES`, `PDF_YIELD_EVERY`.
+- **Virtualised thumbnail strip:** from **150 pages** only the thumbnails near the viewport (±30) are in the DOM, with spacers keeping the scrollbar honest. Constants: `STRIP_VIRT_MIN`, `STRIP_OVERSCAN`, `STRIP_STEP`.
+- **Performance test plan (300-page PDF, mid-range phone):** (1) Chrome → install the PWA. (2) Open a 300-page PDF at 2× quality; watch Chrome task manager / `chrome://inspect` memory — it should stay roughly flat after the first ~10 pages and the tab must not reload. (3) Scroll the strip end-to-end: frame rate stays smooth and DOM thumbs ≤ ~140. (4) Try a 500-page file → the range prompt appears. (5) Airplane mode → reload → app opens, Library works, edit a page → chip says Offline; turn the network on → it syncs.

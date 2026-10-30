@@ -659,6 +659,18 @@ a { color:inherit; text-decoration:none }
 #exportDlg .dc-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.75rem; }
 #exportDlg .dc-actions button { min-height:44px; }
 /* Phase 3 — page tools */
+#syncDlg { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:1rem; }
+#syncDlg .tt-box { max-width:620px; max-height:90vh; overflow:auto; }
+#syncDlg .dc-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; align-items:center; }
+#syncDlg .dc-actions button, #syncDlg .tt-hdr button { min-height:44px; }
+#syncDlg .sc-row { display:flex; flex-direction:column; gap:.25rem; padding:.5rem 0; border-top:1px solid var(--line); }
+#syncDlg .sc-row label { display:flex; gap:.4rem; align-items:flex-start; min-height:44px; }
+#ocrDlg { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:1rem; }
+#ocrDlg .tt-box { max-width:520px; }
+#ocrDlg .ex-row { display:flex; gap:.6rem; align-items:center; margin:.5rem 0; flex-wrap:wrap; }
+#ocrDlg .ex-row input[type=text], #ocrDlg .ex-row select { flex:1; min-height:44px; min-width:9rem; background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:var(--r-sm); padding:0 .6rem; font:inherit; }
+#ocrDlg .dc-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; align-items:center; }
+#ocrDlg .dc-actions button, #ocrDlg .tt-hdr button { min-height:44px; }
 #ptDlg { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; padding:1rem; }
 #ptDlg .tt-box { max-width:560px; }
 #ptDlg .ex-row { display:flex; gap:.6rem; align-items:center; margin:.5rem 0; flex-wrap:wrap; }
@@ -1038,6 +1050,7 @@ a { color:inherit; text-decoration:none }
 
   <!-- UPLOAD ZONE -->
   <div class="upload-area" id="uploadArea" style="margin-top:1.25rem">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden/>
     <input type="file" id="fileInput" accept="image/*,.pdf,.txt,text/plain,.zip,.docx,.json" multiple/>
     <div class="upload-icon">📂</div>
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
@@ -1094,12 +1107,15 @@ a { color:inherit; text-decoration:none }
   <!-- ACTION ROW -->
   <div class="action-row hidden" id="actionRow">
     <button class="btn btn-primary" id="flowBtn" title="Space">⚡ <span id="flowBtnTxt">Auto Step (Space)</span></button>
+    <button class="btn btn-warning hidden" id="driveChip" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap" data-mode=""></button>
     <button class="btn btn-secondary" id="driveSaveBtn">☁️ <span id="driveSaveBtnTxt">Drive-এ Save</span></button>
     <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
     <button class="btn btn-secondary hidden" id="downloadBtn">💾 <span id="downloadBtnTxt">.txt Download</span></button>
     <button class="btn btn-secondary" id="exportBtn">⬇ <span id="exportBtnTxt">Export…</span></button>
     <button class="btn btn-secondary" id="textToolsBtn">🧹 <span id="textToolsBtnTxt">Text tools…</span></button>
     <button class="btn btn-secondary" id="pageToolsBtn">🛠 <span id="pageToolsBtnTxt">Page tools…</span></button>
+    <button class="btn btn-secondary" id="cameraBtn">📷 <span id="cameraBtnTxt">Scan page</span></button>
+    <button class="btn btn-secondary" id="ocrBtn">🤖 <span id="ocrBtnTxt">Auto-OCR…</span></button>
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
     <button class="btn btn-warning hidden" id="reviewBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">⚠️ <span id="reviewBtnTxt">Review</span></button>
     <button class="btn btn-warning hidden" id="retryActionBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryActionBtnTxt">Retry</span></button>
@@ -1803,7 +1819,7 @@ function saveNow() {
     id: p.id, projectId: pid, order: i, name: p.name, text: p.text || '',
     status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, driveFileId: p.driveFileId || null,
     hash: p.hash || null, phash: p.phash || null, possibleDupOf: p.possibleDupOf || null,
-    flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
+    ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
   }));
   // Phase 4: search index — rebuilt only when some page text changed (per-page word lists are cached on the page)
   const sSig = snap.map(x => x.text.length + ':' + hashStr(x.text)).join(',');
@@ -1815,6 +1831,7 @@ function saveNow() {
     createdAt: pr.createdAt || Date.now(), updatedAt: Date.now(),
     pageCount: snap.length, doneCount: snap.filter(s => s.status === 'done').length, current: state.current,
     driveFolderId: pr.driveFolderId || null, driveMetaId: pr.driveMetaId || null, driveTextId: pr.driveTextId || null,
+    driveRev: pr.driveRev || '', blobsFreed: false,   // Phase 8: last Drive revision seen; images present locally
     firstPageHash: snap[0]?.hash || null, // for Library-level duplicate-project detection
   };
   const write = async () => {
@@ -1893,7 +1910,7 @@ function pushRestoredPage(o) {
     remoteUrl: '', remoteAt: 0, text: o.text || '', pdfPage: null, txtOnly: !!o.txtOnly,
     driveFileId: o.driveFileId || null, blobSaved: !!o.blobSaved,
     hash: o.hash || null, phash: o.phash || null, possibleDupOf: o.possibleDupOf || null,
-    flags: Array.isArray(o.flags) ? o.flags : [], reviewed: !!o.reviewed,
+    ocr: sanitizeOcr(o.ocr), flags: Array.isArray(o.flags) ? o.flags : [], reviewed: !!o.reviewed,
     note: typeof o.note === 'string' ? o.note : '', bookmark: !!o.bookmark,
   });
 }
@@ -1904,16 +1921,20 @@ function afterProjectLoaded(startIdx) {
   renderAll();
 }
 
-async function openLocalProject(pid, pageIdx) {
+async function openLocalProject(pid, pageIdx) {   // eslint-disable-line complexity
   if (pid === state.projectId && state.pages.length) {
     if (pageIdx != null) { state.current = Math.max(0, Math.min(pageIdx, state.pages.length - 1)); renderAll(); }
     closeLib(); return;
   }
   await saveNow();
   const { proj, recs, blobs } = await localLoad(pid);
+  if (proj.blobsFreed && proj.driveFolderId) {   // Phase 8: images were freed from this device → bring them back from Drive
+    toast(L('☁️ ছবি Drive থেকে আনা হচ্ছে…', '☁️ Restoring images from Drive…'), '', 3000);
+    return openDriveProject(proj.driveFolderId, pageIdx != null ? pageIdx : (proj.current || 0));
+  }
   resetWorkspaceState();
   state.projectId = pid;
-  state.proj = { createdAt: proj.createdAt, driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, lastSig: '' };
+  state.proj = { createdAt: proj.createdAt, driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, driveRev: proj.driveRev || '', lastSig: '' };
   state.sourceFileName = proj.sourceFileName || proj.name;
   recs.forEach((r, i) => {
     if (!r.txtOnly && !blobs[i]?.blob) return;
@@ -1985,6 +2006,7 @@ async function gInit() {
         }
       } catch {}
       saveSetting('textriva-g-hint', gdrive.user?.email || '1');
+      scheduleTokenRefresh();
       refreshAcctUi();
       p?.res(gdrive.token);
     },
@@ -2071,13 +2093,14 @@ let _syncing = false, _dtimer = null;
 const syncSig = () => state.pages.map(p => p.id + (p.status === 'done' ? 'd' : 'p') + (p.reviewed ? 'r' : '') + (p.bookmark ? 'b' : '') + 'i' + (p.imgRev || 0) + hashStr(p.text || '') + hashStr(p.note || '')).join(',');
 
 function queueDriveSync() {
-  if (!GOOGLE_CLIENT_ID || _syncing || !state.proj?.driveFolderId || !driveValid()) return;
+  refreshDriveChip();
+  if (!GOOGLE_CLIENT_ID || _syncing || !state.proj?.driveFolderId || !driveValid() || state.syncConflict || isOffline()) return;
   if (state.proj.lastSig === syncSig()) return;
   clearTimeout(_dtimer);
   _dtimer = setTimeout(() => syncToDrive({ silent: true }), 8000);
 }
 
-async function syncToDrive({ silent = false } = {}) {
+async function syncToDrive({ silent = false, force = false } = {}) {
   if (!GOOGLE_CLIENT_ID) { openLib('drive'); return; }
   if (!state.pages.length) { if (!silent) toast(L('আগে কিছু page load করুন', 'Load some pages first'), '', 2000); return; }
   if (_syncing) return;
@@ -2089,9 +2112,25 @@ async function syncToDrive({ silent = false } = {}) {
     const root = await dRoot();
     const pr = state.proj;
     const folderName = `${projectName()} · ${state.projectId.slice(-4)}`;
+    let remoteRev = '';
     if (pr.driveFolderId) {
-      try { const info = await (await dfetch(`${DRIVE}/files/${pr.driveFolderId}?fields=id,trashed`)).json(); if (info.trashed) throw new Error('trashed'); }
-      catch { pr.driveFolderId = pr.driveMetaId = pr.driveTextId = null; state.pages.forEach(p => { p.driveFileId = null; }); }
+      try {
+        const info = await (await dfetch(`${DRIVE}/files/${pr.driveFolderId}?fields=id,trashed,appProperties`)).json();
+        if (info.trashed) throw new Error('trashed');
+        remoteRev = (info.appProperties && info.appProperties.rev) || '';
+      } catch (e) {
+        // Only a trashed / missing folder means "start a new one" — a network or auth hiccup must NOT create a duplicate folder.
+        if (!(e.message === 'trashed' || /Drive 404/.test(e.message))) throw e;
+        pr.driveFolderId = pr.driveMetaId = pr.driveTextId = null; pr.driveRev = ''; state.pages.forEach(p => { p.driveFileId = null; });
+      }
+    }
+    // Phase 8: someone else (another device/tab) wrote to Drive since we last synced → never overwrite silently
+    if (pr.driveFolderId && !force && remoteRev && remoteRev !== (pr.driveRev || '')) {
+      state.syncConflict = { remoteRev };
+      refreshDriveChip();
+      if (silent) toast(L('⚠️ Drive-এ অন্য কপি আছে — auto-sync থেমেছে', '⚠️ Drive has a newer copy — auto-sync paused'), 'warn', 6000);
+      else { _syncing = false; refreshDriveBtn(); await openSyncConflict(); }
+      return;
     }
     if (!pr.driveFolderId) {
       pr.driveFolderId = (await dMkdir(folderName, root, { textriva: 'project', pid: state.projectId })).id;
@@ -2111,7 +2150,7 @@ async function syncToDrive({ silent = false } = {}) {
     const sig = syncSig();
     const meta = {
       v: 1, app: 'textriva', name: projectName(), sourceFileName: state.sourceFileName || '', createdAt: pr.createdAt, updatedAt: Date.now(),
-      pages: state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, fileId: p.driveFileId || null, hash: p.hash || null, phash: p.phash || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark })),
+      pages: state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, fileId: p.driveFileId || null, hash: p.hash || null, phash: p.phash || null, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark })),
     };
     pr.driveMetaId = await dUpload({ name: 'project.json', parentId: folder, mime: 'application/json', blob: new Blob([JSON.stringify(meta)], { type: 'application/json' }), fileId: pr.driveMetaId });
     pr.driveTextId = await dUpload({ name: 'text.txt', parentId: folder, mime: 'text/plain', blob: new Blob([buildAllText()], { type: 'text/plain;charset=utf-8' }), fileId: pr.driveTextId });
@@ -2120,7 +2159,9 @@ async function syncToDrive({ silent = false } = {}) {
       for (const k of await dList(`'${folder}' in parents and trashed=false`, 'files(id)')) if (!keep.has(k.id)) await dPatch(k.id, { trashed: true }).catch(() => {});
     }
     const done = state.pages.filter(p => p.status === 'done').length;
-    await dPatch(folder, { name: folderName, appProperties: { textriva: 'project', pid: state.projectId, pages: String(state.pages.length), done: String(done) } });
+    const rev = newRev();
+    await dPatch(folder, { name: folderName, appProperties: { textriva: 'project', pid: state.projectId, pages: String(state.pages.length), done: String(done), rev, dev: deviceId() } });
+    pr.driveRev = rev; state.syncConflict = null;
     pr.lastSig = sig;
     _syncing = false;
     await saveNow();
@@ -2133,7 +2174,7 @@ async function syncToDrive({ silent = false } = {}) {
   }
 }
 
-async function openDriveProject(folderId) {
+async function openDriveProject(folderId, pageIdx) {
   await saveNow();
   const label0 = $('uploadPhaseLabel').textContent;
   try {
@@ -2143,27 +2184,35 @@ async function openDriveProject(folderId) {
     const metaFile = kids.find(k => k.name === 'project.json');
     if (!metaFile) throw new Error(L('project.json পাওয়া যায়নি', 'project.json not found'));
     const meta = await (await dfetch(`${DRIVE}/files/${metaFile.id}?alt=media`)).json();
+    const finfo = await (await dfetch(`${DRIVE}/files/${folderId}?fields=id,appProperties`)).json().catch(() => ({}));
     const textFile = kids.find(k => k.name === 'text.txt');
     const existing = (await localList().catch(() => [])).find(p => p.driveFolderId === folderId);
-    resetWorkspaceState();
-    state.projectId = existing?.id || newId();
-    state.proj = { createdAt: meta.createdAt || Date.now(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, lastSig: '' };
-    state.sourceFileName = meta.sourceFileName || meta.name || 'Untitled';
-    const total = meta.pages.length;
+    // Phase 8: download EVERYTHING first. If the network drops half-way nothing has been replaced yet
+    // (previously the workspace was reset first, and a later save could prune the local copy).
+    const total = meta.pages.length, got = [];
     for (let i = 0; i < total; i++) {
       const m = meta.pages[i];
       setUploadProgress(i, total, false, i + 1);
-      if (m.txtOnly) { pushRestoredPage({ name: m.name, text: m.text, txtOnly: true, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark }); continue; }
+      if (m.txtOnly) { got.push({ m, blob: null }); continue; }
       if (!m.fileId) continue;
-      const blob = await (await dfetch(`${DRIVE}/files/${m.fileId}?alt=media`)).blob();
-      pushRestoredPage({ name: m.name, text: m.text, status: m.status, blob, driveFileId: m.fileId, blobSaved: false, hash: m.hash || null, phash: m.phash || null, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
+      got.push({ m, blob: await (await dfetch(`${DRIVE}/files/${m.fileId}?alt=media`)).blob() });
+    }
+    resetWorkspaceState();
+    state.projectId = existing?.id || newId();
+    state.proj = { createdAt: meta.createdAt || Date.now(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, driveRev: (finfo.appProperties && finfo.appProperties.rev) || '', lastSig: '' };
+    state.sourceFileName = meta.sourceFileName || meta.name || 'Untitled';
+    state.syncConflict = null;
+    for (const { m, blob } of got) {
+      if (m.txtOnly) pushRestoredPage({ name: m.name, text: m.text, txtOnly: true, ocr: m.ocr, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
+      else pushRestoredPage({ name: m.name, text: m.text, status: m.status, blob, driveFileId: m.fileId, blobSaved: false, hash: m.hash || null, phash: m.phash || null, ocr: m.ocr, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
     }
     setUploadProgress(total, total, false, total);
     state.proj.lastSig = syncSig();
-    const startIdx = state.pages.findIndex(p => !p.txtOnly && !(p.text || '').trim());
+    const startIdx = pageIdx != null ? pageIdx : state.pages.findIndex(p => !p.txtOnly && !(p.text || '').trim());
     afterProjectLoaded(startIdx === -1 ? 0 : startIdx);
     closeLib();
     await saveNow();
+    refreshDriveChip();
     toast(L(`☁️ "${meta.name}" Drive থেকে খোলা হয়েছে`, `☁️ "${meta.name}" opened from Drive`), 'ok', 2500);
   } finally {
     hideProgress(); $('uploadPhaseLabel').textContent = label0;
@@ -2187,6 +2236,251 @@ async function trashDriveProject(folderId) {
     }
   } catch {}
 }
+
+// ══════════════════════════════════════════
+// PHASE 8 — SYNC HARDENING (conflict dialog, Reconnect chip + silent token refresh, storage meter, free up space)
+// Drive stays optional (GOOGLE_CLIENT_ID empty ⇒ everything here is inert). imgbb is not touched.
+// ══════════════════════════════════════════
+const LS_DEVICE = 'textriva-device-id';
+function deviceId() {
+  let d = readSaved(LS_DEVICE);
+  if (!d) { d = Math.random().toString(36).slice(2, 8); saveSetting(LS_DEVICE, d); }
+  return d;
+}
+const newRev = () => Date.now().toString(36) + '-' + deviceId();   // written to the Drive folder's appProperties after every successful sync
+
+// ── Merge helpers (pure) ──
+// Pairs local pages with Drive pages: same Drive file id first, then an unambiguous page name.
+function matchPagesForMerge(localPages, remotePages) {
+  const usedL = new Set(), usedR = new Set(), pairs = [];
+  remotePages.forEach((rp, ri) => {
+    if (!rp.fileId) return;
+    const li = localPages.findIndex((lp, i) => !usedL.has(i) && lp.driveFileId && lp.driveFileId === rp.fileId);
+    if (li >= 0) { usedL.add(li); usedR.add(ri); pairs.push({ li, ri }); }
+  });
+  remotePages.forEach((rp, ri) => {
+    if (usedR.has(ri)) return;
+    const sameR = remotePages.filter((x, i) => !usedR.has(i) && x.name === rp.name).length;
+    const cands = localPages.map((lp, i) => i).filter(i => !usedL.has(i) && localPages[i].name === rp.name);
+    if (sameR === 1 && cands.length === 1) { usedL.add(cands[0]); usedR.add(ri); pairs.push({ li: cands[0], ri }); }
+  });
+  return {
+    pairs: pairs.sort((a, b) => a.ri - b.ri),
+    localOnly: localPages.map((x, i) => i).filter(i => !usedL.has(i)),
+    remoteOnly: remotePages.map((x, i) => i).filter(i => !usedR.has(i)),
+  };
+}
+// kind: same | local (Drive has no text) | remote (this device has no text) | conflict (both differ)
+function planMerge(localPages, remotePages) {
+  const m = matchPagesForMerge(localPages, remotePages);
+  const rows = m.pairs.map(({ li, ri }) => {
+    const a = String(localPages[li].text || '').trim(), b = String(remotePages[ri].text || '').trim();
+    return { li, ri, kind: a === b ? 'same' : !b ? 'local' : !a ? 'remote' : 'conflict' };
+  });
+  return { rows, localOnly: m.localOnly, remoteOnly: m.remoteOnly };
+}
+
+// ── Sync state / chip ──
+state.syncConflict = null;
+function driveUnsynced() { return !!(state.proj && state.proj.driveFolderId && state.pages.length && state.proj.lastSig !== syncSig()); }
+function refreshDriveChip() {
+  const c = $('driveChip'); if (!c) return;
+  let mode = '';
+  if (GOOGLE_CLIENT_ID && state.proj && state.proj.driveFolderId) {
+    if (state.syncConflict) mode = 'conflict';
+    else if (isOffline() && driveUnsynced()) mode = 'offline';
+    else if (!driveValid() && driveUnsynced() && readSaved('textriva-g-hint')) mode = 'reconnect';   // only if this device signed in before
+  }
+  c.dataset.mode = mode;
+  c.classList.toggle('hidden', !mode);
+  if (mode === 'conflict') c.textContent = L('⚠️ Sync conflict — সমাধান করুন', '⚠️ Sync conflict — resolve');
+  else if (mode === 'reconnect') c.textContent = L('☁️ Reconnect', '☁️ Reconnect');
+  else if (mode === 'offline') c.textContent = L('📴 Offline — sync queued', '📴 Offline — sync queued');
+}
+let _tokTimer = null;
+function scheduleTokenRefresh() {
+  clearTimeout(_tokTimer);
+  _tokTimer = setTimeout(silentTokenRefresh, Math.max(30000, gdrive.exp - Date.now() - 3 * 60 * 1000));
+}
+async function silentTokenRefresh() {
+  if (!GOOGLE_CLIENT_ID || gdrive.pending) return;
+  try { await gRequest('none'); queueDriveSync(); } catch (e) { /* needs a click → Reconnect chip */ }
+  refreshDriveChip();
+}
+$('driveChip').onclick = async () => {
+  const mode = $('driveChip').dataset.mode;
+  try {
+    if (mode === 'conflict') await openSyncConflict();
+    else if (mode === 'offline') toast(L('Offline — ইন্টারনেট ফিরলে নিজে থেকে sync হবে', 'Offline — it will sync by itself when you are back online'), '', 3000);
+    else if (mode === 'reconnect') { await driveToken(); refreshDriveChip(); await syncToDrive({ silent: true }); refreshDriveChip(); }
+  } catch (e) { toast('❌ ' + e.message, 'err', 4000); }
+};
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDriveChip(); });
+window.addEventListener('focus', refreshDriveChip);
+
+// ── Conflict dialog ──
+async function fetchRemoteMeta() {
+  const pr = state.proj;
+  if (!pr || !pr.driveMetaId) throw new Error(L('Drive-এ project.json নেই', 'No project.json on Drive'));
+  return (await dfetch(`${DRIVE}/files/${pr.driveMetaId}?alt=media`)).json();
+}
+function closeSyncDlg() { const d = $('syncDlg'); if (d) d.remove(); }
+const clip80 = s => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > 80 ? s.slice(0, 80) + '…' : s; };
+
+async function openSyncConflict() {
+  const pr = state.proj;
+  if (!pr || !pr.driveFolderId) return;
+  closeSyncDlg();
+  const wrap = document.createElement('div');
+  wrap.id = 'syncDlg'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+  wrap.innerHTML = `<div class="tt-box"><div class="tt-hdr"><strong>⚠️ ${L('Sync conflict', 'Sync conflict')}</strong><button class="btn btn-secondary" data-sc="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div><div class="tt-hint" id="scBody">${L('Drive-এর কপি দেখা হচ্ছে…', 'Checking the Drive copy…')}</div></div>`;
+  wrap.addEventListener('click', e => { if (e.target === wrap) closeSyncDlg(); });
+  document.body.appendChild(wrap);
+  const body = wrap.querySelector('#scBody');
+  let meta;
+  try { meta = await fetchRemoteMeta(); }
+  catch (e) { body.textContent = '❌ ' + e.message; wrap.querySelector('[data-sc="close"]').onclick = closeSyncDlg; return; }
+  const remote = Array.isArray(meta.pages) ? meta.pages : [];
+  const plan = planMerge(state.pages, remote);
+  const conflicts = plan.rows.filter(r => r.kind === 'conflict');
+  const auto = plan.rows.filter(r => r.kind === 'local' || r.kind === 'remote').length;
+  const cRows = conflicts.map(r => `<div class="sc-row"><b>${L('পেজ', 'Page')} ${r.li + 1}</b>
+      <label><input type="radio" name="sc${r.li}" value="local" checked> ${L('এই device', 'This device')}: <i>${esc(clip80(state.pages[r.li].text))}</i></label>
+      <label><input type="radio" name="sc${r.li}" value="remote"> Drive: <i>${esc(clip80(remote[r.ri].text))}</i></label></div>`).join('');
+  body.innerHTML = `<p>${L('এই project অন্য device/ট্যাব থেকে Drive-এ বদলানো হয়েছে, আবার এই device-এও বদলেছে।', 'This project was changed on Drive from another device/tab, and it also changed here.')}</p>
+    <p><b>Drive:</b> ${remote.length} ${L('পেজ', 'pages')} · ${esc(fmtDate(meta.updatedAt || 0))}<br><b>${L('এই device', 'This device')}:</b> ${state.pages.length} ${L('পেজ', 'pages')}</p>
+    <div class="dc-actions">
+      <button class="btn btn-secondary" data-sc="drive">☁️ ${L('Drive-এরটা নিন', 'Use Drive')}</button>
+      <button class="btn btn-secondary" data-sc="device">💻 ${L('এই device-এরটা নিন', 'Use this device')}</button>
+      <button class="btn btn-primary" data-sc="mergeshow">🔀 ${L('পেজ ধরে merge', 'Merge page by page')}</button>
+    </div>
+    <div id="scMerge" class="hidden">
+      <p>${L(`${auto}টি পেজ নিজে থেকেই merge হবে (যেদিকে text আছে সেটা)। ${plan.remoteOnly.length}টি পেজ শুধু Drive-এ আছে (যোগ হবে), ${plan.localOnly.length}টি শুধু এখানে (থাকবে)।`, `${auto} page(s) merge automatically (whichever side has text). ${plan.remoteOnly.length} page(s) exist only on Drive (will be added), ${plan.localOnly.length} only here (kept).`)}</p>
+      ${conflicts.length ? `<p>${L('এই পেজগুলোয় দুই দিকের text আলাদা — বেছে নিন:', 'These pages differ on both sides — choose:')}</p>${cRows}` : `<p>${L('কোনো পেজে দ্বন্দ্ব নেই।', 'No page-level conflicts.')}</p>`}
+      <div class="dc-actions"><button class="btn btn-primary" data-sc="mergeapply">✔ ${L('Merge করে Drive-এ save', 'Merge and save to Drive')}</button></div>
+    </div>
+    <div class="dc-actions"><button class="btn btn-secondary" data-sc="close">${L('পরে', 'Later')}</button></div>`;
+  body.onclick = async e => {
+    const b = e.target.closest('[data-sc]'); if (!b) return;
+    const a = b.dataset.sc;
+    try {
+      if (a === 'close') closeSyncDlg();
+      else if (a === 'mergeshow') body.querySelector('#scMerge').classList.remove('hidden');
+      else if (a === 'drive') {
+        if (!confirm(L('এই device-এর অসংরক্ষিত বদল বাদ যাবে এবং Drive-এর কপি খুলবে। চালিয়ে যাবেন?', 'Unsynced changes on this device are discarded and the Drive copy is opened. Continue?'))) return;
+        closeSyncDlg(); state.syncConflict = null;
+        await openDriveProject(pr.driveFolderId);
+        refreshDriveChip();
+      } else if (a === 'device') {
+        if (!confirm(L('Drive-এর বদলগুলো (শুধু Drive-এ থাকা পেজ সহ) এই device-এর কপি দিয়ে ওভাররাইট হবে। চালিয়ে যাবেন?', 'The Drive copy (including pages only on Drive) is overwritten by this device. Continue?'))) return;
+        closeSyncDlg(); state.syncConflict = null;
+        await syncToDrive({ force: true });
+        refreshDriveChip();
+      } else if (a === 'mergeapply') {
+        const choices = {};
+        conflicts.forEach(r => { const c = body.querySelector(`input[name="sc${r.li}"]:checked`); choices[r.li] = c ? c.value : 'local'; });
+        b.disabled = true;
+        await applyMerge(plan, remote, choices);
+        closeSyncDlg(); state.syncConflict = null;
+        await syncToDrive({ force: true });
+        refreshDriveChip();
+        toast(L('🔀 Merge হয়েছে', '🔀 Merged'), 'ok', 2500);
+      }
+    } catch (err) { toast('❌ ' + err.message, 'err', 5000); const m = body.querySelector('[data-sc="mergeapply"]'); if (m) m.disabled = false; }
+  };
+}
+
+// Applies a merge plan to the open project (text-level; images of Drive-only pages are downloaded).
+async function applyMerge(plan, remote, choices) {
+  const localRefs = state.pages.slice();
+  const takeRemote = (pg, rp) => {
+    recordUndo(pg);
+    pg.text = String(rp.text || ''); pg.status = pg.text.trim() ? 'done' : pg.status;
+    pg.ocr = sanitizeOcr(rp.ocr); pg.reviewed = !!rp.reviewed;
+    if (rp.note) pg.note = String(rp.note);
+  };
+  plan.rows.forEach(r => {
+    const pg = localRefs[r.li], rp = remote[r.ri];
+    if (r.kind === 'remote' || (r.kind === 'conflict' && choices[r.li] === 'remote')) takeRemote(pg, rp);
+    if (!pg.note && rp.note) pg.note = String(rp.note);
+    if (rp.bookmark) pg.bookmark = true;
+  });
+  // Drive-only pages: download, then insert right after the page that precedes them on Drive
+  const pairByRi = new Map(plan.rows.map(r => [r.ri, r.li]));
+  let anchor = -1; const inserts = [];
+  remote.forEach((rp, ri) => {
+    if (pairByRi.has(ri)) { anchor = pairByRi.get(ri); return; }
+    if (plan.remoteOnly.includes(ri)) inserts.push({ ri, anchor });
+  });
+  const created = [];
+  for (const ins of inserts) {
+    const rp = remote[ins.ri];
+    let blob = null;
+    if (!rp.txtOnly) {
+      if (!rp.fileId) continue;
+      blob = await (await dfetch(`${DRIVE}/files/${rp.fileId}?alt=media`)).blob();
+    }
+    const before = state.pages.length;
+    pushRestoredPage({ name: rp.name, text: rp.text, status: rp.status, txtOnly: !!rp.txtOnly, blob, driveFileId: rp.fileId || null, blobSaved: false,
+      hash: rp.hash || null, phash: rp.phash || null, ocr: rp.ocr, flags: rp.flags, reviewed: rp.reviewed, note: rp.note, bookmark: rp.bookmark });
+    created.push({ pg: state.pages[before], anchor: ins.anchor });
+  }
+  const bucket = new Map();
+  created.forEach(c => { const k = c.anchor; if (!bucket.has(k)) bucket.set(k, []); bucket.get(k).push(c.pg); });
+  const out = [];
+  (bucket.get(-1) || []).forEach(p => out.push(p));
+  localRefs.forEach((p, i) => { out.push(p); (bucket.get(i) || []).forEach(x => out.push(x)); });
+  state.pages.length = 0; out.forEach(p => state.pages.push(p));
+  state.current = Math.max(0, Math.min(state.current, state.pages.length - 1));
+  refreshFlags(); renderAll(); updateStats();
+  await saveNow();
+}
+
+// ── Storage meter + free up space ──
+async function storageInfo() {
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const e = await navigator.storage.estimate();
+      if (e && e.quota) return { usage: e.usage || 0, quota: e.quota };
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+const fmtBytes = n => n >= 1073741824 ? (n / 1073741824).toFixed(1) + ' GB' : n >= 1048576 ? Math.round(n / 1048576) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+// A finished, Drive-linked project that is not open can drop its images (they are re-downloaded from Drive when it is opened).
+const isFreeable = p => !!(p && p.driveFolderId && p.pageCount > 0 && p.doneCount === p.pageCount && !p.blobsFreed && p.id !== state.projectId);
+
+function storageMeterHtml(info, list) {
+  if (!info) return '';
+  const pct = Math.min(100, Math.round(info.usage / info.quota * 100));
+  const n = list.filter(isFreeable).length;
+  return `<div class="lib-note lib-row"><span>💽 ${L('Storage', 'Storage')}: ${fmtBytes(info.usage)} / ${fmtBytes(info.quota)} (${pct}%)<span class="lib-prog" style="display:block;margin-top:.3rem"><i style="width:${pct}%"></i></span></span>
+    <span class="lib-actions">${n ? `<button class="btn btn-secondary" data-act="free-space" title="${L('শেষ হওয়া, Drive-এ থাকা project-এর ছবি এই device থেকে সরান (text থাকে)', 'Remove images of finished, Drive-linked projects from this device (text stays)')}">🧹 ${L('Space খালি করুন', 'Free up space')} (${n})</button>` : ''}</span></div>`;
+}
+
+async function freeUpSpace() {
+  const list = (await localList()).filter(isFreeable);
+  if (!list.length) { toast(L('খালি করার মতো project নেই', 'Nothing to free up'), '', 2500); return { freed: 0, projects: 0 }; }
+  if (!confirm(L(`${list.length}টি শেষ হওয়া project-এর ছবি এই device থেকে সরানো হবে। text থাকবে, ছবি Drive থেকে আবার আসবে (project খুললে, Sign in লাগবে)। চালিয়ে যাবেন?`,
+                 `Images of ${list.length} finished project(s) will be removed from this device. Text stays; images come back from Drive when you open the project (sign-in needed). Continue?`))) return { freed: 0, projects: 0 };
+  let freed = 0, projects = 0;
+  for (const p of list) {
+    const { recs, blobs } = await localLoad(p.id);
+    if (!recs.every(r => r.txtOnly || r.driveFileId)) continue;                // some image is not on Drive yet → keep it
+    const size = blobs.reduce((s, b) => s + ((b && b.blob && b.blob.size) || 0), 0);
+    const db = await idb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(['projects', 'blobs'], 'readwrite');
+      tx.oncomplete = resolve; tx.onerror = tx.onabort = () => reject(tx.error);
+      recs.forEach(r => { if (!r.txtOnly) tx.objectStore('blobs').delete(r.id); });
+      tx.objectStore('projects').put({ ...p, blobsFreed: true });
+    });
+    freed += size; projects++;
+  }
+  toast(projects ? L(`🧹 ${projects}টি project থেকে ${fmtBytes(freed)} খালি হয়েছে`, `🧹 Freed ${fmtBytes(freed)} from ${projects} project(s)`) : L('কোনো project খালি করা যায়নি (ছবি এখনো Drive-এ নেই)', 'Nothing freed (images are not on Drive yet)'), projects ? 'ok' : 'warn', 4000);
+  return { freed, projects };
+}
+function renderPhase8UI() { refreshDriveChip(); }
 
 // ══════════════════════════════════════════
 // LIBRARY UI
@@ -2258,12 +2552,15 @@ async function renderLocalTab(box) {
   });
   const dupIds = new Set();
   groups.forEach(g => { if (g.length > 1) g.forEach(p => dupIds.add(p.id)); });
-  box.innerHTML = head + srch + bk + list.map(p => itemHtml({
+  const meter = storageMeterHtml(await storageInfo(), list);
+  if (my !== _libSeq) return;
+  box.innerHTML = head + srch + bk + meter + list.map(p => itemHtml({
     name: p.name, current: p.id === state.projectId,
     pct: p.pageCount ? Math.round(p.doneCount / p.pageCount * 100) : 0,
     meta: `${p.pageCount} ${L('পেজ', 'pages')} · ${p.doneCount} done · ${esc(fmtDate(p.updatedAt))}`,
     tags: (p.id === state.projectId ? ` <span class="lib-tag">● ${L('খোলা আছে', 'open')}</span>` : '')
       + (p.driveFolderId ? ' <span class="lib-tag">☁️</span>' : '')
+      + (p.blobsFreed ? ` <span class="lib-tag" title="${L('ছবি Drive-এ আছে; খুললে ফিরে আসবে', 'Images are on Drive; restored when opened')}">🧹 ${L('ছবি Drive-এ', 'images on Drive')}</span>` : '')
       + (dupIds.has(p.id) ? ` <span class="lib-tag" style="background:var(--yellow,#d97706);color:#fff" title="${L('একই PDF/ছবি আরেকটা project-এও আছে', 'Same PDF/images exist in another project')}">⚠️ duplicate</span>` : ''),
     actions: `<button class="btn btn-primary" data-act="open-local" data-id="${p.id}">▶ ${L('খুলুন', 'Open')}</button><button class="btn btn-secondary" data-act="dl-local" data-id="${p.id}" title=".txt download">⬇ .txt</button>`
       + (dupIds.has(p.id) ? `<button class="btn btn-secondary" data-act="merge-dup" data-id="${p.id}" title="${L('একই রকম আরেকটা project মুছুন', 'Delete the other identical project')}">🗑 ${L('Duplicate সরান', 'Remove duplicate')}</button>` : '')
@@ -2313,6 +2610,7 @@ $('libContent').addEventListener('click', async e => {
     else if (act === 'open-hit') await openLocalProject(id, parseInt(b.dataset.page, 10) - 1);
     else if (act === 'dl-local') await downloadLocalText(id);
     else if (act === 'export-all') await exportAllBackup();
+    else if (act === 'free-space') { await freeUpSpace(); renderLib(); }
     else if (act === 'merge-into') { await mergeProjectIntoCurrent(id); renderLib(); initResumeCard(); }
     else if (act === 'import-backup') $('backupInput').click();
     else if (act === 'del-local') {
@@ -2584,10 +2882,14 @@ async function loadPdf(file) {
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: buf }).promise;
-    const total = pdf.numPages;
-    for (let i = 1; i <= total; i++) {
-      setSplitProgress(i - 1, total);
-      $('splitDetail').textContent = t('splitRendering', { cur: i, total });
+    const numPages = pdf.numPages;
+    const picked = await pdfPagesToLoad(numPages);
+    if (!picked) { hideProgress(); return; }
+    const total = picked.length;
+    for (let n = 0; n < total; n++) {
+      const i = picked[n] + 1;
+      setSplitProgress(n, total);
+      $('splitDetail').textContent = t('splitRendering', { cur: n + 1, total });
       const page = await pdf.getPage(i);
       const scale = parseFloat($('qualitySel').value) || 2.0;
       const vp = page.getViewport({ scale });
@@ -2596,14 +2898,111 @@ async function loadPdf(file) {
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
       addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob), page);
-      setSplitProgress(i, total);
+      canvas.width = canvas.height = 0;            // give the bitmap memory back right away
+      try { page.cleanup(); } catch (e) { /* ignore */ }
+      setSplitProgress(n + 1, total);
+      if ((n + 1) % PDF_YIELD_EVERY === 0) await new Promise(r => setTimeout(r, 0));   // let the UI breathe on big files
     }
+    try { pdf.cleanup(); } catch (e) { /* ignore */ }
     setSplitProgress(total, total);
     toast(t('pdfLoaded', { total }), 'ok');
   } catch (e) {
     toast(t('pdfError', { error: e.message }), 'err');
     hideProgress();
   }
+}
+
+// ══════════════════════════════════════════
+// PHASE 9 — PWA, MOBILE, PERFORMANCE
+// (offline-queued Drive sync, Web Share Target, camera scan, big-PDF guard, virtualised thumbnail strip)
+// ══════════════════════════════════════════
+const PDF_WARN_PAGES = 300;       // above this, ask before loading everything (memory guard)
+const PDF_YIELD_EVERY = 5;        // pages rendered one at a time (concurrency 1); yield to the UI every N
+const STRIP_VIRT_MIN = 150;       // virtualise the thumbnail strip from this many pages
+const STRIP_OVERSCAN = 30;        // extra thumbs rendered on each side of the viewport
+const STRIP_STEP = 90;            // 82px thumb + 8px gap (.page-thumb width + .strip gap)
+const SHARE_CACHE = 'textriva-share';
+
+// Pure: which 0-based pages to load. Returns null if the user cancelled.
+function planPdfPages(numPages, answer) {
+  if (numPages <= PDF_WARN_PAGES || answer === 'all') return Array.from({ length: numPages }, (_, i) => i);
+  const r = parsePageRange(answer, numPages);
+  return r.length ? r : null;
+}
+async function pdfPagesToLoad(numPages) {
+  if (numPages <= PDF_WARN_PAGES) return planPdfPages(numPages, 'all');
+  if (confirm(L(`এই PDF-এ ${numPages} page। সব একসাথে load করলে ফোনে tab crash করতে পারে।\nOK = সব load করুন, Cancel = page range বেছে নিন`,
+                `This PDF has ${numPages} pages. Loading all of it can crash the tab on a phone.\nOK = load all, Cancel = choose a page range`))) return planPdfPages(numPages, 'all');
+  const ans = prompt(L(`কোন page load করবেন? (যেমন 1-100, 150-200) — মোট ${numPages}`, `Which pages to load? (e.g. 1-100, 150-200) — total ${numPages}`), `1-${Math.min(100, numPages)}`);
+  return ans == null ? null : planPdfPages(numPages, ans);
+}
+
+// Pure: index window [from, to) of thumbnails to render.
+function stripWindow(total, scrollLeft, viewW, centerIndex) {
+  if (total < STRIP_VIRT_MIN) return { from: 0, to: total, virtual: false };
+  let a, b;
+  if (centerIndex != null) { a = centerIndex - Math.ceil((viewW || 800) / STRIP_STEP / 2); b = centerIndex + Math.ceil((viewW || 800) / STRIP_STEP / 2); }
+  else { a = Math.floor(scrollLeft / STRIP_STEP); b = Math.ceil((scrollLeft + (viewW || 800)) / STRIP_STEP); }
+  return { from: Math.max(0, a - STRIP_OVERSCAN), to: Math.min(total, b + STRIP_OVERSCAN), virtual: true };
+}
+let _stripRange = null;
+function onStripScroll() {
+  if (state.pages.length < STRIP_VIRT_MIN) return;
+  cancelAnimationFrame(onStripScroll._raf);
+  onStripScroll._raf = requestAnimationFrame(() => {
+    const r = _stripRange; if (!r) return;
+    const visFrom = Math.floor(strip.scrollLeft / STRIP_STEP), visTo = Math.ceil((strip.scrollLeft + (strip.clientWidth || 800)) / STRIP_STEP);
+    // re-render only when the viewport gets close to the edge of what is rendered
+    if ((r.from > 0 && visFrom < r.from + 10) || (r.to < state.pages.length && visTo > r.to - 10)) renderStrip({ fromScroll: true });
+  });
+}
+
+// ── Offline: Library + editing already work from IndexedDB; Drive sync is queued until we are back online ──
+function isOffline() { return typeof navigator !== 'undefined' && navigator.onLine === false; }
+function onNetBack() {
+  toast(L('🟢 আবার online', '🟢 Back online'), 'ok', 2500);
+  if (!GOOGLE_CLIENT_ID || !state.proj || !state.proj.driveFolderId) { refreshDriveChip(); return; }
+  if (!driveValid()) silentTokenRefresh(); else queueDriveSync();
+  refreshDriveChip();
+}
+function onNetLost() {
+  toast(L('📴 Offline — লেখা চলবে, Drive sync পরে হবে', '📴 Offline — keep editing, Drive sync is queued'), '', 3500);
+  refreshDriveChip();
+}
+window.addEventListener('online', onNetBack);
+window.addEventListener('offline', onNetLost);
+
+// ── Web Share Target: the service worker parks shared files in a cache, we pick them up here ──
+async function consumeSharedFiles(cacheStorage) {
+  cacheStorage = cacheStorage || (typeof caches !== 'undefined' ? caches : null);
+  if (!cacheStorage) return 0;
+  let cache; try { cache = await cacheStorage.open(SHARE_CACHE); } catch (e) { return 0; }
+  const reqs = await cache.keys();
+  const files = [];
+  for (const rq of reqs) {
+    const res = await cache.match(rq); if (!res) continue;
+    const blob = await res.blob();
+    let name = 'shared'; try { name = decodeURIComponent(res.headers.get('x-name') || 'shared'); } catch (e) { /* keep default */ }
+    files.push(new File([blob], name, { type: blob.type || res.headers.get('content-type') || '' }));
+    await cache.delete(rq);
+  }
+  if (files.length) { toast(L(`📲 ${files.length}টি shared file নেওয়া হলো`, `📲 Received ${files.length} shared file(s)`), 'ok', 2500); await handleFiles(files); }
+  return files.length;
+}
+if (/[?&]shared=/.test(location.search)) {
+  consumeSharedFiles().finally(() => { try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ } });
+}
+
+// ── Camera capture: one photo → one page (appended) ──
+function scanName(i) { return 'scan-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14) + (i ? '-' + (i + 1) : '') + '.jpg'; }
+$('cameraBtn').onclick = () => $('cameraInput').click();
+$('cameraInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []).map((f, i) => new File([f], scanName(i), { type: f.type || 'image/jpeg' }));
+  e.target.value = '';
+  if (files.length) await handleFiles(files);
+});
+function renderPhase9UI() {
+  const b = $('cameraBtnTxt'); if (b) b.textContent = L('Scan page', 'Scan page');
 }
 
 // ══════════════════════════════════════════
@@ -2798,6 +3197,7 @@ function flagLabel(code) {
   return ({
     empty: L('খালি', 'Empty'), short: L('খুব ছোট', 'Too short'), garbage: L('অদ্ভুত চিহ্ন', 'Garbled'),
     repeat: L('একই চিহ্ন বারবার', 'Repeated chars'), script: L('ভুল ভাষা?', 'Wrong script?'),
+    lowconf: L('OCR কম-নিশ্চিত', 'Low OCR confidence'),
   })[code] || code;
 }
 const flagsText = pg => (pg.flags || []).map(flagLabel).join(', ');
@@ -2817,6 +3217,7 @@ function refreshFlags() {
     if (!processed(pg)) { pg.flags = []; return; }
     const f = (pg._base || []).slice();
     if (projScript && (pg._script === 'bn' || pg._script === 'en') && pg._script !== projScript) f.push('script');
+    if (ocrIsLowConf(pg)) f.push('lowconf');
     pg.flags = f;
   });
 }
@@ -3693,6 +4094,173 @@ $('libContent').addEventListener('input', e => {
 });
 
 // ══════════════════════════════════════════
+// PHASE 6 — OPTIONAL OCR ENGINE (Tesseract.js in the browser; Lens stays the default and imgbb stays the image host)
+// Nothing here runs unless the user opens 🤖 Auto-OCR… and presses Start. No paid service, no server, no API key.
+// The vision-LLM engine from the plan is NOT implemented (needs a paid provider — to be decided with the owner).
+// ══════════════════════════════════════════
+const TESS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js'; // pinned, lazy-loaded on first use
+const OCR_LANG_DEFAULT = 'ben+eng';
+const OCR_LOW_CONF = 70;                         // tesseract confidence (0-100) below this → ⚠️ "Low confidence"
+const LS_OCR_ENGINE = 'textriva-ocr-engine', LS_OCR_LANG = 'textriva-ocr-lang';
+
+// pg.ocr = { engine: 'tesseract', conf: 0-100, hash: hashStr(text at OCR time) } — or null.
+// The hash makes the info self-expiring: once the text is changed (Lens paste, edit, cleanup…) it no longer applies.
+function sanitizeOcr(o) {
+  if (!o || typeof o !== 'object' || o.engine !== 'tesseract') return null;
+  const conf = Number(o.conf);
+  return { engine: 'tesseract', conf: isFinite(conf) ? Math.max(0, Math.min(100, Math.round(conf))) : 0, hash: Number(o.hash) | 0 };
+}
+const ocrValid = pg => !!(pg && pg.ocr && pg.ocr.hash === hashStr(pg.text || ''));
+const ocrIsLowConf = pg => ocrValid(pg) && pg.ocr.conf < OCR_LOW_CONF;
+
+// Which pages an OCR run touches. mode 'empty' = only pages without text (Auto); 'all' = every page in the list (Redo).
+function pagesForOcr(pages, indices, mode) {
+  return indices.filter(i => {
+    const pg = pages[i];
+    if (!pg || pg.txtOnly) return false;                 // text-only pages have no image
+    return mode === 'all' ? true : !(pg.text || '').trim();
+  });
+}
+function cleanOcrText(t) {
+  return String(t == null ? '' : t).replace(/\r\n?/g, '\n').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+// ── Engine seam (tests replace ocrIO; the real one loads Tesseract.js lazily and keeps ONE worker for the whole run) ──
+let _tessP = null, _tessWorker = null, _tessLang = '';
+function loadTesseract() {
+  if (window.Tesseract) return Promise.resolve(window.Tesseract);
+  if (_tessP) return _tessP;
+  return _tessP = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = TESS_URL; s.crossOrigin = 'anonymous';
+    s.onload = () => (window.Tesseract ? resolve(window.Tesseract) : reject(new Error('Tesseract missing')));
+    s.onerror = () => { _tessP = null; reject(new Error(L('OCR library load হয়নি — internet আছে?', 'Could not load the OCR library — are you online?'))); };
+    document.head.appendChild(s);
+  });
+}
+const ocrIO = {
+  async recognize(blob, lang) {
+    const T = await loadTesseract();
+    if (!_tessWorker || _tessLang !== lang) {
+      await ocrIO.stop();
+      _tessWorker = await T.createWorker(lang);   // downloads language data on first use, browser-cached afterwards
+      _tessLang = lang;
+    }
+    const { data } = await _tessWorker.recognize(blob);
+    return { text: data.text || '', confidence: data.confidence };
+  },
+  async stop() {
+    const w = _tessWorker; _tessWorker = null; _tessLang = '';
+    if (w) { try { await w.terminate(); } catch (e) { /* ignore */ } }
+  },
+};
+
+state.ocrRun = null;
+// Runs OCR over the given page indices. Resolves with { done, low, failed, cancelled }.
+async function runOcr(indices, opts) {
+  opts = opts || {};
+  if (state.ocrRun) return null;
+  const lang = opts.lang || OCR_LANG_DEFAULT;
+  const ids = indices.map(i => state.pages[i] && state.pages[i].id).filter(Boolean);   // ids, so reordering mid-run is harmless
+  const run = state.ocrRun = { cancel: false, total: ids.length, n: 0 };
+  const res = { done: 0, low: 0, failed: 0, cancelled: false };
+  const progress = opts.onProgress || (() => {});
+  try {
+    for (const id of ids) {
+      if (run.cancel) { res.cancelled = true; break; }
+      const pg = state.pages.find(p => p.id === id);
+      run.n++;
+      progress(run.n, run.total, pg);
+      if (!pg || pg.txtOnly) continue;
+      const blob0 = pg.blob;
+      try {
+        const out = await ocrIO.recognize(await lensCopyBlob(blob0), lang);
+        if (pg.blob !== blob0) continue;                  // image edited meanwhile → result is for the old image
+        const text = cleanOcrText(out.text);
+        if (!text) { res.failed++; continue; }            // blank result: leave the page as it was
+        recordUndo(pg);                                    // undo restores the previous text/status
+        pg.text = text; pg.status = 'done'; pg.reviewed = false;
+        pg.ocr = sanitizeOcr({ engine: 'tesseract', conf: out.confidence, hash: hashStr(text) });
+        res.done++;
+        if (pg.ocr.conf < OCR_LOW_CONF) res.low++;
+      } catch (e) {
+        res.failed++;
+        if (opts.stopOnError !== false && /library|load/i.test(String(e && e.message))) { res.cancelled = true; res.error = e.message; break; }
+      }
+      if (opts.onPage) opts.onPage(pg);
+    }
+  } finally {
+    state.ocrRun = null;
+    await ocrIO.stop();
+  }
+  return res;
+}
+
+// ── Dialog ──
+function closeOcrDlg() { const d = $('ocrDlg'); if (d) d.remove(); }
+function openOcrDlg() {
+  if (!state.pages.length) return;
+  closeOcrDlg();
+  const eng = readSaved(LS_OCR_ENGINE) === 'redo' ? 'redo' : 'auto';
+  const lang = readSaved(LS_OCR_LANG) || OCR_LANG_DEFAULT;
+  const wrap = document.createElement('div');
+  wrap.id = 'ocrDlg'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+  wrap.innerHTML = `<div class="tt-box">
+    <div class="tt-hdr"><strong>🤖 ${L('Auto-OCR (Tesseract)', 'Auto-OCR (Tesseract)')}</strong><button class="btn btn-secondary" data-oc="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
+    <div class="tt-hint">${L('ঐচ্ছিক। Google Lens-ই ডিফল্ট ও বেশি নির্ভুল। Tesseract ব্রাউজারেই চলে (বিনামূল্যে), তাই ভুল বেশি হতে পারে — কম-confidence পেজে ⚠️ বসবে, পরে Review থেকে Lens-এ আবার করুন। প্রথমবার ভাষার ডেটা ডাউনলোড হয়।', 'Optional. Google Lens stays the default and is more accurate. Tesseract runs in your browser (free), so it may make more mistakes — low-confidence pages get ⚠️, then use Review → Redo with Lens. Language data is downloaded on first use.')}</div>
+    <div class="ex-row"><label for="ocRange">${L('কোন পেজে', 'Pages')}</label><input id="ocRange" type="text" value="1-${state.pages.length}" placeholder="3, 5-8"></div>
+    <div class="ex-row"><label for="ocMode">${L('কোন পেজ', 'Which pages')}</label><select id="ocMode"><option value="auto"${eng === 'auto' ? ' selected' : ''}>${L('Auto — শুধু text-ছাড়া পেজ', 'Auto — only pages without text')}</option><option value="redo"${eng === 'redo' ? ' selected' : ''}>${L('Redo — ওভাররাইট (Undo যাবে)', 'Redo — overwrite (undoable)')}</option></select></div>
+    <div class="ex-row"><label for="ocLang">${L('ভাষা', 'Language')}</label><select id="ocLang"><option value="ben+eng"${lang === 'ben+eng' ? ' selected' : ''}>বাংলা + English</option><option value="ben"${lang === 'ben' ? ' selected' : ''}>বাংলা</option><option value="eng"${lang === 'eng' ? ' selected' : ''}>English</option></select></div>
+    <div class="tt-hint" id="ocInfo"></div>
+    <div class="dc-actions"><button class="btn btn-primary" data-oc="start">▶ ${L('শুরু করুন', 'Start')}</button><button class="btn btn-secondary" data-oc="stop" disabled>■ ${L('থামান', 'Stop')}</button><button class="btn btn-secondary" data-oc="close">${L('বন্ধ', 'Close')}</button></div>
+  </div>`;
+  const q = sel => wrap.querySelector(sel);
+  const targets = () => {
+    const idx = parsePageRange(q('#ocRange').value, state.pages.length);
+    return pagesForOcr(state.pages, idx, q('#ocMode').value === 'redo' ? 'all' : 'empty');
+  };
+  const refreshInfo = () => { const n = targets().length; q('#ocInfo').textContent = L(`${n}টি পেজে OCR চলবে`, `${n} page(s) will be processed`); };
+  wrap.addEventListener('input', refreshInfo); wrap.addEventListener('change', refreshInfo);
+  wrap.addEventListener('click', async e => {
+    if (e.target === wrap) { if (!state.ocrRun) closeOcrDlg(); return; }
+    const b = e.target.closest('[data-oc]'); if (!b || b.disabled) return;
+    const a = b.dataset.oc;
+    if (a === 'close') { if (state.ocrRun) state.ocrRun.cancel = true; closeOcrDlg(); }
+    else if (a === 'stop') { if (state.ocrRun) state.ocrRun.cancel = true; b.disabled = true; }
+    else if (a === 'start') {
+      const idx = targets();
+      if (!idx.length) { toast(L('এই range-এ OCR করার মতো পেজ নেই', 'No pages to process in this range'), '', 2500); return; }
+      const redo = q('#ocMode').value === 'redo';
+      if (redo && idx.some(i => (state.pages[i].text || '').trim()) &&
+          !confirm(L('যেসব পেজে text আছে সেগুলো ওভাররাইট হবে (Undo করা যাবে)। চালিয়ে যাবেন?', 'Pages that already have text will be overwritten (undo is available). Continue?'))) return;
+      saveSetting(LS_OCR_ENGINE, redo ? 'redo' : 'auto'); saveSetting(LS_OCR_LANG, q('#ocLang').value);
+      q('[data-oc="start"]').disabled = true; q('[data-oc="stop"]').disabled = false;
+      const res = await runOcr(idx, {
+        lang: q('#ocLang').value,
+        onProgress: (n, total) => { const el = q('#ocInfo'); if (el) el.textContent = L(`OCR চলছে… ${n}/${total}`, `OCR running… ${n}/${total}`); },
+        onPage: () => { renderStrip(); renderLensGrid(); },
+      });
+      refreshFlags(); renderAll(); updateStats();
+      const st = q('[data-oc="start"]'); if (st) st.disabled = false;
+      const sp = q('[data-oc="stop"]'); if (sp) sp.disabled = true;
+      if (!res) return;
+      toast(res.error ? res.error : L(`✅ ${res.done} পেজ হয়েছে · ⚠️ ${res.low} কম-confidence · ${res.failed} ব্যর্থ${res.cancelled ? ' · থামানো হয়েছে' : ''}`,
+                                      `✅ ${res.done} done · ⚠️ ${res.low} low confidence · ${res.failed} failed${res.cancelled ? ' · stopped' : ''}`), res.done ? 'ok' : 'warn', 6000);
+      if (res.low && $('ocrDlg')) closeOcrDlg();
+      if (res.low) startReview();
+    }
+  });
+  wrap.addEventListener('keydown', e => { if (e.key === 'Escape' && !state.ocrRun) { e.stopPropagation(); closeOcrDlg(); } });
+  document.body.appendChild(wrap);
+  refreshInfo();
+  q('[data-oc="start"]').focus();
+}
+function renderPhase6UI() {
+  const b = $('ocrBtnTxt'); if (b) b.textContent = L('Auto-OCR…', 'Auto-OCR…');
+}
+$('ocrBtn').onclick = () => openOcrDlg();
+
+// ══════════════════════════════════════════
 // PHASE 3 — PAGE TOOLS (drag-reorder, rotate, crop, split spread, enhance-for-Lens, move/merge projects)
 // Every change to a page image goes through setPageBlob(): it invalidates remoteUrl/remoteAt/driveFileId, sets blobSaved=false
 // and re-hashes, so the edited image is re-saved, re-uploaded to Lens and re-synced to Drive. Order = index in state.pages
@@ -3969,7 +4537,7 @@ async function movePagesToProject(idxs, target) {
   }
   const recs = moving.map((p, k) => ({
     id: newId() + k, projectId: tproj.id, order: base + k, name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly,
-    driveFileId: null, hash: p.hash || null, phash: p.phash || null, possibleDupOf: null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
+    driveFileId: null, hash: p.hash || null, phash: p.phash || null, possibleDupOf: null, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
   }));
   const updated = Object.assign({}, tproj, {
     pageCount: base + recs.length, doneCount: (tproj.doneCount || 0) + recs.filter(r => r.status === 'done').length, updatedAt: Date.now(),
@@ -3999,6 +4567,7 @@ async function mergeProjectIntoCurrent(pid) {
   if (pid === state.projectId) return 0;
   await saveNow();
   const { proj, recs, blobs } = await localLoad(pid);
+  if (proj.blobsFreed) { toast(L('এই project-এর ছবি Drive-এ আছে — আগে খুলুন (ছবি ফিরে আসবে), তারপর merge করুন', 'This project\'s images are on Drive — open it first (images come back), then merge'), 'warn', 5000); return 0; }
   let n = 0;
   recs.forEach((r, i) => {
     if (!r.txtOnly && !(blobs[i] && blobs[i].blob)) return;
@@ -4233,7 +4802,7 @@ function buildProjectJson(meta, pages) {
     createdAt: meta.createdAt || Date.now(), updatedAt: meta.updatedAt || Date.now(), exportedAt: Date.now(),
     pages: pages.map((p, i) => ({
       page: i + 1, name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly,
-      flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark, hash: p.hash || null, phash: p.phash || null, image: p.image || null,
+      ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark, hash: p.hash || null, phash: p.phash || null, image: p.image || null,
     })),
   }, null, 2);
 }
@@ -4248,6 +4817,7 @@ function parseProjectJson(str) {
       name: String(p.name == null ? 'page-' + (i + 1) : p.name), text: String(p.text == null ? '' : p.text),
       status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly,
       flags: Array.isArray(p.flags) ? p.flags.map(String) : [], reviewed: !!p.reviewed,
+      ocr: (p.ocr && p.ocr.engine === 'tesseract' && isFinite(Number(p.ocr.conf))) ? { engine: 'tesseract', conf: Math.max(0, Math.min(100, Math.round(Number(p.ocr.conf)))), hash: Number(p.ocr.hash) | 0 } : null,
       note: typeof p.note === 'string' ? p.note : '', bookmark: !!p.bookmark,
       hash: p.hash || null, phash: p.phash || null, image: p.image || null,
     })),
@@ -4412,7 +4982,7 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 const exportBaseName = () => (state.sourceFileName || 'textriva').replace(/\.[^/.]+$/, '') || 'textriva';
-const exportPages = () => state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status, txtOnly: !!p.txtOnly, flags: p.flags || [], reviewed: !!p.reviewed, hash: p.hash || null, phash: p.phash || null }));
+const exportPages = () => state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status, txtOnly: !!p.txtOnly, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, hash: p.hash || null, phash: p.phash || null }));
 const exportMeta = () => ({ name: projectName(), sourceFileName: state.sourceFileName || '', createdAt: (state.proj && state.proj.createdAt) || Date.now(), updatedAt: Date.now() });
 
 async function printAsPdf(title, pages, opts) {
@@ -4533,16 +5103,18 @@ async function exportAllBackup() {
   const JSZip = await loadJSZip();
   const zip = new JSZip();
   const projects = [];
+  const noImgs = list.filter(p => p.blobsFreed).length;
   for (const pr of list) {
     const { proj, recs, blobs } = await localLoad(pr.id);
     projects.push({
       meta: { name: proj.name, sourceFileName: proj.sourceFileName || '', createdAt: proj.createdAt, updatedAt: proj.updatedAt },
-      pages: recs.map((r, i) => ({ name: r.name, text: r.text || '', status: r.status, txtOnly: !!r.txtOnly, flags: r.flags || [], reviewed: !!r.reviewed, note: r.note || '', bookmark: !!r.bookmark, hash: r.hash || null, phash: r.phash || null, data: blobs[i] && blobs[i].blob ? blobs[i].blob : null, mime: blobs[i] && blobs[i].blob && blobs[i].blob.type })),
+      pages: recs.map((r, i) => ({ name: r.name, text: r.text || '', status: r.status, txtOnly: !!r.txtOnly, ocr: r.ocr || null, flags: r.flags || [], reviewed: !!r.reviewed, note: r.note || '', bookmark: !!r.bookmark, hash: r.hash || null, phash: r.phash || null, data: blobs[i] && blobs[i].blob ? blobs[i].blob : null, mime: blobs[i] && blobs[i].blob && blobs[i].blob.type })),
     });
   }
   buildBackupZip(zip, projects);
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
   downloadBlob(blob, 'textriva-backup-' + new Date().toISOString().slice(0, 10) + '.zip');
+  if (noImgs) toast(L(`ℹ️ ${noImgs}টি project-এর ছবি এই device-এ নেই (Drive-এ আছে) — backup-এ শুধু text`, `ℹ️ ${noImgs} project(s) have no local images (they are on Drive) — only their text is in the backup`), 'warn', 6000);
   toast(L(`✅ ${projects.length}টি project export হয়েছে`, `✅ Exported ${projects.length} project(s)`), 'ok', 3000);
 }
 
@@ -4554,7 +5126,7 @@ async function importProjectToLibrary(proj) {
     const hasImg = !p.txtOnly && p.data && p.data.length;
     recs.push({
       id, projectId: pid, order: i, name: p.name, text: p.text, status: (!hasImg || p.status === 'done') ? 'done' : 'pending',
-      txtOnly: !hasImg, driveFileId: null, hash: p.hash || null, phash: p.phash || null, possibleDupOf: null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
+      txtOnly: !hasImg, driveFileId: null, hash: p.hash || null, phash: p.phash || null, possibleDupOf: null, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
     });
     if (hasImg) blobs.push({ id, blob: new Blob([p.data], { type: p.mime || 'image/jpeg' }) });
   });
@@ -4801,19 +5373,26 @@ function renderAll() {
   renderReviewUI();
   updateUndoButtons();
   renderPhase4UI();
-  renderPhase3UI();
+  renderPhase3UI(); renderPhase6UI(); renderPhase9UI(); renderPhase8UI();
 }
 
-function renderStrip() {
+function renderStrip(opts) {
+  opts = opts || {};
   strip.innerHTML = '';
+  const total = state.pages.length;
+  const win = stripWindow(total, strip.scrollLeft, strip.clientWidth, opts.fromScroll ? null : state.current);
+  _stripRange = win.virtual ? win : null;
+  const spacer = n => { const d = document.createElement('div'); d.className = 'strip-spacer'; d.style.cssText = `flex:0 0 ${n * STRIP_STEP - 8}px;`; return d; };
+  if (win.virtual && win.from > 0) strip.appendChild(spacer(win.from));
   state.pages.forEach((pg, i) => {
+    if (i < win.from || i >= win.to) return;
     const el = document.createElement('div');
     el.className = `page-thumb${i === state.current ? ' active' : ''}${pg.status === 'done' ? ' done' : ''}${pg.status === 'uploading' ? ' uploading' : ''}${pg.status === 'error' ? ' error' : ''}`;
     el.dataset.i = i;
     el.draggable = true;
     const thumbContent = pg.txtOnly
       ? `<div class="pt-img" style="display:flex;align-items:center;justify-content:center;background:var(--card2);aspect-ratio:.7;font-size:1.4rem;color:var(--accent);">📄</div>`
-      : `<img class="pt-img" src="${pg.url}" alt="page ${i+1}" draggable="false"/>`;
+      : `<img class="pt-img" src="${pg.url}" alt="page ${i+1}" draggable="false" loading="lazy" decoding="async"/>`;
     el.innerHTML = `
       ${thumbContent}
       ${(pg.bookmark || pg.note) ? `<div class="pt-marks">${pg.bookmark ? `<span class="pt-badge bm" title="${L('Bookmark', 'Bookmark')}">🔖</span>` : ''}${pg.note ? `<span class="pt-badge note" title="${esc(pg.note.slice(0, 80))}">📝</span>` : ''}</div>` : ''}
@@ -4839,9 +5418,10 @@ function renderStrip() {
     });
     strip.appendChild(el);
   });
-  const active = strip.querySelector('.active');
-  if (active) active.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
+  if (win.virtual && win.to < total) strip.appendChild(spacer(total - win.to));
+  if (!opts.fromScroll) { const active = strip.querySelector('.active'); if (active) active.scrollIntoView({ inline: 'nearest', behavior: win.virtual ? 'auto' : 'smooth' }); }
 }
+strip.addEventListener('scroll', onStripScroll, { passive: true });
 
 function renderLensGrid() {
   lensGrid.innerHTML = '';
