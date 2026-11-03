@@ -1119,6 +1119,7 @@ a { color:inherit; text-decoration:none }
     <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
     <button class="btn btn-warning hidden" id="reviewBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">⚠️ <span id="reviewBtnTxt">Review</span></button>
     <button class="btn btn-warning hidden" id="retryActionBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryActionBtnTxt">Retry</span></button>
+    <button class="btn btn-danger" id="allClearBtn" title="সব মুছে একদম শুরুর অবস্থায় ফিরুন" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">🗑 <span id="allClearBtnTxt">All Clear</span></button>
   </div>
 
   <!-- WORKSPACE -->
@@ -1235,7 +1236,7 @@ a { color:inherit; text-decoration:none }
       <div class="ftr-title" id="ftrTitle3">Social &amp; Community</div>
       <div class="ftr-text" id="ftrText3">Follow updates and reach out for collaboration or project ideas.</div>
       <div class="ftr-social">
-        <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Home/index.html" target="_blank" rel="noopener" aria-label="Developer portfolio" title="Developer portfolio" class="ftr-logo-icon">
+        <a href="https://akhinoor.kuetx.com" target="_blank" rel="noopener" aria-label="Developer portfolio" title="Developer portfolio" class="ftr-logo-icon">
           <img src="/assets/brand/a3km-studio-icon.png" alt="A3KM Studio" />
         </a>
         <a href="mailto:mdakhinoorislam.official.2005@gmail.com" id="ftrLinkEmail" class="ftr-mail-btn" aria-label="Email" title="Email">
@@ -1260,7 +1261,7 @@ a { color:inherit; text-decoration:none }
     <span id="ftrBottomText">© Textriva • OCR tool developed by Md Akhinoor Islam</span>
     <span class="ftr-legal"><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></span>
     <span class="ftr-bottom-links">
-      <a href="https://a3kmstudio.vercel.app/Portfolio_Clients/Mr_Akhinoor_Portfolio/Projects%20Code/websites/websites-listing.html" target="_blank" rel="noopener" id="ftrBottomPortfolio">Websites &amp; Tools</a>
+      <a href="https://akhinoor.kuetx.com" target="_blank" rel="noopener" id="ftrBottomPortfolio">Websites &amp; Tools</a>
     </span>
   </div>
 </footer>
@@ -1494,7 +1495,7 @@ const i18n = {
     uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · আগের export করা .txt আবার import করা যাবে',
     stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
     copyAllBtnTxt: 'সব Text Copy', copyAllMergedBtnTxt: 'Merged Copy',
-    copyClipBtnTxt: 'কপি', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', folderBtnTxt: 'Folder থেকে ছবি',
+    copyClipBtnTxt: 'কপি', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', allClearBtnTxt: 'All Clear', folderBtnTxt: 'Folder থেকে ছবি',
     previewTitleTxt: '👁 Preview', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
     previewEmptyTxt: 'কোনো পেজ select করুন',
     textTitleTxt: '✏️ Text — পেজ',
@@ -1576,7 +1577,7 @@ const i18n = {
     uploadSubNote: 'PDF pages are processed separately · previously exported .txt files can be re-imported',
     stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
     copyAllBtnTxt: 'Copy All Text', copyAllMergedBtnTxt: 'Merged Copy',
-    copyClipBtnTxt: 'Copy', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', folderBtnTxt: 'Import image folder',
+    copyClipBtnTxt: 'Copy', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', allClearBtnTxt: 'All Clear', folderBtnTxt: 'Import image folder',
     previewTitleTxt: '👁 Preview', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
     previewEmptyTxt: 'Select a page to preview',
     textTitleTxt: '✏️ Text — Page',
@@ -1675,7 +1676,7 @@ function applyLanguage() {
   html.lang = currentLang === 'en' ? 'en' : 'bn';
   const ids = ['chipFree','chipNoApi','how1Title','how1Text','how2Title','how2Text','how3Title','how3Text','how4Title','how4Text',
     'uploadTitle','uploadSubNote','stripLabelPrefix','stripLabelSuffix','copyAllBtnTxt','copyAllMergedBtnTxt',
-    'copyClipBtnTxt','downloadBtnTxt','exportBtnTxt','folderBtnTxt','previewTitleTxt','previewEmptyTxt','textTitleTxt',
+    'copyClipBtnTxt','downloadBtnTxt','exportBtnTxt','allClearBtnTxt','folderBtnTxt','previewTitleTxt','previewEmptyTxt','textTitleTxt',
     'lensSectionTitleTxt','lensSectionSubTxt','allExtractedTitleTxt','allCopyBtnTxt','allDlBtnTxt',
     'ftrText1','ftrBadge1','ftrBadge2','ftrBadge3','ftrKicker2','ftrText2','ftrOwnerLine1','ftrOwnerLine2','ftrOwnerLine3',
     'ftrKicker3','ftrTitle3','ftrText3','ftrBottomText','ftrBottomPortfolio'];
@@ -2752,24 +2753,114 @@ window.addEventListener('focus', () => {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
 window.addEventListener('pagehide', () => { saveNow(); });
 
-// imgbb link টিকে থাকার সময় (upload 30 min expiry; আমরা 20 min পরে নতুন করে upload করি)
-const REMOTE_TTL = 20 * 60 * 1000;
+// imgbb link এখন expire হয় না (server expiration দেয় না)। তবু নিরাপত্তার জন্য 7 দিন পর নিজে থেকে নতুন করে upload করা হয়।
+const REMOTE_TTL = 7 * 24 * 60 * 60 * 1000;
 const isFresh = pg => !!pg.remoteUrl && (Date.now() - (pg.remoteAt || 0)) < REMOTE_TTL;
-// শুধু সামনের কয়েকটা page আগে থেকে upload — সব একসাথে নয়, তাই পিছনের page-এর link আর মরে না
-const PREFETCH = 3;
-let _prefetching = false, _prefetchAgain = null;
-async function prefetchAhead(from = state.current, count = PREFETCH) {
-  if (_prefetching) { _prefetchAgain = from; return; }
-  _prefetching = true;
-  try {
-    for (let i = from; i < Math.min(state.pages.length, from + count); i++) {
-      const pg = state.pages[i];
-      if (!pg || pg.txtOnly || pg.status === 'uploading' || pg.status === 'error' || pg.status === 'done' || isFresh(pg)) continue;
-      await uploadPage(i);
-    }
-  } finally { _prefetching = false; }
-  if (_prefetchAgain != null) { const f = _prefetchAgain; _prefetchAgain = null; prefetchAhead(f); }
+
+// ── Background auto-upload ───────────────────────────────────────────────────
+// সব page নিজে থেকে, একসাথে কয়েকটা করে (parallel) upload হয়; থামে না।
+//  • যে page-এ আছি সেখান থেকে শুরু, তারপর সামনে, শেষে পিছনের page
+//  • fail করলে নিজে নিজে আবার চেষ্টা (backoff সহ) — কখনো হাল ছাড়ে না
+//  • link পুরনো হয়ে গেলে নিজে নতুন করে upload
+//  • internet গেলে থামে, ফিরলে আবার চলে; tab-এ ফিরলেও চলে
+const UPLOAD_CONCURRENCY = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? 4 : 8;   // queue একটানা চলে; এটা শুধু একসাথে কয়টা request ওড়ে
+const UPLOAD_RETRY_BASE_MS = 4000, UPLOAD_RETRY_MAX_MS = 60000;
+const UPLOAD_KEEPER_MS = 30000;
+const _bgFail = new Map();            // page id -> { n, nextAt }
+let _bgActive = 0, _bgTimer = null, _bgPauseUntil = 0, _bgDidWork = false, _bgSlowToastAt = 0;
+
+const needsUpload = pg => !!pg && !pg.txtOnly && pg.status !== 'uploading' && pg.status !== 'done' && !isFresh(pg);
+
+function pickNextUpload() {
+  const n = state.pages.length;
+  if (!n) return -1;
+  const now = Date.now();
+  const from = Math.min(Math.max(state.current || 0, 0), n - 1);
+  for (let k = 0; k < n; k++) {
+    const i = (from + k) % n;
+    const pg = state.pages[i];
+    if (!needsUpload(pg)) continue;
+    const f = _bgFail.get(pg.id);
+    if (f && f.nextAt > now) continue;
+    return i;
+  }
+  return -1;
 }
+
+function bgUploadProgress() {
+  if (state.uploading) return;                       // manual "retry all" owns the bar
+  const eligible = state.pages.filter(p => !p.txtOnly && p.status !== 'done');
+  if (!eligible.length) return;
+  const ok = eligible.filter(p => isFresh(p) || p.status === 'ready').length;
+  const errors = eligible.filter(p => p.status === 'error').length;
+  if (ok >= eligible.length) {
+    if (_bgDidWork && _bgActive === 0) {
+      _bgDidWork = false;
+      setUploadProgress(ok, eligible.length, false);
+      toast(t('allUploadComplete'), 'ok', 2500);
+      setTimeout(() => { if (_bgActive === 0 && !state.uploading) hideProgress(); }, 1200);
+      updateBanner();
+    }
+    return;
+  }
+  if (_bgDidWork || _bgActive > 0) {
+    showProgress();
+    $('uploadPhaseLabel').textContent = t('uploadPhaseLabel');
+    setUploadProgress(ok, eligible.length, errors > 0 && _bgActive === 0);
+  }
+}
+
+function scheduleUploadKeeper(delay = UPLOAD_KEEPER_MS) {
+  clearTimeout(_bgTimer);
+  _bgTimer = setTimeout(pumpUploads, delay);
+}
+
+async function _uploadWorker() {
+  _bgActive++;
+  try {
+    while (navigator.onLine && Date.now() >= _bgPauseUntil) {
+      const i = pickNextUpload();
+      if (i < 0) break;
+      const pg = state.pages[i];
+      _bgDidWork = true;
+      const r = await uploadPage(i, true);
+      if (r === true) _bgFail.delete(pg.id);
+      else if (r === false) {
+        const f = _bgFail.get(pg.id) || { n: 0, nextAt: 0 };
+        f.n++;
+        f.nextAt = Date.now() + Math.min(UPLOAD_RETRY_MAX_MS, UPLOAD_RETRY_BASE_MS * Math.pow(2, f.n - 1));
+        _bgFail.set(pg.id, f);
+        if (f.n === 3 && Date.now() - _bgSlowToastAt > 60000) {
+          _bgSlowToastAt = Date.now();
+          toast(L('Upload একটু আটকাচ্ছে — নিজে নিজে আবার চেষ্টা চলছে', 'Uploads are struggling — retrying automatically'), 'warn', 4000);
+        }
+      }
+      bgUploadProgress();
+    }
+  } finally {
+    _bgActive--;
+    if (_bgActive === 0) { bgUploadProgress(); scheduleUploadKeeper(); }
+  }
+}
+
+function pumpUploads() {
+  if (window.__textrivaNoBgUpload) return;   // শুধু test harness-এর জন্য switch
+  clearTimeout(_bgTimer);
+  if (!state.pages.length) { scheduleUploadKeeper(); return; }
+  const wait = _bgPauseUntil - Date.now();
+  if (wait > 0) { scheduleUploadKeeper(wait + 50); return; }
+  if (navigator.onLine) {
+    while (_bgActive < UPLOAD_CONCURRENCY && pickNextUpload() >= 0) _uploadWorker();
+  }
+  if (_bgActive === 0) scheduleUploadKeeper(); else bgUploadProgress();
+}
+
+// পুরনো নাম — বিভিন্ন জায়গা থেকে ডাকা হয়; এখন সব page-ই upload হয়
+function prefetchAhead() { pumpUploads(); }
+
+window.addEventListener('online', () => { _bgPauseUntil = 0; pumpUploads(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pumpUploads(); });
+scheduleUploadKeeper(2000);
 
 // ══════════════════════════════════════════
 // FILE HANDLING
@@ -2807,7 +2898,8 @@ async function handleFiles(files) {
   }
   fileInput.value = '';
   hideProgress();
-  renderAll();   // renderWorkspace() সামনের কয়েকটা page নিজেই prefetch করে
+  renderAll();   // renderWorkspace() background upload চালু করে
+  pumpUploads(); bgUploadProgress();
 }
 
 // ── TXT Re-import ─────────────────────────────────────────────────────────────
@@ -5219,6 +5311,7 @@ async function addPage(name, blob, url, pdfPage) {
   const id = Math.random().toString(36).slice(2);
   const pg = { id, name, blob, url, status: 'pending', remoteUrl: '', text: '', pdfPage: pdfPage || null, remoteAt: 0, driveFileId: null, blobSaved: false, hash: null, phash: null, dupOf: null };
   state.pages.push(pg);
+  pumpUploads();   // নতুন page এলেই background upload শুরু/চালু
   // Compute hashes in the background so adding many pages stays fast; duplicate
   // checks/UI updates happen once each page's hash resolves.
   computePageHashes(pg).catch(() => {}); // hashing failure must never block the upload flow
@@ -5338,6 +5431,36 @@ function clearWorkspace() {
   saveNow();            // আগের কাজ library-তে থেকে যায় (snapshot সাথে সাথেই নেওয়া হয়)
   resetWorkspaceState();
 }
+// ── All Clear: দুই ধাপ নিশ্চিতকরণের পর সব মুছে অ্যাপ একদম শুরুর অবস্থায় ──
+// মোছে: সব page/ছবি, লেখা text, note, bookmark, upload queue, undo, এই project-এর Library কপি।
+// ছোঁয়া হয় না: Google Drive-এ আগে save করা কপি, Library-র অন্য project।
+async function allClear() {
+  if (!state.pages.length && !state.projectId) { toast(L('পরিষ্কার করার মতো কিছু নেই', 'Nothing to clear'), '', 2000); return; }
+  const n = state.pages.length;
+  if (!confirm(L(
+    `⚠️ All Clear — ধাপ ১/২\n\nএই project-এর ${n}টা page, সব লেখা text, note, bookmark আর upload মুছে অ্যাপ একদম শুরুর অবস্থায় ফিরবে।\n\nচালিয়ে যাবেন?`,
+    `⚠️ All Clear — step 1/2\n\nThis removes all ${n} pages, every piece of text, notes, bookmarks and uploads, and returns the app to its starting state.\n\nContinue?`))) return;
+  if (!confirm(L(
+    `🛑 শেষবারের মতো নিশ্চিত করুন — ধাপ ২/২\n\nএটা আর ফেরত আনা যাবে না (Undo নেই)। এই project এই device-এর Library থেকেও মুছে যাবে।\n(Google Drive-এ আগে save করা কপি আর Library-র অন্য project ছোঁয়া হবে না।)\n\nসত্যিই সব মুছবেন?`,
+    `🛑 Final confirmation — step 2/2\n\nThis cannot be undone. The project is also removed from this device's Library.\n(A copy already saved to Google Drive and other Library projects are not touched.)\n\nReally delete everything?`))) return;
+
+  // upload queue থামাও
+  _bgFail.clear(); _bgDidWork = false; clearTimeout(_bgTimer); clearTimeout(_dtimer);
+  state.pages.forEach(p => { try { URL.revokeObjectURL(p.url); } catch {} });
+  state.pages = [];                       // pages খালি + projectId আছে → saveNow() Library থেকে project মুছে দেয়
+  try { await saveNow(); } catch {}
+  resetWorkspaceState();
+  state.sourceFileName = '';
+  state.awaitingLens = false;
+  textArea.value = '';
+  try { updateTxtStats(); } catch {}
+  try { fileInput.value = ''; } catch {}
+  try { await initResumeCard(); } catch {}
+  scheduleUploadKeeper();
+  toast(L('✅ সব পরিষ্কার — আবার শুরু করুন', '✅ Everything cleared — start fresh'), 'ok', 3500);
+}
+$('allClearBtn').onclick = allClear;
+
 function resetWorkspaceState() {
   state.pages.forEach(p => { try { URL.revokeObjectURL(p.url); } catch {} });
   state.pages = []; state.current = 0;
@@ -5544,7 +5667,7 @@ function blobToBase64(blob) {
   });
 }
 
-async function compressBlob(blob, maxKB = 3500) {
+async function compressBlob(blob, maxKB = 2800) {   // base64 +33% → ~3.7MB, Vercel-এর 4.5MB body limit-এর নিচে
   if (blob.size / 1024 <= maxKB) return blob;
   return new Promise(resolve => {
     const img = new Image();
@@ -5567,22 +5690,30 @@ async function compressBlob(blob, maxKB = 3500) {
 // imgbb key lives only in server env vars (Vercel / Cloudflare). See api/upload.js.
 async function uploadToImgbb(b64) {
   let res, data;
+  const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const killer = ctl ? setTimeout(() => ctl.abort(), 90000) : null;   // আটকে থাকা request queue থামাতে পারবে না
   try {
     res = await fetch('/api/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: b64 }),
+      signal: ctl ? ctl.signal : undefined,
     });
   } catch (e) {
+    clearTimeout(killer);
     throw new Error(L('সার্ভারে পৌঁছানো যাচ্ছে না — ইন্টারনেট চেক করো', 'Could not reach the upload server — check your connection'));
   }
   try {
     data = await res.json();
   } catch (e) {
+    clearTimeout(killer);
     throw new Error(L('সার্ভার থেকে ভুল উত্তর এসেছে', 'Server returned an invalid response'));
   }
+  clearTimeout(killer);
   if (!res.ok || !data.success) {
-    throw new Error(data?.error || L('Upload ব্যর্থ হয়েছে — পরে আবার চেষ্টা করো', 'Upload failed — please try again'));
+    const err = new Error(data?.error || L('Upload ব্যর্থ হয়েছে — পরে আবার চেষ্টা করো', 'Upload failed — please try again'));
+    err.status = res.status;
+    throw err;
   }
   return data.url;
 }
@@ -5599,41 +5730,48 @@ async function uploadImageWithRetry(blob, maxAttempts = 3) {
       return url;
     } catch (e) {
       lastErr = e;
+      if (e && e.status === 429) _bgPauseUntil = Math.max(_bgPauseUntil, Date.now() + 10000);   // too many requests → সবাই একটু থামুক
       if (attempt < maxAttempts) {
-        // exponential backoff: 1s, 2s, 4s
-        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+        // exponential backoff: 1s, 2s, 4s (429 হলে 8s+)
+        const base = (e && e.status === 429) ? 8000 : 1000;
+        await new Promise(r => setTimeout(r, base * Math.pow(2, attempt - 1)));
       }
     }
   }
   throw lastErr;
 }
 
-async function uploadPage(i) {
+// quiet = background auto-upload (toast/renderWorkspace ছাড়া, যাতে লেখার মাঝে বিরক্ত না করে)
+// return: true = upload হয়েছে, false = fail, null = বাদ পড়েছে (ছবি বদলেছে / আগে থেকেই ঠিক আছে)
+async function uploadPage(i, quiet = false) {
   const pg = state.pages[i];
-  if (!pg || pg.status === 'uploading' || isFresh(pg)) return;
+  if (!pg || pg.status === 'uploading' || isFresh(pg)) return null;
   const prev = pg.status;
   const blob0 = pg.blob;   // Phase 3: if the image is edited while uploading, this link shows the OLD image → drop it
   pg.status = 'uploading';
   renderStrip(); renderLensGrid();
+  let ok = false;
   try {
     const url = await uploadImageWithRetry(pg.blob);
-    if (pg.blob !== blob0) { renderStrip(); renderLensGrid(); return; }
+    if (pg.blob !== blob0) { renderStrip(); renderLensGrid(); return null; }
     pg.remoteUrl = url;
     pg.remoteAt = Date.now();
     pg.status = (prev === 'done' || pg.status === 'done') ? 'done' : 'ready';
     trackUploadError(false);
-    toast(t('pageUploaded', { num: i + 1 }), 'ok', 2000);
+    if (!quiet) toast(t('pageUploaded', { num: i + 1 }), 'ok', 2000);
+    ok = true;
   } catch (e) {
-    if (pg.blob !== blob0) { renderStrip(); renderLensGrid(); return; }
+    if (pg.blob !== blob0) { renderStrip(); renderLensGrid(); return null; }
     pg.status = (prev === 'done' || pg.status === 'done') ? 'done' : 'error';
     pg.remoteUrl = '';
     pg.remoteAt = 0;
     trackUploadError(true);
-    toast(t('pageUploadFailed', { num: i + 1, error: e.message }), 'err', 4000);
+    if (!quiet) toast(t('pageUploadFailed', { num: i + 1, error: e.message }), 'err', 4000);
   }
   renderStrip(); renderLensGrid();
-  if (state.current === i) renderWorkspace();
+  if (state.current === i && !quiet) renderWorkspace();
   updateStats();
+  return ok;
 }
 
 async function uploadAllPages(onlyErrors = false) {
@@ -5679,6 +5817,7 @@ async function retryPage(i) {
   const pg = state.pages[i];
   if (!pg || pg.status === 'uploading') return;
   toast(t('retryingPage', { num: i + 1 }), '', 2000);
+  _bgFail.delete(pg.id);
   pg.status = 'pending';
   renderStrip(); renderLensGrid();
   showProgress();
@@ -5691,8 +5830,9 @@ async function retryPage(i) {
 }
 
 // Retry all failed button
-retryFailedBtn.onclick = () => uploadAllPages(true);
-retryActionBtn.onclick  = () => uploadAllPages(true);
+const retryFailedNow = () => { _bgFail.clear(); _bgPauseUntil = 0; pumpUploads(); toast(L('সব failed page আবার upload হচ্ছে…', 'Retrying all failed pages…'), '', 2000); };
+retryFailedBtn.onclick = retryFailedNow;
+retryActionBtn.onclick  = retryFailedNow;
 
 // ══════════════════════════════════════════
 // GOOGLE LENS

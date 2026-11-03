@@ -307,7 +307,7 @@ test('Alt+→ moves the current page when no dialog is open', async () => {
 });
 
 test('an upload that finishes after the image was edited is discarded (Lens must never get the old image)', async () => {
-  const w = await bootApp();
+  const w = await bootApp({ bgUpload: true });
   fakeIO(w);
   let n = 0;
   w.fetch = () => { const id = ++n; return new Promise(r => setTimeout(() => r({ ok: true, json: async () => ({ success: true, url: 'https://i.example/up' + id + '.jpg' }) }), 30)); };
@@ -320,6 +320,7 @@ test('an upload that finishes after the image was edited is discarded (Lens must
   await tick(250);
   assert.notEqual(pg.remoteUrl, 'https://i.example/up1.jpg', 'link of the pre-edit image was dropped');
   assert.ok(n >= 2, 'the edited image was uploaded again');
+  w.close();   // stop the background-upload keeper timer
 });
 
 // ── wiring (static) ──

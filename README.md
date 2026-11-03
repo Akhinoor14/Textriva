@@ -49,8 +49,10 @@ vercel --prod
 
 - প্রতিটা upload/PDF **project** হিসেবে browser-এর IndexedDB-তে save হয় (ছবি + লেখা text + কোন page done)।
   Refresh/বন্ধ করলেও থাকে। হোমে **"চালিয়ে যান"** card আসে; header-এর **Library** থেকে সব project খোলা/`.txt` নামানো/মোছা যায়।
-- Lens-এর জন্য imgbb link এখন **শুধু সামনের ৩ page** আগে থেকে upload হয় এবং ২০ মিনিটের বেশি পুরনো হলে নিজে থেকে নতুন করে upload হয় —
-  তাই বড় PDF-এও পিছনের page-এর link আর মরে না।
+- **Auto upload (সব page, একটানা, থামে না):** PDF/ছবি দেওয়ার সাথে সাথেই সব page-এর imgbb link নিজে থেকে তৈরি হতে থাকে — একসাথে ৮টা request (কম RAM-এর ফোনে ৪টা), queue একটানা চলে। আপনি যে page-এ আছেন সেখান থেকে শুরু, তারপর সামনে, শেষে পিছনের page।
+  Fail করলে নিজে নিজে আবার চেষ্টা (৪s → ৮s → … ৬০s), internet গেলে থেমে থাকে ও ফিরলে নিজেই চলে, 429 এলে একটু থেমে আবার। উপরের progress bar-এ % দেখা যায়।
+- **Expire-এর চিন্তা নেই:** server এখন imgbb-তে `expiration` দেয় না, তাই link expire হয় না। (নিরাপত্তার জন্য ৭ দিন পর app নিজে নতুন করে upload করে।)
+- **🗑 All Clear:** action row-এর শেষ বাটন। চাপলে ২ ধাপে confirm চায়; দুটোতেই OK দিলে সব page, text, note, bookmark, upload queue ও এই project-এর Library কপি মুছে অ্যাপ শুরুর অবস্থায় ফেরে। Undo নেই। Google Drive-এ আগে save করা কপি ও Library-র অন্য project ছোঁয়া হয় না।
 
 ## ☁️ Google Sign in + Drive
 

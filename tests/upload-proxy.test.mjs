@@ -58,7 +58,7 @@ test('500 response never contains the word "imgbb key" or an actual key value', 
 test('enforces per-IP rate limit after many rapid requests', async () => {
   const ip = '203.0.113.9';
   let lastStatus;
-  for (let i = 0; i < 35; i++) {
+  for (let i = 0; i < 605; i++) {
     const req = {
       method: 'POST',
       headers: { 'x-forwarded-for': ip },

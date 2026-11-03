@@ -1,5 +1,5 @@
 // Textriva Service Worker — v1.7 (Phase 9: share target + offline CDN cache)
-const CACHE = 'textriva-v15';
+const CACHE = 'textriva-v16';
 
 const SHELL = [
   '/',

@@ -11,7 +11,7 @@
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 30;
+const RATE_LIMIT_MAX_REQUESTS = 600; // per IP per window (একটানা parallel background upload)
 
 const rateBuckets = globalThis.__textrivaRateBuckets || (globalThis.__textrivaRateBuckets = new Map());
 
@@ -76,7 +76,7 @@ export async function onRequestPost(context) {
 
     const form = new FormData();
     form.append('image', image);
-    form.append('expiration', '1800');
+    // expiration দেওয়া হয় না → link কখনো expire হয় না (client 7 দিন পর safety re-upload করে)
 
     const imgbbUrl = `https://api.imgbb.com/1/upload?key=${env.IMGBB_KEY}`;
     const res = await fetch(imgbbUrl, { method: 'POST', body: form });

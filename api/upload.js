@@ -12,7 +12,7 @@
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024; // ~12MB base64 (client compresses before upload)
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 30; // per IP per window
+const RATE_LIMIT_MAX_REQUESTS = 600; // per IP per window (একটানা parallel background upload)
 
 // Best-effort in-memory store. Resets whenever the serverless instance recycles;
 // this is a soft guard against runaway/looped clients, not a security boundary.
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 
     const form = new FormData();
     form.append('image', image);
-    form.append('expiration', '1800'); // 30 min — matches client REMOTE_TTL expectations
+    // expiration দেওয়া হয় না → link কখনো expire হয় না (client 7 দিন পর safety re-upload করে)
 
     const imgbbRes = await fetch(
       `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}`,
