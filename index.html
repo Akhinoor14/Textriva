@@ -296,7 +296,9 @@ a { color:inherit; text-decoration:none }
 .strip-label { font-size:.8rem; color:var(--mid); font-family:var(--font-body); font-weight:600 }
 .strip-label b { color:var(--accent) }
 .strip-actions { display:flex; gap:.4rem }
-.strip { display:flex; gap:.5rem; overflow-x:auto; padding-bottom:.5rem; scrollbar-width:thin; }
+.strip { position:relative; display:flex; gap:.5rem; overflow-x:auto; padding:.7rem .5rem .6rem; scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%); }
 .page-thumb {
   flex-shrink:0; width:82px;
   border-radius:var(--r-sm); border:2px solid var(--line);
@@ -304,7 +306,8 @@ a { color:inherit; text-decoration:none }
   position:relative; overflow:hidden;
 }
 .page-thumb:hover { border-color:var(--accent); transform:translateY(-2px) }
-.page-thumb.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-gm) }
+.page-thumb.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-gm), 0 8px 22px var(--accent-gm); transform:scale(1.12); z-index:2 }
+.page-thumb.active:hover { transform:scale(1.12) }
 .page-thumb.done { border-color:var(--green) }
 .page-thumb.uploading { border-color:var(--yellow) }
 .page-thumb.error { border-color:var(--red) }
@@ -967,9 +970,139 @@ a { color:inherit; text-decoration:none }
 .lib-actions .btn { padding:.38rem .7rem; font-size:.74rem; text-decoration:none }
 .lib-empty { text-align:center; color:var(--dim); padding:1.6rem .5rem; font-size:.82rem; line-height:1.8 }
 @media (max-width:600px) { .lib-actions { width:100% } .lib-actions .btn { flex:1; justify-content:center } }
+
+/* ── account state + welcome card ── */
+#acctBtn { position:relative }
+#acctBtn.acct-stale::after { content:''; position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%; background:#f59e0b; box-shadow:0 0 0 2px var(--card); }
+.wl-bg { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(3,8,20,.62); backdrop-filter:blur(3px); animation:wlFade .18s ease-out }
+.wl-card { position:relative; width:100%; max-width:460px; max-height:calc(100vh - 32px); overflow:auto; background:var(--card); color:var(--text); border:1px solid var(--line2); border-radius:18px; padding:26px 24px 18px; box-shadow:0 24px 64px rgba(0,0,0,.45); animation:wlPop .22s cubic-bezier(.2,.9,.3,1.1) }
+.wl-x { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; border:1px solid var(--line2); background:transparent; color:var(--mid); cursor:pointer; font-size:.9rem }
+.wl-x:hover { color:var(--text); border-color:var(--accent) }
+.wl-brand { display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:.02em; color:var(--accent); margin-bottom:10px }
+.wl-card h2 { margin:0 0 6px; font-size:1.3rem; line-height:1.3 }
+.wl-sub { margin:0 0 14px; font-size:.88rem; line-height:1.6; color:var(--mid) }
+.wl-list { list-style:none; margin:0 0 14px; padding:0; display:grid; gap:8px }
+.wl-list li { display:flex; gap:12px; align-items:flex-start; padding:10px 12px; background:var(--card2); border:1px solid var(--line2); border-radius:12px }
+.wl-ico { flex:0 0 auto; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:var(--accent-gl); font-size:1.05rem }
+.wl-list b { display:block; font-size:.9rem; margin-bottom:2px }
+.wl-list small { display:block; font-size:.78rem; line-height:1.55; color:var(--mid) }
+.wl-note { font-size:.78rem; line-height:1.6; color:var(--mid); border-left:3px solid var(--accent); padding:4px 0 4px 10px; margin-bottom:16px }
+.wl-actions { display:flex; flex-direction:column; gap:8px }
+.wl-actions .btn { width:100%; justify-content:center; padding:11px 14px }
+.wl-go { display:flex; align-items:center; gap:8px }
+.wl-priv { display:block; text-align:center; margin-top:12px; font-size:.74rem; color:var(--mid) }
+@keyframes wlFade { from { opacity:0 } to { opacity:1 } }
+@keyframes wlPop { from { opacity:0; transform:translateY(10px) scale(.97) } to { opacity:1; transform:none } }
+@media (prefers-reduced-motion: reduce) { .wl-bg, .wl-card { animation:none } }
+@media (max-width:480px) { .wl-card { padding:22px 16px 14px } .wl-card h2 { font-size:1.15rem } }
+
+/* ══════════════════════════════════════════════
+   PROFESSIONAL POLISH — calm visuals, functional motion only
+══════════════════════════════════════════════ */
+[hidden] { display:none !important }
+.ic { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; vertical-align:-3px }
+.ic-xl { width:38px; height:38px; stroke-width:1.5 }
+.upload-icon { color:var(--accent); display:flex; justify-content:center; margin-bottom:.5rem }
+.preview-empty .big { display:flex; justify-content:center; color:var(--dim); opacity:.6; margin-bottom:.4rem }
+.wl-ico .ic, .pwa-icon .ic { width:18px; height:18px }
+.btn-icon .ic, .pt-badge .ic { width:14px; height:14px }
+
+/* no glow, no lift, no decorative gradients */
+.btn { transition: background .12s, border-color .12s, color .12s }
+.btn-primary, .btn-primary:hover:not(:disabled) { box-shadow:none; transform:none }
+.btn-warning:hover:not(:disabled), .hdr-ctl:hover, .hdr-ctl:active, .page-thumb:hover, .upload-area:hover, .upload-area.over { transform:none }
+.upload-area:hover .upload-icon { transform:none }
+.upload-area::before { display:none }
+.hdr { box-shadow:none; backdrop-filter:none; background:var(--card) !important; }
+.logo-mark { box-shadow:none; background:transparent !important }
+.logo-wordmark { text-shadow:none !important }
+.chip-free, .chip-done.all-done { box-shadow:none }
+.modal::before { display:none }
+.modal { box-shadow:0 8px 28px rgba(0,0,0,.28) }
+.modal-bg { backdrop-filter:none }
+.progress-bar.split-bar { background:var(--yellow) }
+.progress-bar.upload-bar { background:var(--accent) }
+.progress-bar.upload-bar.error { background:var(--red) }
+.wl-bg { backdrop-filter:none }
+
+/* motion: only what shows activity (spinner, progress width) */
+.btn-warning.has-errors, #flowBtn.waiting-copy, .pt-progress { animation:none }
+.pt-progress { transform:none; width:100% }
+.toast, .modal-bg, .modal, #pwa-install-bar { animation:none }
+.toast.out { animation:none; opacity:0; transition:opacity .15s }
+.wl-bg, .wl-card { animation:none }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important } }
+
+/* action row: status chips left, main actions right */
+.action-spacer { flex:1 1 auto }
+.more-wrap { position:relative }
+.more-menu { position:absolute; right:0; top:calc(100% + 6px); z-index:120; min-width:200px; display:flex; flex-direction:column; gap:2px; padding:6px; background:var(--card); border:1px solid var(--line2); border-radius:var(--r-sm); box-shadow:0 8px 24px rgba(0,0,0,.28) }
+.more-menu.hidden { display:none }
+.more-menu .btn { width:100%; justify-content:flex-start; border-color:transparent; background:transparent; font-weight:500 }
+.more-menu .btn.hidden { display:none }
+.more-menu .btn-secondary:hover { background:var(--accent-gl); border-color:transparent }
+.more-menu .btn-danger { background:transparent }
+.more-menu .btn-danger:hover { background:var(--red-gl) }
+.more-sep { height:1px; background:var(--line); margin:4px 2px }
+
+/* sticky Auto Step bar (same action as the Space key) */
+.step-bar { position:fixed; left:0; right:0; bottom:0; z-index:90; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.65rem 1.5rem calc(.65rem + env(safe-area-inset-bottom, 0px)); background:var(--card); border-top:1px solid var(--line2) }
+.step-bar.hidden { display:none }
+.step-info { display:flex; flex-direction:column; min-width:0; line-height:1.3 }
+.step-info b { font-size:.95rem; font-variant-numeric:tabular-nums }
+.step-info span { font-size:.74rem; color:var(--mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#flowBtn { min-height:54px; padding:.8rem 2.1rem; font-size:1.05rem; font-weight:700; flex:none; margin-left:auto; border-radius:calc(var(--r-sm) + 2px); box-shadow:0 4px 18px var(--accent-gm) }
+#flowBtn.waiting-copy { opacity:1; background:var(--yellow-gl); color:var(--yellow); border-color:var(--yellow) }
+#flowBtn.is-complete { background:var(--green-gl); color:var(--green); border-color:var(--green) }
+.step-kbd { font-family:var(--font-mono); font-size:.66rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid currentColor; opacity:.75; margin-left:.25rem }
+@media (hover:none), (max-width:700px) { .step-kbd { display:none } }
+@media (max-width:560px) { .step-bar { padding-left:1rem; padding-right:1rem } #flowBtn { padding:.7rem 1.2rem; min-height:50px; font-size:1rem } }
+body.has-stepbar .wrap { padding-bottom:6rem }
+body.has-stepbar #pwa-install-bar { bottom:76px }
+
+/* ── MOBILE ONLY (phones / touch): thumb-zone Auto Step + swipe-friendly strip. Desktop is untouched. ── */
+@media (max-width:640px) {
+  /* strip: swipe settles on a thumbnail, no accidental ✕, bigger tap targets */
+  .strip { gap:.55rem; padding:.9rem 50% 1rem; scroll-snap-type:x proximity; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%) }
+  .page-thumb { scroll-snap-align:center; -webkit-tap-highlight-color:transparent }
+  .page-thumb.active { transform:scale(1.18) }
+  .page-thumb .pt-remove { display:none }
+  /* Auto Step: full-width, thumb-reach button; progress sits on a slim line above it */
+  .step-bar { flex-direction:column; align-items:stretch; gap:.45rem; padding:.55rem .9rem calc(.6rem + env(safe-area-inset-bottom, 0px)); box-shadow:0 -6px 20px rgba(0,0,0,.18) }
+  .step-info { flex-direction:row; align-items:baseline; justify-content:space-between; gap:.6rem }
+  .step-info b { font-size:.85rem }
+  .step-info span { font-size:.72rem; text-align:right }
+  #flowBtn { width:100%; margin-left:0; min-height:58px; justify-content:center; font-size:1.1rem; border-radius:14px; touch-action:manipulation; -webkit-tap-highlight-color:transparent }
+  #flowBtn:active:not(:disabled) { transform:scale(.97) }
+  body.has-stepbar .wrap { padding-bottom:9.5rem }
+  body.has-stepbar #pwa-install-bar { bottom:112px }
+}
 </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5v14l12-7z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 12h6M9 16h6"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-first" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6z"/></symbol>
+  <symbol id="i-last" viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-drive" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 0 9.5z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4M4 5v4h4M4 13a8 8 0 0 0 14.5 4M20 19v-4h-4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-offline" viewBox="0 0 24 24"><path d="M3 3l18 18M8.5 8.5A8 8 0 0 0 4 11M12 12a4 4 0 0 0-3 1.3M16 8.3A8 8 0 0 1 20 11M12 18h.01"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
 
 <!-- ═══════════ HEADER ═══════════ -->
 <header class="hdr">
@@ -982,8 +1115,8 @@ a { color:inherit; text-decoration:none }
       </div>
     </div>
     <div class="hdr-right">
-      <span class="chip chip-free" id="chipFree">✦ Free</span>
-      <span class="chip chip-lens" id="chipNoApi">⚡ No API</span>
+      <span class="chip chip-free" id="chipFree" hidden>Free</span>
+      <span class="chip chip-lens" id="chipNoApi" hidden>No API</span>
       <div id="statsChip" class="chip chip-done hidden"></div>
       <div class="quality-sel" title="PDF render quality — higher = better OCR but slower">
         <label id="qualityLabel">DPI</label>
@@ -1029,7 +1162,7 @@ a { color:inherit; text-decoration:none }
 <main class="wrap">
 
   <!-- HOW IT WORKS -->
-  <div class="how-strip" id="howStrip">
+  <div class="how-strip" id="howStrip" hidden>
     <div class="how-card"><div class="how-num">1</div><div class="how-txt"><p id="how1Title">Upload করুন</p><small id="how1Text">Image (JPG/PNG/WEBP) বা PDF — PDF হলে প্রতিটি page আলাদা হবে</small></div></div>
     <div class="how-card"><div class="how-num">2</div><div class="how-txt"><p id="how2Title">Direct Lens</p><small id="how2Text">Upload ছাড়াই Google Lens এ সরাসরি page পাঠানো যাবে — ISP block নেই</small></div></div>
     <div class="how-card"><div class="how-num">3</div><div class="how-txt"><p id="how3Title">Google Lens</p><small id="how3Text">সেই link দিয়ে Google Lens খুলবে — Lens নিজেই text extract করবে</small></div></div>
@@ -1037,7 +1170,7 @@ a { color:inherit; text-decoration:none }
   </div>
 
   <!-- GOOGLE SIGN-IN PROMPT + RESUME -->
-  <div class="lib-banner hidden" id="acctPrompt">
+  <div class="lib-banner hidden" id="acctPrompt" hidden>
     <div class="lib-banner-txt" id="acctPromptTxt"></div>
     <button class="btn btn-primary" id="acctPromptBtn">Sign in</button>
     <button class="btn btn-secondary" id="acctPromptX" aria-label="Dismiss">✕</button>
@@ -1045,14 +1178,14 @@ a { color:inherit; text-decoration:none }
   <div class="lib-banner hidden" id="resumeCard">
     <div class="lib-banner-txt" id="resumeTxt"></div>
     <button class="btn btn-primary" id="resumeBtn">▶</button>
-    <button class="btn btn-secondary" id="resumeLibBtn">📚 Library</button>
+    <button class="btn btn-secondary" id="resumeLibBtn">Library</button>
   </div>
 
   <!-- UPLOAD ZONE -->
   <div class="upload-area" id="uploadArea" style="margin-top:1.25rem">
     <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden/>
     <input type="file" id="fileInput" accept="image/*,.pdf,.txt,text/plain,.zip,.docx,.json" multiple/>
-    <div class="upload-icon">📂</div>
+    <div class="upload-icon"><svg class="ic ic-xl" aria-hidden="true"><use href="#i-upload"/></svg></div>
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
       <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
@@ -1061,7 +1194,7 @@ a { color:inherit; text-decoration:none }
   </div>
 
   <div style="text-align:center;margin-top:.5rem">
-    <button class="btn btn-secondary" id="folderBtn" type="button" style="min-height:44px">📁 <span id="folderBtnTxt">Folder import</span></button>
+    <button class="btn btn-secondary" id="folderBtn" type="button" style="min-height:44px"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> <span id="folderBtnTxt">Folder import</span></button>
     <input type="file" id="folderInput" webkitdirectory multiple style="display:none"/>
     <input type="file" id="backupInput" accept=".zip,.json,application/zip,application/json" multiple style="display:none"/>
     <div class="upload-sub" style="margin-top:.35rem">.zip (images / backup) · .docx · .json</div>
@@ -1081,7 +1214,7 @@ a { color:inherit; text-decoration:none }
     <!-- Phase 1: PDF Split -->
     <div class="progress-phase" id="splitPhase">
       <div class="progress-phase-hdr">
-        <span class="progress-phase-label"><span class="phase-ico">📄</span> <span id="splitPhaseLabel">PDF splitting</span></span>
+        <span class="progress-phase-label"><span class="phase-ico"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg></span> <span id="splitPhaseLabel">PDF splitting</span></span>
         <span class="progress-phase-pct" id="splitPct">0%</span>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar split-bar" id="splitBar" style="width:0%"></div></div>
@@ -1090,7 +1223,7 @@ a { color:inherit; text-decoration:none }
     <!-- Phase 2: Upload -->
     <div class="progress-phase" id="uploadPhase">
       <div class="progress-phase-hdr">
-        <span class="progress-phase-label"><span class="phase-ico">☁️</span> <span id="uploadPhaseLabel">Uploading</span></span>
+        <span class="progress-phase-label"><span class="phase-ico"><svg class="ic" aria-hidden="true"><use href="#i-drive"/></svg></span> <span id="uploadPhaseLabel">Uploading</span></span>
         <span class="progress-phase-pct" id="uploadPct">0%</span>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar upload-bar" id="uploadBar" style="width:0%"></div></div>
@@ -1106,20 +1239,32 @@ a { color:inherit; text-decoration:none }
 
   <!-- ACTION ROW -->
   <div class="action-row hidden" id="actionRow">
-    <button class="btn btn-primary" id="flowBtn" title="Space">⚡ <span id="flowBtnTxt">Auto Step (Space)</span></button>
     <button class="btn btn-warning hidden" id="driveChip" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap" data-mode=""></button>
-    <button class="btn btn-secondary" id="driveSaveBtn">☁️ <span id="driveSaveBtnTxt">Drive-এ Save</span></button>
-    <button class="btn btn-secondary hidden" id="copyAllBtn">📋 <span id="copyAllBtnTxt">সব Text Copy</span></button>
-    <button class="btn btn-secondary hidden" id="downloadBtn">💾 <span id="downloadBtnTxt">.txt Download</span></button>
-    <button class="btn btn-secondary" id="exportBtn">⬇ <span id="exportBtnTxt">Export…</span></button>
-    <button class="btn btn-secondary" id="textToolsBtn">🧹 <span id="textToolsBtnTxt">Text tools…</span></button>
-    <button class="btn btn-secondary" id="pageToolsBtn">🛠 <span id="pageToolsBtnTxt">Page tools…</span></button>
-    <button class="btn btn-secondary" id="cameraBtn">📷 <span id="cameraBtnTxt">Scan page</span></button>
-    <button class="btn btn-secondary" id="ocrBtn">🤖 <span id="ocrBtnTxt">Auto-OCR…</span></button>
-    <button class="btn btn-secondary hidden" id="copyAllMergedBtn">📄 <span id="copyAllMergedBtnTxt">Merged Copy</span></button>
-    <button class="btn btn-warning hidden" id="reviewBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">⚠️ <span id="reviewBtnTxt">Review</span></button>
+    <button class="btn btn-warning hidden" id="reviewBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap"><span id="reviewBtnTxt">Review</span></button>
     <button class="btn btn-warning hidden" id="retryActionBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryActionBtnTxt">Retry</span></button>
-    <button class="btn btn-danger" id="allClearBtn" title="সব মুছে একদম শুরুর অবস্থায় ফিরুন" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">🗑 <span id="allClearBtnTxt">All Clear</span></button>
+    <span class="action-spacer"></span>
+    <button class="btn btn-secondary" id="driveSaveBtn"><svg class="ic" aria-hidden="true"><use href="#i-drive"/></svg> <span id="driveSaveBtnTxt">Drive-এ Save</span></button>
+    <button class="btn btn-secondary" id="exportBtn"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> <span id="exportBtnTxt">Export…</span></button>
+    <div class="more-wrap">
+      <button class="btn btn-secondary" id="moreBtn" aria-haspopup="true" aria-expanded="false" aria-controls="moreMenu"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg> <span id="moreBtnTxt">More</span></button>
+      <div class="more-menu hidden" id="moreMenu" role="menu">
+        <button class="btn btn-secondary hidden" id="copyAllBtn" role="menuitem"><span id="copyAllBtnTxt">সব Text Copy</span></button>
+        <button class="btn btn-secondary hidden" id="copyAllMergedBtn" role="menuitem"><span id="copyAllMergedBtnTxt">Merged Copy</span></button>
+        <button class="btn btn-secondary hidden" id="downloadBtn" role="menuitem"><span id="downloadBtnTxt">.txt Download</span></button>
+        <button class="btn btn-secondary" id="textToolsBtn" role="menuitem"><span id="textToolsBtnTxt">Text tools…</span></button>
+        <button class="btn btn-secondary" id="pageToolsBtn" role="menuitem"><span id="pageToolsBtnTxt">Page tools…</span></button>
+        <button class="btn btn-secondary" id="cameraBtn" role="menuitem"><span id="cameraBtnTxt">Scan page</span></button>
+        <button class="btn btn-secondary" id="ocrBtn" role="menuitem"><span id="ocrBtnTxt">Auto-OCR…</span></button>
+        <div class="more-sep" role="separator"></div>
+        <button class="btn btn-danger" id="allClearBtn" role="menuitem" title="সব মুছে একদম শুরুর অবস্থায় ফিরুন"><span id="allClearBtnTxt">All Clear</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY STEP BAR — same action as the Space key -->
+  <div class="step-bar hidden" id="stepBar" role="region" aria-label="Auto step">
+    <div class="step-info"><b id="stepCount">0 / 0</b><span id="stepHint"></span></div>
+    <button class="btn btn-primary" id="flowBtn" title="Space"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><span id="flowBtnTxt">Auto Step</span><kbd class="step-kbd" aria-hidden="true">Space</kbd></button>
   </div>
 
   <!-- WORKSPACE -->
@@ -1127,17 +1272,17 @@ a { color:inherit; text-decoration:none }
     <!-- Preview -->
     <div class="preview-panel">
       <div class="panel-hdr">
-        <div class="panel-title"><span id="previewTitleTxt">👁 Preview</span> — <b id="previewPageNum">1</b><span id="previewPageTotal" style="color:var(--dim);font-weight:400"> / 1</span></div>
+        <div class="panel-title"><span id="previewTitleTxt">Preview</span> — <b id="previewPageNum">1</b><span id="previewPageTotal" style="color:var(--dim);font-weight:400"> / 1</span></div>
         <div style="display:flex;gap:.4rem">
           <button class="btn-icon" id="cutPageBtn" title="এই page বাদ দাও (C)" aria-label="Cut page" style="color:var(--err,#f87171)">✂</button>
-          <button class="btn-icon" id="copyClipBtn" title="Copy" aria-label="Copy">📄 <span class="sr-only" id="copyClipBtnTxt">Copy</span></button>
+          <button class="btn-icon" id="copyClipBtn" title="Copy" aria-label="Copy"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span class="sr-only" id="copyClipBtnTxt">Copy</span></button>
           <input type="number" id="gotoPage" class="goto-input" min="1" inputmode="numeric" placeholder="Go to #" aria-label="Go to page number">
           <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
           <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
         </div>
       </div>
       <div class="preview-img-wrap" id="previewImgWrap">
-        <div class="preview-empty"><div class="big">🖼</div><p id="previewEmptyTxt">কোনো পেজ select করুন</p></div>
+        <div class="preview-empty"><div class="big"><svg class="ic ic-xl" aria-hidden="true"><use href="#i-image"/></svg></div><p id="previewEmptyTxt">কোনো পেজ select করুন</p></div>
         <div class="zoom-badge" id="zoomBadge">100%</div>
       </div>
     </div>
@@ -1145,20 +1290,20 @@ a { color:inherit; text-decoration:none }
     <!-- Text Editor -->
     <div class="text-panel">
       <div class="panel-hdr">
-        <div class="panel-title"><span id="textTitleTxt">✏️ Text — পেজ</span> <b id="textPageNum">1</b></div>
+        <div class="panel-title"><span id="textTitleTxt">Text — পেজ</span> <b id="textPageNum">1</b></div>
         <div style="display:flex;gap:.4rem;align-items:center">
           <button class="btn btn-secondary" id="undoPageBtn" style="padding:.3rem .6rem;font-size:.72rem" title="Undo (this page)" aria-label="Undo">↶</button>
           <button class="btn btn-secondary" id="redoPageBtn" style="padding:.3rem .6rem;font-size:.72rem" title="Redo (this page)" aria-label="Redo">↷</button>
-          <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">📋 Paste</button>
-          <button class="btn btn-secondary" id="quickSaveBtn" style="padding:.3rem .65rem;font-size:.72rem" title="Save & Next" aria-label="Save & Next">✅</button>
-          <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">🔍 Lens</button>
+          <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">Paste</button>
+          <button class="btn btn-secondary" id="quickSaveBtn" style="padding:.3rem .65rem;font-size:.72rem" title="Save & Next" aria-label="Save & Next"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button>
+          <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">Lens</button>
         </div>
       </div>
       <div id="reviewBar" class="hidden"></div>
       <div id="pageMetaBar" class="page-meta">
-        <button class="btn btn-secondary" id="bookmarkBtn" aria-pressed="false">＋🔖</button>
-        <button class="btn btn-secondary" id="noteBtn" aria-pressed="false">📝</button>
-        <button class="btn btn-secondary" id="bmListBtn">🔖 <span id="bmListTxt">Bookmarks</span></button>
+        <button class="btn btn-secondary" id="bookmarkBtn" aria-pressed="false">＋</button>
+        <button class="btn btn-secondary" id="noteBtn" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-note"/></svg></button>
+        <button class="btn btn-secondary" id="bmListBtn"><span id="bmListTxt">Bookmarks</span></button>
       </div>
       <div id="noteBar" class="hidden"><textarea id="noteArea" rows="2" maxlength="2000"></textarea></div>
       <div class="txt-body">
@@ -1191,12 +1336,12 @@ a { color:inherit; text-decoration:none }
   <div class="results-section hidden" id="resultsSection">
     <div class="results-hdr">
       <div>
-        <div style="font-size:.85rem;font-weight:700;color:var(--bright)" id="allExtractedTitleTxt">📋 All Extracted Text</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--bright)" id="allExtractedTitleTxt">All Extracted Text</div>
         <div class="results-meta" id="allMeta">0 pages · 0 chars · 0 words</div>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn btn-secondary" id="allCopyBtn" style="font-size:.75rem;padding:.4rem .8rem">📋 <span id="allCopyBtnTxt">Copy All</span></button>
-        <button class="btn btn-secondary" id="allDlBtn" style="font-size:.75rem;padding:.4rem .8rem">💾 <span id="allDlBtnTxt">Download</span></button>
+        <button class="btn btn-secondary" id="allCopyBtn" style="font-size:.75rem;padding:.4rem .8rem"><span id="allCopyBtnTxt">Copy All</span></button>
+        <button class="btn btn-secondary" id="allDlBtn" style="font-size:.75rem;padding:.4rem .8rem"><span id="allDlBtnTxt">Download</span></button>
       </div>
     </div>
     <div class="results-body">
@@ -1215,7 +1360,7 @@ a { color:inherit; text-decoration:none }
         <span class="ftr-wordmark-text" aria-label="Textriva">Textriva</span>
       </div>
       <div class="ftr-text" id="ftrText1">Textriva is a lightweight OCR workspace for images and PDF pages. It guides a simple Google Lens flow and keeps page-wise text organized for fast export.</div>
-      <div class="ftr-meta">
+      <div class="ftr-meta" hidden>
         <span class="ftr-badge" id="ftrBadge1">Free Workflow</span>
         <span class="ftr-badge" id="ftrBadge2">Page-wise OCR</span>
         <span class="ftr-badge" id="ftrBadge3">Lens-based</span>
@@ -1282,7 +1427,7 @@ a { color:inherit; text-decoration:none }
       <div class="step-row"><div class="step-n">3</div><div class="step-t" id="helpStep3"><strong>Lens tab এ</strong> text select করুন → Copy করুন → এই app এ ফিরে এসে paste করুন।</div></div>
       <div class="step-row"><div class="step-n">4</div><div class="step-t" id="helpStep4"><strong>Upload-এর পর Space চাপুন।</strong> প্রথমবার প্রথম page-এর Lens খুলবে; Lens থেকে copy করে ফিরে এসে প্রতিবার Space চাপলেই paste, save, next ও পরের Lens হবে।</div></div>
 
-      <div class="help-shortcuts-title" id="helpShortcutsTitle">⌨️ Keyboard Shortcuts</div>
+      <div class="help-shortcuts-title" id="helpShortcutsTitle">Keyboard Shortcuts</div>
       <div class="shortcut-grid" id="helpShortcutsGrid">
 
         <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.2rem 0 .1rem;text-transform:uppercase;">Navigation</div>
@@ -1297,7 +1442,7 @@ a { color:inherit; text-decoration:none }
         <kbd>L</kbd>             <span id="sc1">Current page Google Lens এ খুলুন</span>
         <kbd>Ctrl+Enter</kbd>    <span id="sc2">Text save করুন, পরের page এ যান</span>
         <kbd>R</kbd>             <span id="scr">Clipboard paste → Save → Next (Lens ছাড়া)</span>
-        <kbd>Space</kbd> <span id="sc6">🔥 Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow</span>
+        <kbd>Space</kbd> <span id="sc6">Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow</span>
 
         <div style="grid-column:1/-1;font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--accent);opacity:.7;margin:.5rem 0 .1rem;text-transform:uppercase;">Preview Zoom</div>
         <kbd>Z</kbd>             <span id="scz">Zoom in (বার বার চাপুন বাড়াতে)</span>
@@ -1309,15 +1454,15 @@ a { color:inherit; text-decoration:none }
         <kbd>M</kbd> / <kbd>Esc</kbd> <span id="sc4">এই modal বন্ধ করুন</span>
       </div>
 
-      <div class="help-shortcuts-title" style="margin-top:.9rem">⚡ Lens Workflow (সবচেয়ে দ্রুত)</div>
+      <div class="help-shortcuts-title" style="margin-top:.9rem">Lens Workflow (সবচেয়ে দ্রুত)</div>
       <div style="font-size:.74rem; color:var(--mid); line-height:1.9; background:var(--card2); border:1px solid var(--line); border-radius:var(--r-sm); padding:.6rem .85rem; margin-top:.3rem;">
         Lens window এ → <kbd style="background:var(--card);border:1px solid var(--line2);border-bottom:2px solid var(--line2);border-radius:4px;padding:.1rem .36rem;font-family:var(--font-mono);font-size:.67rem;">Ctrl+A</kbd> → <kbd style="background:var(--card);border:1px solid var(--line2);border-bottom:2px solid var(--line2);border-radius:4px;padding:.1rem .36rem;font-family:var(--font-mono);font-size:.67rem;">Ctrl+C</kbd> → <kbd style="background:var(--card);border:1px solid var(--line2);border-bottom:2px solid var(--line2);border-radius:4px;padding:.1rem .36rem;font-family:var(--font-mono);font-size:.67rem;">Ctrl+W</kbd><br>
-        App এ ফিরে → <kbd style="background:var(--card);border:1px solid var(--line2);border-bottom:2px solid var(--line2);border-radius:4px;padding:.1rem .36rem;font-family:var(--font-mono);font-size:.67rem;">Space</kbd> চাপুন — বাকি সব automatic 🚀
+        App এ ফিরে → <kbd style="background:var(--card);border:1px solid var(--line2);border-bottom:2px solid var(--line2);border-radius:4px;padding:.1rem .36rem;font-family:var(--font-mono);font-size:.67rem;">Space</kbd> চাপুন — বাকি সব automatic 
       </div>
 
       <div id="helpTip" class="help-tip"></div>
       <div id="helpIspNotice" class="help-isp-notice" style="display:none">
-        ⛔ <strong id="helpIspTitle">Site ঢুকতে পারছেন না?</strong>
+        <strong id="helpIspTitle">Site ঢুকতে পারছেন না?</strong>
         <span id="helpIspText"> ISP block হতে পারে। Custom domain যোগ করুন Vercel Dashboard → Settings → Domains। Free subdomain পাবেন <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a> তে।</span>
       </div>
     </div>
@@ -1339,8 +1484,8 @@ a { color:inherit; text-decoration:none }
     </div>
     <div class="modal-body">
       <div class="lib-tabs">
-        <button class="btn btn-secondary lib-tab active" id="tabLocal">💾 This device</button>
-        <button class="btn btn-secondary lib-tab" id="tabDrive">☁️ Google Drive</button>
+        <button class="btn btn-secondary lib-tab active" id="tabLocal">This device</button>
+        <button class="btn btn-secondary lib-tab" id="tabDrive">Google Drive</button>
       </div>
       <div id="libContent"></div>
     </div>
@@ -1496,13 +1641,13 @@ const i18n = {
     stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
     copyAllBtnTxt: 'সব Text Copy', copyAllMergedBtnTxt: 'Merged Copy',
     copyClipBtnTxt: 'কপি', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', allClearBtnTxt: 'All Clear', folderBtnTxt: 'Folder থেকে ছবি',
-    previewTitleTxt: '👁 Preview', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
+    previewTitleTxt: 'Preview', prevPageTitle: 'আগের পেজ', nextPageTitle: 'পরের পেজ',
     previewEmptyTxt: 'কোনো পেজ select করুন',
-    textTitleTxt: '✏️ Text — পেজ',
+    textTitleTxt: 'Text — পেজ',
     textPlaceholder: 'Google Lens থেকে text copy করে এখানে paste করুন (Ctrl+V)...\n\nঅথবা উপরের \'Lens\' বাটন চাপুন।',
     lensSectionTitleTxt: 'Lens — সব পেজ',
     lensSectionSubTxt: 'প্রতিটা পেজের জন্য আলাদা Lens বাটন। Mobile এ একবারে ১টা tab খোলা ভালো।',
-    allExtractedTitleTxt: '📋 All Extracted Text',
+    allExtractedTitleTxt: 'All Extracted Text',
     allCopyBtnTxt: 'Copy All', allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'এখানে সব পেজের extracted text দেখাবে...',
     ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages.',
@@ -1520,7 +1665,7 @@ const i18n = {
     helpStep2: '<strong>Lens button চাপুন।</strong> Upload ছাড়াই সরাসরি Google Lens এ যাবে।',
     helpStep3: '<strong>Lens ট্যাব থেকে</strong> টেক্সট সিলেক্ট করে কপি করুন, এখানে পেস্ট করুন।',
     helpStep4: '<strong>Upload-এর পর Space চাপুন।</strong> প্রথমবার প্রথম page-এর Lens খুলবে; Lens থেকে copy করে ফিরে এসে প্রতিবার Space চাপলেই paste, save, next ও পরের Lens হবে।',
-    helpShortcutsTitle: '⌨️ কীবোর্ড শর্টকাট',
+    helpShortcutsTitle: 'কীবোর্ড শর্টকাট',
     sc1: 'Current page Google Lens এ খুলুন',
     sc2: 'Text save করুন, পরের page এ যান',
     sc3: 'আগের / পরের page এ যান',
@@ -1528,11 +1673,11 @@ const i18n = {
     sc5: 'Screenshot বা image clipboard থেকে add করুন',
     scc: 'Textarea এ selected text cut করুন (clipboard এ যাবে)',
     scr: 'Clipboard paste → Save → Next (Lens ছাড়া)',
-    sc6: '🔥 Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow',
+    sc6: 'Upload-এর পর প্রথম Lens খুলুন; এরপর paste + save + next + Lens — পুরো workflow',
     scz: 'Zoom in — বার বার চাপুন বাড়াতে',
     scx: 'Zoom reset — original size এ ফেরা',
     scpan: 'Zoom অবস্থায় image pan করুন',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens এখন base64 দিয়ে সরাসরি খোলে — upload বা ISP block এর সমস্যা নেই।',
+    helpTip: '<strong style="color:var(--yellow)">Tip:</strong> Lens এখন base64 দিয়ে সরাসরি খোলে — upload বা ISP block এর সমস্যা নেই।',
     helpIspTitle: 'Site ঢুকতে পারছেন না?',
     helpIspText: ' ISP block হতে পারে। Custom domain যোগ করুন Vercel Dashboard → Settings → Domains। Free subdomain পাবেন <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a> তে।',
     helpOk: 'বুঝেছি ✓',
@@ -1540,10 +1685,10 @@ const i18n = {
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
     pageBlock: '=== পেজ {num} — {name} ===',
-    statusPending: '⏳ Pending', statusUploading: '⬆️ Upload',
+    statusPending: 'Pending', statusUploading: '⬆️ Upload',
     statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
-    lpcDone: '✓ Done', lpcOpen: '🔍 Lens', lpcRetry: '↺ Retry',
-    pdfLoading: '📄 PDF loading: {name}', pdfLoaded: '✅ {total} pages loaded',
+    lpcDone: '✓ Done', lpcOpen: 'Lens', lpcRetry: '↺ Retry',
+    pdfLoading: 'PDF loading: {name}', pdfLoaded: '✅ {total} pages loaded',
     pdfError: 'PDF load error: {error}',
     pageUploaded: '✅ পেজ {num} uploaded!',
     pageUploadFailed: '❌ পেজ {num} failed: {error}',
@@ -1551,19 +1696,19 @@ const i18n = {
     allUploadComplete: '✅ সব pages upload complete!',
     uploadFailedSome: '❌ {n}/{total} pages upload failed — retry করুন',
     retryN: '↺ Retry {n} টি',
-    splitPhaseLabel: '📄 PDF splitting',
-    uploadPhaseLabel: '☁️ Uploading',
-    splitRendering: '📄 পেজ {cur} / {total} render করছে...',
-    popupBlocked: '🚫 Popup blocked! Browser এ popup allow করুন।',
-    lensOpened: '🔍 পেজ {num} Lens এ খুলেছে!',
+    splitPhaseLabel: 'PDF splitting',
+    uploadPhaseLabel: 'Uploading',
+    splitRendering: 'পেজ {cur} / {total} render করছে...',
+    popupBlocked: 'Popup blocked! Browser এ popup allow করুন।',
+    lensOpened: 'পেজ {num} Lens এ খুলেছে!',
     pastedOk: '✓ Paste হয়েছে!', pasteManual: 'Ctrl+V দিয়ে paste করুন',
     copyFailed: 'Copy করা যায়নি!',
-    pageSaved: '✅ পেজ {num} saved!', allPagesDone: '🎉 সব pages complete!',
+    pageSaved: '✅ পেজ {num} saved!', allPagesDone: 'সব pages complete!',
     noText: 'কোনো text নেই!',
     copiedAllText: '✓ সব text copied!', copiedMergedText: '✓ merged text copied!', copied: '✓ Copied!',
     clearConfirm: 'সব pages মুছে ফেলবেন?',
-    pasteReminder: '💡 Text paste হয়েছে — "Save & Next" চাপুন',
-    clipboardPasted: '📋 Clipboard image যোগ হয়েছে!',
+    pasteReminder: 'Text paste হয়েছে — "Save & Next" চাপুন',
+    clipboardPasted: 'Clipboard image যোগ হয়েছে!',
     retryingPage: '↺ পেজ {num} retry করছে...',
     retryComplete: '✅ Retry complete!',
   },
@@ -1578,13 +1723,13 @@ const i18n = {
     stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
     copyAllBtnTxt: 'Copy All Text', copyAllMergedBtnTxt: 'Merged Copy',
     copyClipBtnTxt: 'Copy', downloadBtnTxt: '.txt Download', exportBtnTxt: 'Export…', allClearBtnTxt: 'All Clear', folderBtnTxt: 'Import image folder',
-    previewTitleTxt: '👁 Preview', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
+    previewTitleTxt: 'Preview', prevPageTitle: 'Previous page', nextPageTitle: 'Next page',
     previewEmptyTxt: 'Select a page to preview',
-    textTitleTxt: '✏️ Text — Page',
+    textTitleTxt: 'Text — Page',
     textPlaceholder: 'Copy text from Google Lens and paste here (Ctrl+V)...\n\nOr click the "Lens" button above.',
     lensSectionTitleTxt: 'Lens — All Pages',
     lensSectionSubTxt: 'Each page has its own Lens button. On mobile, one tab at a time works best.',
-    allExtractedTitleTxt: '📋 All Extracted Text',
+    allExtractedTitleTxt: 'All Extracted Text',
     allCopyBtnTxt: 'Copy All', allDlBtnTxt: 'Download',
     allTextareaPlaceholder: 'All extracted text appears here...',
     ftrText1: 'Textriva is a lightweight OCR workspace for images and PDF pages.',
@@ -1602,7 +1747,7 @@ const i18n = {
     helpStep2: '<strong>Click Lens.</strong> Pages open in Google Lens directly — no upload needed.',
     helpStep3: '<strong>In the Lens tab,</strong> select the text, copy it, then paste here.',
     helpStep4: '<strong>Press Space after uploading.</strong> The first press opens Lens for page 1; then each Space pastes, saves, moves next, and opens the next Lens.',
-    helpShortcutsTitle: '⌨️ Keyboard Shortcuts',
+    helpShortcutsTitle: 'Keyboard Shortcuts',
     sc1: 'Open current page in Google Lens',
     sc2: 'Save text and go to next page',
     sc3: 'Previous / next page',
@@ -1610,11 +1755,11 @@ const i18n = {
     sc5: 'Paste screenshot or image from clipboard',
     scc: 'Cut selected text from textarea to clipboard',
     scr: 'Paste from clipboard → Save → Next (no Lens)',
-    sc6: '🔥 Open the first Lens after upload; then Space runs paste + save + next + Lens',
+    sc6: 'Open the first Lens after upload; then Space runs paste + save + next + Lens',
     scz: 'Zoom in — press repeatedly to increase',
     scx: 'Zoom reset — return to original size',
     scpan: 'Pan image while zoomed',
-    helpTip: '💡 <strong style="color:var(--yellow)">Tip:</strong> Lens opens via base64 directly — no upload, no ISP blocking.',
+    helpTip: '<strong style="color:var(--yellow)">Tip:</strong> Lens opens via base64 directly — no upload, no ISP blocking.',
     helpIspTitle: "Can't access the site?",
     helpIspText: ' Your ISP may be blocking the Vercel domain. Add a custom domain in Vercel Dashboard → Settings → Domains. Free subdomains available at <a href="https://is-a.dev" target="_blank" rel="noopener" style="color:var(--accent)">is-a.dev</a>.',
     helpOk: 'Got it ✓',
@@ -1622,10 +1767,10 @@ const i18n = {
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
     pageBlock: '=== Page {num} — {name} ===',
-    statusPending: '⏳ Pending', statusUploading: '⬆️ Uploading',
+    statusPending: 'Pending', statusUploading: '⬆️ Uploading',
     statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
-    lpcDone: '✓ Done', lpcOpen: '🔍 Open Lens', lpcRetry: '↺ Retry upload',
-    pdfLoading: '📄 Loading PDF: {name}', pdfLoaded: '✅ {total} pages loaded',
+    lpcDone: '✓ Done', lpcOpen: 'Open Lens', lpcRetry: '↺ Retry upload',
+    pdfLoading: 'Loading PDF: {name}', pdfLoaded: '✅ {total} pages loaded',
     pdfError: 'PDF load error: {error}',
     pageUploaded: '✅ Page {num} uploaded!',
     pageUploadFailed: '❌ Page {num} failed: {error}',
@@ -1633,19 +1778,19 @@ const i18n = {
     allUploadComplete: '✅ All pages uploaded!',
     uploadFailedSome: '❌ {n} of {total} pages failed — click Retry',
     retryN: '↺ Retry {n}',
-    splitPhaseLabel: '📄 PDF splitting',
-    uploadPhaseLabel: '☁️ Uploading',
-    splitRendering: '📄 Rendering page {cur} of {total}...',
-    popupBlocked: '🚫 Popup blocked! Allow popups in your browser.',
-    lensOpened: '🔍 Page {num} opened in Lens!',
+    splitPhaseLabel: 'PDF splitting',
+    uploadPhaseLabel: 'Uploading',
+    splitRendering: 'Rendering page {cur} of {total}...',
+    popupBlocked: 'Popup blocked! Allow popups in your browser.',
+    lensOpened: 'Page {num} opened in Lens!',
     pastedOk: '✓ Pasted!', pasteManual: 'Use Ctrl+V to paste',
     copyFailed: 'Copy failed.',
-    pageSaved: '✅ Page {num} saved!', allPagesDone: '🎉 All pages done!',
+    pageSaved: '✅ Page {num} saved!', allPagesDone: 'All pages done!',
     noText: 'No text available!',
     copiedAllText: '✓ All text copied!', copiedMergedText: '✓ Merged text copied!', copied: '✓ Copied!',
     clearConfirm: 'Clear all pages?',
-    pasteReminder: '💡 Text pasted — click "Save & Next"',
-    clipboardPasted: '📋 Clipboard image added!',
+    pasteReminder: 'Text pasted — click "Save & Next"',
+    clipboardPasted: 'Clipboard image added!',
     retryingPage: '↺ Retrying page {num}...',
     retryComplete: '✅ Retry complete!',
   },
@@ -1729,6 +1874,7 @@ $('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').
 // TOAST
 // ══════════════════════════════════════════
 function toast(msg, type = '', dur = 3000, action = null) {
+  msg = String(msg ?? '').replace(/^(?:\u2705|\u274C|\u26A0\uFE0F?|\u2139\uFE0F?)\s*/u, '');
   const el = document.createElement('div');
   el.className = `toast${type ? ' ' + type : ''}`;
   const span = document.createElement('span');
@@ -1756,12 +1902,20 @@ state.lastClip = '';
 state.awaitingLens = false;
 
 const L = (bn, en) => currentLang === 'en' ? en : bn;
+const IC = n => `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;   // inline icon from the sprite
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtDate = ts => { try { return new Date(ts).toLocaleString(currentLang === 'en' ? 'en-GB' : 'bn-BD', { dateStyle: 'medium', timeStyle: 'short' }); } catch { return ''; } };
 const newId = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return h; };
 
 const LS_LAST = 'textriva-last-project';
+// ── Account identity (device-level) ──────────────────────────────────────────
+// সাইন-ইন করা user-এর profile (নাম/ছবি/email/sub) এই device-এ থাকে, যাতে refresh করলেও top bar-এ account ঠিক থাকে।
+// Token (Drive access) কখনো save হয় না — শুধু memory-তে থাকে, তাই এটা password/credential নয়।
+// প্রতিটি local project-এ `owner` (Google sub) থাকে; Library ও search শুধু current owner-এর project দেখায় ('' = guest)।
+const LS_USER = 'textriva-g-user';
+function storedUser() { try { const u = JSON.parse(readSaved(LS_USER) || 'null'); return u && (u.sub || u.email) ? u : null; } catch { return null; } }
+function currentOwner() { const u = storedUser(); return u ? String(u.sub || u.email) : ''; }
 let _db = null, _dbFailed = false, _saveTimer = null, _savePending = false, _saveChain = Promise.resolve();
 
 const DB_VERSION = 2;
@@ -1794,7 +1948,7 @@ const idbReq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result
 function ensureProject() {
   if (!state.projectId) {
     state.projectId = newId();
-    state.proj = { createdAt: Date.now(), driveFolderId: null, driveMetaId: null, driveTextId: null, lastSig: '' };
+    state.proj = { createdAt: Date.now(), owner: currentOwner(), driveFolderId: null, driveMetaId: null, driveTextId: null, lastSig: '' };
   }
 }
 function projectName() { return (state.sourceFileName || 'Untitled').replace(/\.[^/.]+$/, '') || 'Untitled'; }
@@ -1830,6 +1984,7 @@ function saveNow() {
   const newBlobs = state.pages.filter(p => !p.txtOnly && !p.blobSaved && p.blob).map(p => ({ id: p.id, blob: p.blob, pg: p }));
   const proj = {
     id: pid, name: projectName(), sourceFileName: state.sourceFileName || '',
+    owner: (pr.owner != null ? pr.owner : currentOwner()),
     createdAt: pr.createdAt || Date.now(), updatedAt: Date.now(),
     pageCount: snap.length, doneCount: snap.filter(s => s.status === 'done').length, current: state.current,
     driveFolderId: pr.driveFolderId || null, driveMetaId: pr.driveMetaId || null, driveTextId: pr.driveTextId || null,
@@ -1878,10 +2033,31 @@ async function dbDeleteProject(pid) {
   });
 }
 
-async function localList() {
+// সব owner-এর project (শুধু internal migration-এর জন্য) — UI সবসময় localList() ব্যবহার করে
+async function localListAll() {
   const db = await idb();
   const all = await idbReq(db.transaction('projects').objectStore('projects').getAll());
   return all.sort((a, b) => b.updatedAt - a.updatedAt);
+}
+// শুধু current account-এর project ('' = guest)। এক device-এ একাধিক user থাকলেও কেউ কারো project দেখে না।
+async function localList() {
+  const me = currentOwner();
+  return (await localListAll()).filter(p => (p.owner || '') === me);
+}
+async function guestProjects() { return (await localListAll()).filter(p => !p.owner); }
+// Guest project গুলো সাইন-ইন করা account-এ নেওয়া (user নিজে বাটন চাপলে)
+async function claimGuestProjects() {
+  const me = currentOwner(); if (!me) return 0;
+  const list = await guestProjects();
+  if (!list.length) return 0;
+  const db = await idb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction('projects', 'readwrite');
+    tx.oncomplete = resolve; tx.onerror = tx.onabort = () => reject(tx.error);
+    list.forEach(pr => tx.objectStore('projects').put({ ...pr, owner: me }));
+  });
+  if (state.proj && state.projectId && list.some(pr => pr.id === state.projectId)) state.proj.owner = me;
+  return list.length;
 }
 
 async function localLoad(pid) {
@@ -1931,12 +2107,12 @@ async function openLocalProject(pid, pageIdx) {   // eslint-disable-line complex
   await saveNow();
   const { proj, recs, blobs } = await localLoad(pid);
   if (proj.blobsFreed && proj.driveFolderId) {   // Phase 8: images were freed from this device → bring them back from Drive
-    toast(L('☁️ ছবি Drive থেকে আনা হচ্ছে…', '☁️ Restoring images from Drive…'), '', 3000);
+    toast(L('ছবি Drive থেকে আনা হচ্ছে…', 'Restoring images from Drive…'), '', 3000);
     return openDriveProject(proj.driveFolderId, pageIdx != null ? pageIdx : (proj.current || 0));
   }
   resetWorkspaceState();
   state.projectId = pid;
-  state.proj = { createdAt: proj.createdAt, driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, driveRev: proj.driveRev || '', lastSig: '' };
+  state.proj = { createdAt: proj.createdAt, owner: proj.owner || '', driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, driveRev: proj.driveRev || '', lastSig: '' };
   state.sourceFileName = proj.sourceFileName || proj.name;
   recs.forEach((r, i) => {
     if (!r.txtOnly && !blobs[i]?.blob) return;
@@ -1945,7 +2121,7 @@ async function openLocalProject(pid, pageIdx) {   // eslint-disable-line complex
   saveSetting(LS_LAST, pid);
   afterProjectLoaded(pageIdx != null ? pageIdx : (proj.current || 0));
   closeLib();
-  toast(L(`📂 "${proj.name}" খোলা হয়েছে`, `📂 "${proj.name}" opened`), 'ok', 2500);
+  toast(L(`"${proj.name}" খোলা হয়েছে`, `"${proj.name}" opened`), 'ok', 2500);
 }
 
 async function deleteLocalProject(pid) {
@@ -2001,15 +2177,23 @@ async function gInit() {
       if (resp.error) { p?.rej(new Error(resp.error_description || resp.error)); return; }
       gdrive.token = resp.access_token;
       gdrive.exp = Date.now() + (Number(resp.expires_in || 3600) - 120) * 1000;
+      const prevOwner = currentOwner();
       try {
         if (!gdrive.user) {
           const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${gdrive.token}` } });
           if (r.ok) gdrive.user = await r.json();
         }
       } catch {}
+      if (gdrive.user) {
+        const { sub, email, name, given_name, picture } = gdrive.user;
+        saveSetting(LS_USER, JSON.stringify({ sub, email, name, given_name, picture }));
+      }
       saveSetting('textriva-g-hint', gdrive.user?.email || '1');
+      const newOwner = currentOwner();
+      if (newOwner !== prevOwner) { try { await handleOwnerSwitch(prevOwner, newOwner); } catch (e) { console.warn('[owner switch]', e); } }
       scheduleTokenRefresh();
       refreshAcctUi();
+      refreshDriveChip();
       p?.res(gdrive.token);
     },
     error_callback: err => { const p = gdrive.pending; gdrive.pending = null; p?.rej(new Error(err?.type === 'popup_closed' ? L('Sign in বাতিল হয়েছে', 'Sign-in cancelled') : (err?.type || 'sign-in failed'))); },
@@ -2029,11 +2213,41 @@ async function driveToken() {
   if (driveValid()) return gdrive.token;
   return gRequest(readSaved('textriva-g-hint') ? '' : 'select_account');
 }
-function gSignOut() {
+// ওই account-এর কাজ আগে save হয়, তারপর screen থেকে সরে যায় — পরের user যেন আগের user-এর কিছু না দেখে।
+async function gSignOut() {
+  try { await saveNow(); } catch {}
   try { if (gdrive.token) google.accounts.oauth2.revoke(gdrive.token, () => {}); } catch {}
+  clearTimeout(_tokTimer);
   gdrive.token = null; gdrive.exp = 0; gdrive.user = null; gdrive.rootId = null;
   saveSetting('textriva-g-hint', '');
+  saveSetting(LS_USER, '');
+  if (state.projectId && state.proj && state.proj.owner) clearScreenForOwnerChange();
   refreshAcctUi();
+  refreshDriveChip();
+  try { await initResumeCard(); } catch {}
+  if ($('libModal').classList.contains('open')) renderLib();
+}
+function clearScreenForOwnerChange() {
+  _bgFail.clear(); _bgDidWork = false;
+  resetWorkspaceState();
+  state.sourceFileName = ''; state.awaitingLens = false;
+  try { textArea.value = ''; updateTxtStats(); } catch {}
+  try { fileInput.value = ''; } catch {}
+  try { renderAll(); } catch {}
+}
+// অন্য account-এ ঢুকলে: আগের account-এর খোলা কাজ নিরাপদে save করে screen পরিষ্কার;
+// আর guest অবস্থায় যে কাজ চলছিল সেটা নতুন সাইন-ইন করা account-এ চলে যায়।
+async function handleOwnerSwitch(prev, now) {
+  try { await saveNow(); } catch {}
+  if (state.projectId) {
+    const wsOwner = state.proj && state.proj.owner != null ? state.proj.owner : prev;
+    if (wsOwner !== now) {
+      if (!wsOwner && !(state.proj && state.proj.driveFolderId)) { state.proj.owner = now; await saveNow(); }
+      else clearScreenForOwnerChange();
+    }
+  }
+  try { await initResumeCard(); } catch {}
+  if ($('libModal').classList.contains('open')) renderLib();
 }
 
 async function dfetch(url, opts = {}, retry = true) {
@@ -2140,7 +2354,7 @@ async function syncToDrive({ silent = false, force = false } = {}) {
     }
     const folder = pr.driveFolderId;
     const todo = state.pages.filter(p => !p.txtOnly && !p.driveFileId && p.blob);
-    if (todo.length && !silent) { showProgress(); $('uploadPhaseLabel').textContent = '☁️ Google Drive'; }
+    if (todo.length && !silent) { showProgress(); $('uploadPhaseLabel').textContent = 'Google Drive'; }
     let n = 0;
     for (const p of todo) {
       const idx = state.pages.indexOf(p);
@@ -2167,7 +2381,7 @@ async function syncToDrive({ silent = false, force = false } = {}) {
     pr.lastSig = sig;
     _syncing = false;
     await saveNow();
-    if (!silent) toast(L('☁️ Drive-এ save হয়েছে', '☁️ Saved to Google Drive'), 'ok', 2500);
+    if (!silent) toast(L('Drive-এ save হয়েছে', 'Saved to Google Drive'), 'ok', 2500);
   } catch (e) {
     console.warn('[drive sync]', e);
     toast(L('❌ Drive sync হয়নি: ', '❌ Drive sync failed: ') + e.message, 'err', 5000);
@@ -2180,7 +2394,7 @@ async function openDriveProject(folderId, pageIdx) {
   await saveNow();
   const label0 = $('uploadPhaseLabel').textContent;
   try {
-    showProgress(); $('uploadPhaseLabel').textContent = '☁️ Google Drive';
+    showProgress(); $('uploadPhaseLabel').textContent = 'Google Drive';
     setUploadProgress(0, 1, false, 0);
     const kids = await dList(`'${folderId}' in parents and trashed=false`, 'files(id,name)');
     const metaFile = kids.find(k => k.name === 'project.json');
@@ -2201,7 +2415,7 @@ async function openDriveProject(folderId, pageIdx) {
     }
     resetWorkspaceState();
     state.projectId = existing?.id || newId();
-    state.proj = { createdAt: meta.createdAt || Date.now(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, driveRev: (finfo.appProperties && finfo.appProperties.rev) || '', lastSig: '' };
+    state.proj = { createdAt: meta.createdAt || Date.now(), owner: currentOwner(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, driveRev: (finfo.appProperties && finfo.appProperties.rev) || '', lastSig: '' };
     state.sourceFileName = meta.sourceFileName || meta.name || 'Untitled';
     state.syncConflict = null;
     for (const { m, blob } of got) {
@@ -2215,7 +2429,7 @@ async function openDriveProject(folderId, pageIdx) {
     closeLib();
     await saveNow();
     refreshDriveChip();
-    toast(L(`☁️ "${meta.name}" Drive থেকে খোলা হয়েছে`, `☁️ "${meta.name}" opened from Drive`), 'ok', 2500);
+    toast(L(`"${meta.name}" Drive থেকে খোলা হয়েছে`, `"${meta.name}" opened from Drive`), 'ok', 2500);
   } finally {
     hideProgress(); $('uploadPhaseLabel').textContent = label0;
   }
@@ -2296,8 +2510,8 @@ function refreshDriveChip() {
   c.dataset.mode = mode;
   c.classList.toggle('hidden', !mode);
   if (mode === 'conflict') c.textContent = L('⚠️ Sync conflict — সমাধান করুন', '⚠️ Sync conflict — resolve');
-  else if (mode === 'reconnect') c.textContent = L('☁️ Reconnect', '☁️ Reconnect');
-  else if (mode === 'offline') c.textContent = L('📴 Offline — sync queued', '📴 Offline — sync queued');
+  else if (mode === 'reconnect') c.textContent = L('Reconnect', 'Reconnect');
+  else if (mode === 'offline') c.textContent = L('Offline — sync queued', 'Offline — sync queued');
 }
 let _tokTimer = null;
 function scheduleTokenRefresh() {
@@ -2352,9 +2566,9 @@ async function openSyncConflict() {
   body.innerHTML = `<p>${L('এই project অন্য device/ট্যাব থেকে Drive-এ বদলানো হয়েছে, আবার এই device-এও বদলেছে।', 'This project was changed on Drive from another device/tab, and it also changed here.')}</p>
     <p><b>Drive:</b> ${remote.length} ${L('পেজ', 'pages')} · ${esc(fmtDate(meta.updatedAt || 0))}<br><b>${L('এই device', 'This device')}:</b> ${state.pages.length} ${L('পেজ', 'pages')}</p>
     <div class="dc-actions">
-      <button class="btn btn-secondary" data-sc="drive">☁️ ${L('Drive-এরটা নিন', 'Use Drive')}</button>
-      <button class="btn btn-secondary" data-sc="device">💻 ${L('এই device-এরটা নিন', 'Use this device')}</button>
-      <button class="btn btn-primary" data-sc="mergeshow">🔀 ${L('পেজ ধরে merge', 'Merge page by page')}</button>
+      <button class="btn btn-secondary" data-sc="drive">${L('Drive-এরটা নিন', 'Use Drive')}</button>
+      <button class="btn btn-secondary" data-sc="device">${L('এই device-এরটা নিন', 'Use this device')}</button>
+      <button class="btn btn-primary" data-sc="mergeshow">${L('পেজ ধরে merge', 'Merge page by page')}</button>
     </div>
     <div id="scMerge" class="hidden">
       <p>${L(`${auto}টি পেজ নিজে থেকেই merge হবে (যেদিকে text আছে সেটা)। ${plan.remoteOnly.length}টি পেজ শুধু Drive-এ আছে (যোগ হবে), ${plan.localOnly.length}টি শুধু এখানে (থাকবে)।`, `${auto} page(s) merge automatically (whichever side has text). ${plan.remoteOnly.length} page(s) exist only on Drive (will be added), ${plan.localOnly.length} only here (kept).`)}</p>
@@ -2386,7 +2600,7 @@ async function openSyncConflict() {
         closeSyncDlg(); state.syncConflict = null;
         await syncToDrive({ force: true });
         refreshDriveChip();
-        toast(L('🔀 Merge হয়েছে', '🔀 Merged'), 'ok', 2500);
+        toast(L('Merge হয়েছে', 'Merged'), 'ok', 2500);
       }
     } catch (err) { toast('❌ ' + err.message, 'err', 5000); const m = body.querySelector('[data-sc="mergeapply"]'); if (m) m.disabled = false; }
   };
@@ -2456,8 +2670,8 @@ function storageMeterHtml(info, list) {
   if (!info) return '';
   const pct = Math.min(100, Math.round(info.usage / info.quota * 100));
   const n = list.filter(isFreeable).length;
-  return `<div class="lib-note lib-row"><span>💽 ${L('Storage', 'Storage')}: ${fmtBytes(info.usage)} / ${fmtBytes(info.quota)} (${pct}%)<span class="lib-prog" style="display:block;margin-top:.3rem"><i style="width:${pct}%"></i></span></span>
-    <span class="lib-actions">${n ? `<button class="btn btn-secondary" data-act="free-space" title="${L('শেষ হওয়া, Drive-এ থাকা project-এর ছবি এই device থেকে সরান (text থাকে)', 'Remove images of finished, Drive-linked projects from this device (text stays)')}">🧹 ${L('Space খালি করুন', 'Free up space')} (${n})</button>` : ''}</span></div>`;
+  return `<div class="lib-note lib-row"><span>${L('Storage', 'Storage')}: ${fmtBytes(info.usage)} / ${fmtBytes(info.quota)} (${pct}%)<span class="lib-prog" style="display:block;margin-top:.3rem"><i style="width:${pct}%"></i></span></span>
+    <span class="lib-actions">${n ? `<button class="btn btn-secondary" data-act="free-space" title="${L('শেষ হওয়া, Drive-এ থাকা project-এর ছবি এই device থেকে সরান (text থাকে)', 'Remove images of finished, Drive-linked projects from this device (text stays)')}">${L('Space খালি করুন', 'Free up space')} (${n})</button>` : ''}</span></div>`;
 }
 
 async function freeUpSpace() {
@@ -2479,7 +2693,7 @@ async function freeUpSpace() {
     });
     freed += size; projects++;
   }
-  toast(projects ? L(`🧹 ${projects}টি project থেকে ${fmtBytes(freed)} খালি হয়েছে`, `🧹 Freed ${fmtBytes(freed)} from ${projects} project(s)`) : L('কোনো project খালি করা যায়নি (ছবি এখনো Drive-এ নেই)', 'Nothing freed (images are not on Drive yet)'), projects ? 'ok' : 'warn', 4000);
+  toast(projects ? L(`${projects}টি project থেকে ${fmtBytes(freed)} খালি হয়েছে`, `Freed ${fmtBytes(freed)} from ${projects} project(s)`) : L('কোনো project খালি করা যায়নি (ছবি এখনো Drive-এ নেই)', 'Nothing freed (images are not on Drive yet)'), projects ? 'ok' : 'warn', 4000);
   return { freed, projects };
 }
 function renderPhase8UI() { refreshDriveChip(); }
@@ -2499,22 +2713,28 @@ function refreshDriveBtn() {
 
 function refreshAcctUi() {
   const lab = $('acctLabel'), ico = $('acctIco'); if (!lab) return;
-  if (gdrive.user) {
-    lab.textContent = (gdrive.user.given_name || gdrive.user.name || 'Drive').slice(0, 8);
-    ico.innerHTML = gdrive.user.picture ? `<img class="acct-avatar" src="${esc(gdrive.user.picture)}" referrerpolicy="no-referrer" alt="">` : USER_SVG;
-    $('acctBtn').title = gdrive.user.email || 'Google account';
+  const u = gdrive.user || storedUser();          // refresh করলেও account দেখায় (device-এ save করা profile)
+  const stale = !!u && !driveValid();             // account চেনা আছে, কিন্তু Drive token-এর মেয়াদ শেষ → এক ক্লিকে Reconnect
+  const btn = $('acctBtn');
+  btn.dataset.state = !u ? 'out' : (stale ? 'stale' : 'in');
+  btn.classList.toggle('acct-stale', stale);
+  if (u) {
+    lab.textContent = (u.given_name || u.name || 'Drive').slice(0, 8);
+    ico.innerHTML = u.picture ? `<img class="acct-avatar" src="${esc(u.picture)}" referrerpolicy="no-referrer" alt="">` : USER_SVG;
+    btn.title = (u.email || 'Google account') + (stale ? ' — ' + L('Reconnect করতে ক্লিক করুন', 'click to reconnect') : '');
   } else {
-    lab.textContent = 'Sign in'; ico.innerHTML = USER_SVG; $('acctBtn').title = L('Google দিয়ে Sign in', 'Sign in with Google');
+    lab.textContent = 'Sign in'; ico.innerHTML = USER_SVG; btn.title = L('Google দিয়ে Sign in', 'Sign in with Google');
   }
-  $('acctPrompt').classList.toggle('hidden', !!gdrive.user || !GOOGLE_CLIENT_ID || !!sessionStorage.getItem('tx-acct-x'));
+  $('acctPrompt').classList.toggle('hidden', !!u || !GOOGLE_CLIENT_ID || !!sessionStorage.getItem('tx-acct-x') || !!window.__txWelcomeOpen);
   if ($('libModal').classList.contains('open') && libTab === 'drive') renderLib();
 }
 
 function refreshLibUi() {
   $('libBtn').title = L('Library — আগের কাজ', 'Library — past work');
   $('libBtnLabel').textContent = 'Library';
-  $('flowBtnTxt').textContent = L('Auto Step (Space)', 'Auto Step (Space)');
-  $('acctPromptTxt').textContent = L('☁️ শুরুতেই Google দিয়ে Sign in করুন — আপনার file গুলো Drive-এ folder আকারে জমা থাকবে, যেকোনো সময় খুলে কাজ চালিয়ে যাওয়া যাবে।', '☁️ Sign in with Google — your files are kept in Drive as folders, so you can reopen and continue any time.');
+  try { updateStepBar(); } catch {}
+  $('moreBtnTxt').textContent = L('আরও', 'More');
+  $('acctPromptTxt').textContent = L('Sign in ছাড়াও সব চলবে। Google দিয়ে Sign in করলে আপনার কাজ নিজের Drive-এ backup থাকবে এবং অন্য device-এ চালিয়ে যাওয়া যাবে।', 'Everything works without signing in. Sign in with Google to back up your work to your own Drive and continue on other devices.');
   $('acctPromptBtn').textContent = L('Sign in', 'Sign in');
   refreshDriveBtn(); refreshAcctUi();
   if ($('libModal').classList.contains('open')) renderLib();
@@ -2522,8 +2742,8 @@ function refreshLibUi() {
 
 function renderLib() {
   $('libTitle').textContent = L('আমার Library', 'My Library');
-  $('tabLocal').textContent = '💾 ' + L('এই device', 'This device');
-  $('tabDrive').textContent = '☁️ Google Drive';
+  $('tabLocal').textContent = '' + L('এই device', 'This device');
+  $('tabDrive').textContent = 'Google Drive';
   $('tabLocal').classList.toggle('active', libTab === 'local');
   $('tabDrive').classList.toggle('active', libTab === 'drive');
   const box = $('libContent');
@@ -2539,9 +2759,13 @@ async function renderLocalTab(box) {
   let list;
   try { list = await localList(); } catch { box.innerHTML = `<div class="lib-note">${L('এই browser-এ local storage চালু নেই (private mode?)', 'Local storage is unavailable (private mode?)')}</div>`; return; }
   if (my !== _libSeq) return;
-  const head = `<div class="lib-note">${L('আপনার upload করা ছবি/PDF page আর লেখা text — সব এই browser-এ save থাকে। Refresh বা বন্ধ করলেও হারাবে না।', 'Your uploaded pages and extracted text are stored in this browser — refresh or close, nothing is lost.')}</div>`;
-  const srch = `<div class="lib-search"><input id="libSearch" type="search" autocomplete="off" value="${esc(libSearchQ)}" placeholder="🔎 ${L('সব project-এ text খুঁজুন…', 'Search text across all projects…')}" aria-label="${L('Library-তে খুঁজুন', 'Search the Library')}"><div id="libSearchRes"></div></div>`;
-  const bk = `<div class="lib-note lib-row"><span>📦 ${L('সব project এক ZIP-এ backup / backup থেকে ফেরত আনুন', 'Back up everything to one ZIP / restore from a backup')}</span><span class="lib-actions"><button class="btn btn-secondary" data-act="export-all" ${list.length ? '' : 'disabled'}>📦 ${L('সব Export (.zip)', 'Export all (.zip)')}</button><button class="btn btn-secondary" data-act="import-backup">📥 ${L('Backup import', 'Import backup')}</button></span></div>`;
+  const me = storedUser();
+  let guestN = 0; if (me) { try { guestN = (await guestProjects()).length; } catch {} }
+  const who = me ? `${esc(me.email || me.name || '')}` : `${L('Guest (Sign in করা নেই)', 'Guest (not signed in)')}`;
+  const head = `<div class="lib-note">${who}<br>${L('আপনার upload করা ছবি/PDF page আর লেখা text — সব এই browser-এ save থাকে। Refresh বা বন্ধ করলেও হারাবে না। এই তালিকায় শুধু এই account-এর project দেখায়।', 'Your uploaded pages and extracted text are stored in this browser — refresh or close, nothing is lost. This list only shows projects of this account.')}</div>`
+    + (guestN ? `<div class="lib-note lib-row"><span>${L(`Sign in ছাড়া করা ${guestN}টি project এই device-এ আছে।`, `${guestN} project(s) made without signing in are on this device.`)}</span><span class="lib-actions"><button class="btn btn-secondary" data-act="claim-guest">${L('আমার account-এ নিন', 'Add to my account')}</button></span></div>` : '');
+  const srch = `<div class="lib-search"><input id="libSearch" type="search" autocomplete="off" value="${esc(libSearchQ)}" placeholder="${L('সব project-এ text খুঁজুন…', 'Search text across all projects…')}" aria-label="${L('Library-তে খুঁজুন', 'Search the Library')}"><div id="libSearchRes"></div></div>`;
+  const bk = `<div class="lib-note lib-row"><span>${L('সব project এক ZIP-এ backup / backup থেকে ফেরত আনুন', 'Back up everything to one ZIP / restore from a backup')}</span><span class="lib-actions"><button class="btn btn-secondary" data-act="export-all" ${list.length ? '' : 'disabled'}>${L('সব Export (.zip)', 'Export all (.zip)')}</button><button class="btn btn-secondary" data-act="import-backup">${L('Backup import', 'Import backup')}</button></span></div>`;
   if (!list.length) { box.innerHTML = head + bk + `<div class="lib-empty">${L('এখনো কোনো project নেই।<br>কিছু upload করলেই এখানে জমা হবে।', 'No projects yet.<br>Upload something and it will show up here.')}</div>`; return; }
   // Library-level duplicate detection: same (source file name + page count + first-page hash).
   const dupKey = p => `${(p.sourceFileName || '').trim().toLowerCase()}|${p.pageCount || 0}|${p.firstPageHash || ''}`;
@@ -2561,13 +2785,13 @@ async function renderLocalTab(box) {
     pct: p.pageCount ? Math.round(p.doneCount / p.pageCount * 100) : 0,
     meta: `${p.pageCount} ${L('পেজ', 'pages')} · ${p.doneCount} done · ${esc(fmtDate(p.updatedAt))}`,
     tags: (p.id === state.projectId ? ` <span class="lib-tag">● ${L('খোলা আছে', 'open')}</span>` : '')
-      + (p.driveFolderId ? ' <span class="lib-tag">☁️</span>' : '')
-      + (p.blobsFreed ? ` <span class="lib-tag" title="${L('ছবি Drive-এ আছে; খুললে ফিরে আসবে', 'Images are on Drive; restored when opened')}">🧹 ${L('ছবি Drive-এ', 'images on Drive')}</span>` : '')
+      + (p.driveFolderId ? ' <span class="lib-tag">Drive</span>' : '')
+      + (p.blobsFreed ? ` <span class="lib-tag" title="${L('ছবি Drive-এ আছে; খুললে ফিরে আসবে', 'Images are on Drive; restored when opened')}">${L('ছবি Drive-এ', 'images on Drive')}</span>` : '')
       + (dupIds.has(p.id) ? ` <span class="lib-tag" style="background:var(--yellow,#d97706);color:#fff" title="${L('একই PDF/ছবি আরেকটা project-এও আছে', 'Same PDF/images exist in another project')}">⚠️ duplicate</span>` : ''),
     actions: `<button class="btn btn-primary" data-act="open-local" data-id="${p.id}">▶ ${L('খুলুন', 'Open')}</button><button class="btn btn-secondary" data-act="dl-local" data-id="${p.id}" title=".txt download">⬇ .txt</button>`
-      + (dupIds.has(p.id) ? `<button class="btn btn-secondary" data-act="merge-dup" data-id="${p.id}" title="${L('একই রকম আরেকটা project মুছুন', 'Delete the other identical project')}">🗑 ${L('Duplicate সরান', 'Remove duplicate')}</button>` : '')
-      + (state.pages.length && p.id !== state.projectId ? `<button class="btn btn-secondary" data-act="merge-into" data-id="${p.id}" title="${L('এই project-এর সব পেজ খোলা project-এর শেষে যোগ করুন', 'Append all pages of this project to the open project')}">➕ ${L('খোলা project-এ মেশান', 'Merge into open')}</button>` : '')
-      + `<button class="btn btn-danger" data-act="del-local" data-id="${p.id}" title="${L('মুছুন', 'Delete')}">🗑</button>`,
+      + (dupIds.has(p.id) ? `<button class="btn btn-secondary" data-act="merge-dup" data-id="${p.id}" title="${L('একই রকম আরেকটা project মুছুন', 'Delete the other identical project')}">${L('Duplicate সরান', 'Remove duplicate')}</button>` : '')
+      + (state.pages.length && p.id !== state.projectId ? `<button class="btn btn-secondary" data-act="merge-into" data-id="${p.id}" title="${L('এই project-এর সব পেজ খোলা project-এর শেষে যোগ করুন', 'Append all pages of this project to the open project')}">${L('খোলা project-এ মেশান', 'Merge into open')}</button>` : '')
+      + `<button class="btn btn-danger" data-act="del-local" data-id="${p.id}" title="${L('মুছুন', 'Delete')}">${IC('trash')}</button>`,
   })).join('');
 }
 
@@ -2580,10 +2804,10 @@ async function renderDriveTab(box) {
   if (!GOOGLE_CLIENT_ID) { box.innerHTML = setupNote(); return; }
   if (!gdrive.token) {
     const hint = readSaved('textriva-g-hint');
-    box.innerHTML = `<div class="lib-note">${L('Sign in করলে আপনার file গুলো Google Drive → <b>Textriva</b> folder-এ project অনুযায়ী জমা হবে। এখান থেকে দেখা, খোলা ও delete করা যাবে।', 'Sign in to keep your files in Google Drive → <b>Textriva</b> folder, one folder per project. You can view, open and delete them here.')}</div><div style="text-align:center"><button class="btn btn-primary" data-act="signin">🔐 ${hint && hint.includes('@') ? L('চালিয়ে যান — ', 'Continue as ') + esc(hint) : L('Google দিয়ে Sign in', 'Sign in with Google')}</button></div>`;
+    box.innerHTML = `<div class="lib-note">${L('Sign in করলে আপনার file গুলো Google Drive → <b>Textriva</b> folder-এ project অনুযায়ী জমা হবে। এখান থেকে দেখা, খোলা ও delete করা যাবে।', 'Sign in to keep your files in Google Drive → <b>Textriva</b> folder, one folder per project. You can view, open and delete them here.')}</div><div style="text-align:center"><button class="btn btn-primary" data-act="signin">${hint && hint.includes('@') ? L('চালিয়ে যান — ', 'Continue as ') + esc(hint) : L('Google দিয়ে Sign in', 'Sign in with Google')}</button></div>`;
     return;
   }
-  const head = `<div class="lib-note lib-row"><span>👤 ${esc(gdrive.user?.email || '')}<br><small>Drive › Textriva</small></span><span class="lib-actions"><button class="btn btn-primary" data-act="sync" ${state.pages.length ? '' : 'disabled'}>☁️ ${L('এই project Drive-এ save', 'Save current project')}</button><button class="btn btn-secondary" data-act="signout">${L('Sign out', 'Sign out')}</button></span></div>`;
+  const head = `<div class="lib-note lib-row"><span>${esc(gdrive.user?.email || '')}<br><small>Drive › Textriva</small></span><span class="lib-actions"><button class="btn btn-primary" data-act="sync" ${state.pages.length ? '' : 'disabled'}>${L('এই project Drive-এ save', 'Save current project')}</button><button class="btn btn-secondary" data-act="signout">${L('Sign out', 'Sign out')}</button></span></div>`;
   box.innerHTML = head + `<div class="lib-empty">${L('Drive থেকে আনা হচ্ছে…', 'Loading from Drive…')}</div>`;
   try {
     const root = await dRoot();
@@ -2595,7 +2819,7 @@ async function renderDriveTab(box) {
         name: f.name.replace(/ · [a-z0-9]{4}$/i, ''), current: f.id === state.proj?.driveFolderId,
         pct: pages ? Math.round(done / pages * 100) : 0,
         meta: `${pages || '?'} ${L('পেজ', 'pages')} · ${done} done · ${esc(fmtDate(f.modifiedTime))}`,
-        actions: `<button class="btn btn-primary" data-act="open-drive" data-id="${f.id}">▶ ${L('খুলুন', 'Open')}</button><a class="btn btn-secondary" href="https://drive.google.com/drive/folders/${f.id}" target="_blank" rel="noopener" title="Drive-এ দেখুন">↗</a><button class="btn btn-danger" data-act="del-drive" data-id="${f.id}" title="${L('Trash-এ পাঠান', 'Move to trash')}">🗑</button>`,
+        actions: `<button class="btn btn-primary" data-act="open-drive" data-id="${f.id}">▶ ${L('খুলুন', 'Open')}</button><a class="btn btn-secondary" href="https://drive.google.com/drive/folders/${f.id}" target="_blank" rel="noopener" title="Drive-এ দেখুন">↗</a><button class="btn btn-danger" data-act="del-drive" data-id="${f.id}" title="${L('Trash-এ পাঠান', 'Move to trash')}">${IC('trash')}</button>`,
       });
     }).join('') : `<div class="lib-empty">${L('Drive-এ এখনো কিছু save করা হয়নি।<br>উপরের বাটনে চাপ দিয়ে বর্তমান project save করুন।', 'Nothing in Drive yet.<br>Use the button above to save the current project.')}</div>`);
   } catch (e) {
@@ -2620,7 +2844,11 @@ $('libContent').addEventListener('click', async e => {
       await deleteLocalProject(id); renderLib(); initResumeCard();
     }
     else if (act === 'signin' || act === 'retry') { await driveToken(); renderLib(); }
-    else if (act === 'signout') { gSignOut(); renderLib(); }
+    else if (act === 'signout') {
+      if (!confirm(L('Sign out করবেন?\n\nআপনার কাজ এই device-এর Library-তে (এবং Drive-এ) নিরাপদ থাকবে। শুধু screen পরিষ্কার হবে, আর পরের user আপনার project দেখতে পাবে না।', 'Sign out?\n\nYour work stays safe in this device\'s Library (and on Drive). The screen is cleared and the next person will not see your projects.'))) return;
+      await gSignOut(); closeLib();
+    }
+    else if (act === 'claim-guest') { const n = await claimGuestProjects(); renderLib(); initResumeCard(); toast(L(`✅ ${n}টি project আপনার account-এ নেওয়া হয়েছে`, `✅ ${n} project(s) added to your account`), 'ok', 3000); }
     else if (act === 'sync') { await syncToDrive(); renderLib(); }
     else if (act === 'open-drive') await openDriveProject(id);
     else if (act === 'merge-dup') {
@@ -2634,11 +2862,11 @@ $('libContent').addEventListener('click', async e => {
         `এই project-টার মতোই দেখতে:\n${names}\n\nপুরনো/অপ্রয়োজনীয়টা মুছে ফেলবেন? (OK = প্রথমটা মুছবে, Cancel = কিছু মুছবে না)`,
         `Looks the same as:\n${names}\n\nDelete the other one? (OK = deletes the first match, Cancel = keeps both)`
       ));
-      if (delOther) { await deleteLocalProject(others[0].id); renderLib(); initResumeCard(); toast(L('🗑 Duplicate project মুছে ফেলা হয়েছে', '🗑 Duplicate project deleted'), 'ok', 2500); }
+      if (delOther) { await deleteLocalProject(others[0].id); renderLib(); initResumeCard(); toast(L('Duplicate project মুছে ফেলা হয়েছে', 'Duplicate project deleted'), 'ok', 2500); }
     }
     else if (act === 'del-drive') {
       if (!confirm(L('Drive থেকে এই project Trash-এ পাঠাবেন? (Drive-এর Trash থেকে ফেরত আনা যাবে)', 'Move this project to Drive trash? (Recoverable from Drive)'))) return;
-      await trashDriveProject(id); renderLib(); toast(L('🗑 Trash-এ পাঠানো হয়েছে', '🗑 Moved to trash'), 'ok', 2000);
+      await trashDriveProject(id); renderLib(); toast(L('Trash-এ পাঠানো হয়েছে', 'Moved to trash'), 'ok', 2000);
     }
   } catch (err) { toast('❌ ' + err.message, 'err', 5000); }
 });
@@ -2648,9 +2876,83 @@ $('libBtn').onclick = () => openLib('local');
 $('libClose').onclick = closeLib;
 $('libModal').onclick = e => { if (e.target === $('libModal')) closeLib(); };
 $('acctBtn').onclick = async () => {
-  if (GOOGLE_CLIENT_ID && !gdrive.token) { try { await driveToken(); } catch (e) { toast('❌ ' + e.message, 'err', 4000); } }
+  if (GOOGLE_CLIENT_ID && !driveValid()) { try { await driveToken(); } catch (e) { toast('❌ ' + e.message, 'err', 4000); } }
   openLib('drive');
 };
+
+// ── Welcome card (সাইন-ইন না থাকলে শুরুতে একবার; "Sign in ছাড়াই চালান" দিলে ৭ দিন আর আসে না) ──
+const LS_WELCOME = 'textriva-welcome-at', WELCOME_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+function shouldShowWelcome() {
+  if (!GOOGLE_CLIENT_ID || storedUser() || window.__textrivaNoWelcome) return false;
+  if (/[?&]shared=/.test(location.search)) return false;
+  const last = Number(readSaved(LS_WELCOME) || 0);
+  return !last || Date.now() - last > WELCOME_COOLDOWN_MS;
+}
+function closeWelcome() {
+  const d = $('welcomeDlg'); if (d) d.remove();
+  window.__txWelcomeOpen = false;
+  document.removeEventListener('keydown', _wlKey, true);
+  try { if (_wlPrevFocus && _wlPrevFocus.focus) _wlPrevFocus.focus(); } catch {}
+  refreshAcctUi();
+}
+let _wlPrevFocus = null;
+function _wlKey(e) {
+  const d = $('welcomeDlg'); if (!d) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeWelcome(); return; }
+  if (e.key !== 'Tab') return;
+  const f = Array.from(d.querySelectorAll('button, a[href]')).filter(x => !x.disabled);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+function openWelcome() {
+  if ($('welcomeDlg')) return;
+  saveSetting(LS_WELCOME, String(Date.now()));
+  window.__txWelcomeOpen = true; refreshAcctUi();
+  _wlPrevFocus = document.activeElement;
+  const items = [
+    ['drive', L('আপনার নিজের Google Drive-এ backup', 'Backup to your own Google Drive'), L('Project গুলো আপনার Drive-এর “Textriva” folder-এ project অনুযায়ী জমা থাকে।', 'Projects are saved in a “Textriva” folder in your Drive, one folder per project.')],
+    ['sync', L('যেকোনো device-এ কাজ চালিয়ে যান', 'Continue on any device'), L('অন্য ফোন বা কম্পিউটারে Sign in করে Library → Google Drive থেকে খুলুন।', 'Sign in on another phone or computer and open it from Library → Google Drive.')],
+    ['lock', L('আপনার data আলাদা থাকে', 'Your data stays separate'), L('প্রতিটি account-এর project আলাদা। Textriva শুধু নিজের বানানো file ছুঁতে পারে — আপনার Drive-এর বাকি কিছু নয়।', 'Every account has its own projects. Textriva can only touch files it created — nothing else in your Drive.')],
+    ['offline', L('Offline-এও নিরাপদ', 'Safe even when offline'), L('ইন্টারনেট না থাকলে পরিবর্তন অপেক্ষায় থাকে, ফিরলে নিজে থেকে sync হয়।', 'Without internet, changes wait in a queue and sync automatically when you are back online.')],
+  ];
+  const wrap = document.createElement('div');
+  wrap.id = 'welcomeDlg'; wrap.className = 'wl-bg'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-labelledby', 'wlTitle');
+  wrap.innerHTML = `<div class="wl-card">
+    <button class="wl-x" data-wl="skip" aria-label="${L('বন্ধ করুন', 'Close')}">✕</button>
+    <div class="wl-brand"><img src="assets/brand/icon-64.svg" alt="" width="28" height="28"><span>Textriva</span></div>
+    <h2 id="wlTitle">${L('আপনার কাজ নিরাপদ রাখুন', 'Keep your work safe')}</h2>
+    <p class="wl-sub">${L('Sign in ছাড়াই Textriva-র সব feature ব্যবহার করা যায়। Google দিয়ে Sign in করলে বাড়তি যা পাবেন:', 'Every Textriva feature works without signing in. Signing in with Google adds:')}</p>
+    <ul class="wl-list">${items.map(([i, t1, d]) => `<li><span class="wl-ico" aria-hidden="true">${IC(i)}</span><div><b>${t1}</b><small>${d}</small></div></li>`).join('')}</ul>
+    <div class="wl-note">${L('Sign in না করলে কাজ শুধু এই browser-এ save থাকে — browser data মুছলে বা অন্য device-এ গেলে পাওয়া যাবে না।', 'Without signing in, your work is saved only in this browser — it will not be available on other devices or after clearing browser data.')}</div>
+    <div class="wl-actions">
+      <button class="btn btn-primary wl-go" data-wl="signin"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.5 3.5-5.35 3.5a6 6 0 1 1 0-12c1.5 0 2.8.55 3.8 1.45l2.1-2.1A9 9 0 1 0 12 21c5 0 8.6-3.5 8.6-8.4 0-.5-.1-1-.25-1.5z"/></svg>${L('Google দিয়ে Sign in', 'Sign in with Google')}</button>
+      <button class="btn btn-secondary" data-wl="skip">${L('Sign in ছাড়াই চালিয়ে যান', 'Continue without signing in')}</button>
+    </div>
+    <a class="wl-priv" href="privacy.html" target="_blank" rel="noopener">${L('Privacy Policy', 'Privacy Policy')}</a>
+  </div>`;
+  wrap.addEventListener('click', async e => {
+    if (e.target === wrap) { closeWelcome(); return; }
+    const b = e.target.closest('[data-wl]'); if (!b) return;
+    if (b.dataset.wl === 'skip') { closeWelcome(); return; }
+    if (b.dataset.wl === 'signin') {
+      closeWelcome();
+      try { await driveToken(); const u = gdrive.user || storedUser(); toast(L('✅ Sign in সফল' + (u ? ' — ' + (u.given_name || u.name || u.email) : ''), '✅ Signed in' + (u ? ' — ' + (u.given_name || u.name || u.email) : '')), 'ok', 3000); }
+      catch (err) { toast('❌ ' + err.message, 'err', 4000); }
+    }
+  });
+  document.body.appendChild(wrap);
+  document.addEventListener('keydown', _wlKey, true);
+  wrap.querySelector('.wl-go').focus();
+}
+
+// Reload-এর পর: account চেনা থাকলে চুপচাপ token ফেরত আনার চেষ্টা (না হলে top bar-এ Reconnect ইঙ্গিত থাকে);
+// না থাকলে (guest) welcome card।
+setTimeout(() => {
+  if (storedUser()) { if (GOOGLE_CLIENT_ID && !driveValid() && navigator.onLine) silentTokenRefresh(); }
+  else if (shouldShowWelcome()) openWelcome();
+}, 1200);
 $('acctPromptBtn').onclick = () => $('acctBtn').click();
 $('acctPromptX').onclick = () => { try { sessionStorage.setItem('tx-acct-x', '1'); } catch {} $('acctPrompt').classList.add('hidden'); };
 $('driveSaveBtn').onclick = async () => {
@@ -2667,9 +2969,9 @@ async function initResumeCard() {
     if (!list.length) { card.classList.add('hidden'); return; }
     const last = list.find(p => p.id === readSaved(LS_LAST)) || list[0];
     card.dataset.id = last.id;
-    $('resumeTxt').innerHTML = `📂 ${L('আগের কাজ:', 'Last session:')} <b>${esc(last.name)}</b> — ${last.doneCount}/${last.pageCount} done`;
+    $('resumeTxt').innerHTML = `${L('আগের কাজ:', 'Last session:')} <b>${esc(last.name)}</b> — ${last.doneCount}/${last.pageCount} done`;
     $('resumeBtn').textContent = '▶ ' + L('চালিয়ে যান', 'Continue');
-    $('resumeLibBtn').textContent = '📚 Library';
+    $('resumeLibBtn').textContent = 'Library';
     card.classList.remove('hidden');
   } catch { card.classList.add('hidden'); }
 }
@@ -2689,13 +2991,32 @@ function setWaitingForNewCopy(on) {
   const txt = $('flowBtnTxt');
   if (!btn || !txt) return;
   btn.classList.toggle('waiting-copy', on);
-  txt.textContent = on
-    ? L('নতুন copy-এর জন্য অপেক্ষা…', 'Waiting for new copy…')
-    : L('Auto Step (Space)', 'Auto Step (Space)');
+  updateStepBar();
 }
+
+// Sticky bar: progress + the Auto Step button. The button runs the very same runWorkflowStep() as the Space key.
+function updateStepBar() {
+  const bar = $('stepBar'); if (!bar) return;
+  const total = state.pages.length;
+  bar.classList.toggle('hidden', !total);
+  document.body.classList.toggle('has-stepbar', total > 0);
+  if (!total) return;
+  const done = state.pages.filter(p => p.status === 'done').length;
+  $('stepCount').textContent = `${done} / ${total}`;
+  let label, hint;
+  if (state.kWorkflowComplete) { label = L('সব page সম্পন্ন', 'All pages done'); hint = L('OCR শেষ', 'OCR complete'); }
+  else if (_waitingForCopy) { label = L('নতুন copy-এর অপেক্ষায়…', 'Waiting for new copy…'); hint = L('Lens থেকে নতুন text copy করুন', 'Copy fresh text from Lens'); }
+  else if (!state.kWorkflowStarted) { label = L('শুরু করুন', 'Start'); hint = L('প্রথম page Lens-এ খুলবে', 'Opens the first page in Lens'); }
+  else { label = L('Paste ও পরের page', 'Paste & next page'); hint = L(`Page ${state.current + 1} — Lens থেকে copy করে ফিরে আসুন`, `Page ${state.current + 1} — copy from Lens, then return`); }
+  $('flowBtnTxt').textContent = label; $('stepHint').textContent = hint;
+  $('flowBtn').classList.toggle('is-complete', !!state.kWorkflowComplete);
+}
+let _stepBusy = false;   // button and Space share this: one step at a time
 
 function runWorkflowStep() {
   if (!state.pages.length) return;
+  if (_stepBusy) return;
+  _stepBusy = true; setTimeout(() => { _stepBusy = false; }, 450);
   if (state.kWorkflowComplete) { toast(L('✅ সব page-এর OCR শেষ — আর Space চাপার দরকার নেই।', '✅ All pages are done.'), 'ok', 3000); return; }
   if (!state.kWorkflowStarted) {
     setWaitingForNewCopy(false);
@@ -2703,7 +3024,7 @@ function runWorkflowStep() {
     if (start === -1) { state.kWorkflowComplete = true; toast(L('✅ সব page-এ text আছে — OCR শেষ।', '✅ Every page already has text.'), 'ok', 3000); return; }
     state.kWorkflowStarted = true; state.current = start; state.lastClip = '';
     renderAll();
-    toast(L(`🔍 Page ${start + 1}-এর Lens খুলছে — OCR copy করে ফিরে এসে Space চাপুন।`, `🔍 Opening Lens for page ${start + 1} — copy the text, come back and press Space.`), 'ok', 3000);
+    toast(L(`Page ${start + 1}-এর Lens খুলছে — OCR copy করে ফিরে এসে Space চাপুন।`, `Opening Lens for page ${start + 1} — copy the text, come back and press Space.`), 'ok', 3000);
     openLens(start);
     return;
   }
@@ -2735,15 +3056,24 @@ function runWorkflowStep() {
     while (next < state.pages.length && state.pages[next].status === 'done' && (state.pages[next].text || '').trim()) next++;
     if (next >= state.pages.length) {
       state.kWorkflowComplete = true; renderAll();
-      toast(L('🎉 শেষ page-ও save হয়েছে — সব OCR complete!', '🎉 Last page saved — all OCR complete!'), 'ok', UNDO_TOAST_MS, undoAction);
+      toast(L('শেষ page-ও save হয়েছে — সব OCR complete!', 'Last page saved — all OCR complete!'), 'ok', UNDO_TOAST_MS, undoAction);
       return;
     }
-    toast(L('✅ Paste → Save → Next → Lens 🚀', '✅ Paste → Save → Next → Lens 🚀'), 'ok', UNDO_TOAST_MS, undoAction);
+    toast(L('✅ Paste → Save → Next → Lens ', '✅ Paste → Save → Next → Lens '), 'ok', UNDO_TOAST_MS, undoAction);
     state.current = next; renderAll();
     setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
   }).catch(() => toast(L('Clipboard access নেই — manually paste করুন', 'No clipboard access — paste manually'), '', 3000));
 }
 $('flowBtn').onclick = runWorkflowStep;
+$('flowBtn').addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && navigator.vibrate) { try { navigator.vibrate(12); } catch {} } });
+(() => {   // "More" menu for the less-used tools
+  const b = $('moreBtn'), m = $('moreMenu');
+  const close = () => { m.classList.add('hidden'); b.setAttribute('aria-expanded', 'false'); };
+  b.onclick = e => { e.stopPropagation(); const hidden = m.classList.toggle('hidden'); b.setAttribute('aria-expanded', String(!hidden)); };
+  m.addEventListener('click', e => { if (e.target.closest('button')) close(); });
+  document.addEventListener('click', e => { if (!m.classList.contains('hidden') && !e.target.closest('.more-wrap')) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !m.classList.contains('hidden')) close(); }, true);
+})();
 $('qualitySel').addEventListener('change', e => e.target.blur());
 window.addEventListener('focus', () => {
   if (!state.awaitingLens) return;
@@ -2940,7 +3270,7 @@ async function loadTxt(file) {
     const text = pg.lines.join('\n').replace(/^\n+|\n+$/g, ''); // trim leading/trailing blank lines
     addTxtPage(pg.name || file.name, text, placeholder);
   }
-  toast(`📄 ${pages.length}টি পেজ import হয়েছে`, 'ok', 3000);
+  toast(`${pages.length}টি পেজ import হয়েছে`, 'ok', 3000);
 }
 
 // Creates a 1×1 gray placeholder blob (used as image for txt-only pages)
@@ -3059,13 +3389,13 @@ function onStripScroll() {
 // ── Offline: Library + editing already work from IndexedDB; Drive sync is queued until we are back online ──
 function isOffline() { return typeof navigator !== 'undefined' && navigator.onLine === false; }
 function onNetBack() {
-  toast(L('🟢 আবার online', '🟢 Back online'), 'ok', 2500);
+  toast(L('আবার online', 'Back online'), 'ok', 2500);
   if (!GOOGLE_CLIENT_ID || !state.proj || !state.proj.driveFolderId) { refreshDriveChip(); return; }
   if (!driveValid()) silentTokenRefresh(); else queueDriveSync();
   refreshDriveChip();
 }
 function onNetLost() {
-  toast(L('📴 Offline — লেখা চলবে, Drive sync পরে হবে', '📴 Offline — keep editing, Drive sync is queued'), '', 3500);
+  toast(L('Offline — লেখা চলবে, Drive sync পরে হবে', 'Offline — keep editing, Drive sync is queued'), '', 3500);
   refreshDriveChip();
 }
 window.addEventListener('online', onNetBack);
@@ -3085,7 +3415,7 @@ async function consumeSharedFiles(cacheStorage) {
     files.push(new File([blob], name, { type: blob.type || res.headers.get('content-type') || '' }));
     await cache.delete(rq);
   }
-  if (files.length) { toast(L(`📲 ${files.length}টি shared file নেওয়া হলো`, `📲 Received ${files.length} shared file(s)`), 'ok', 2500); await handleFiles(files); }
+  if (files.length) { toast(L(`${files.length}টি shared file নেওয়া হলো`, `Received ${files.length} shared file(s)`), 'ok', 2500); await handleFiles(files); }
   return files.length;
 }
 if (/[?&]shared=/.test(location.search)) {
@@ -3405,7 +3735,7 @@ function reviewAccept() {
   if (!pg) return;
   pg.reviewed = true;
   const l = reviewList();
-  if (!l.length) { state.review = false; renderAll(); toast(L('🎉 সব ⚠️ page review হয়েছে', '🎉 All flagged pages reviewed'), 'ok', 3000); return; }
+  if (!l.length) { state.review = false; renderAll(); toast(L('সব ⚠️ page review হয়েছে', 'All flagged pages reviewed'), 'ok', 3000); return; }
   state.current = l.find(i => i > state.current) ?? l[0];
   renderAll();
 }
@@ -3425,8 +3755,8 @@ function renderReviewUI() {
     <button class="btn btn-secondary" data-rv="prev" aria-label="${L('আগের', 'Previous')}">←</button>
     <button class="btn btn-secondary" data-rv="next" aria-label="${L('পরের', 'Next')}">→</button>
     <button class="btn btn-success" data-rv="accept">✔ ${L('Accept', 'Accept')}</button>
-    <button class="btn btn-secondary" data-rv="lens">🔍 ${L('Lens-এ আবার', 'Redo with Lens')}</button>
-    <button class="btn btn-secondary" data-rv="edit">✏️ ${L('Edit', 'Edit')}</button>
+    <button class="btn btn-secondary" data-rv="lens">${L('Lens-এ আবার', 'Redo with Lens')}</button>
+    <button class="btn btn-secondary" data-rv="edit">${L('Edit', 'Edit')}</button>
     <button class="btn btn-secondary" data-rv="exit">✕ (Esc)</button>`;
 }
 $('reviewBar').addEventListener('click', e => {
@@ -3434,7 +3764,7 @@ $('reviewBar').addEventListener('click', e => {
   if (a === 'prev') reviewStep(-1);
   else if (a === 'next') reviewStep(1);
   else if (a === 'accept') reviewAccept();
-  else if (a === 'lens') { openLens(state.current); toast(L('Lens থেকে copy করে 📋 Paste চাপুন, তারপর Accept', 'Copy from Lens, press 📋 Paste, then Accept'), '', 4000); }
+  else if (a === 'lens') { openLens(state.current); toast(L('Lens থেকে copy করে Paste চাপুন, তারপর Accept', 'Copy from Lens, press Paste, then Accept'), '', 4000); }
   else if (a === 'edit') textArea.focus();
   else if (a === 'exit') exitReview();
 });
@@ -3864,7 +4194,7 @@ function renderBnRules() {
       <span aria-hidden="true">→</span>
       <input data-f="replace" value="${esc(r.replace)}" placeholder="${L('বদলে', 'Replace')}" aria-label="${L('বদলে', 'Replace')}" spellcheck="false">
       <label class="tt-chk"><input type="checkbox" data-f="regex" ${r.regex ? 'checked' : ''}> regex</label>
-      <button class="btn btn-secondary" data-tt="rule-del" aria-label="${L('মুছুন', 'Delete')}">🗑</button></div>`).join('');
+      <button class="btn btn-secondary" data-tt="rule-del" aria-label="${L('মুছুন', 'Delete')}">${IC('trash')}</button></div>`).join('');
   const d = document.getElementById('ttDigits');
   if (d) d.value = _bnFix.digits;
 }
@@ -3984,15 +4314,15 @@ function openTextTools(tab) {
   wrap.setAttribute('role', 'dialog');
   wrap.setAttribute('aria-modal', 'true');
   wrap.innerHTML = `<div class="tt-box">
-    <div class="tt-hdr"><strong>🧹 ${L('Text টুলস', 'Text tools')}</strong><button class="btn btn-secondary" data-tt="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
+    <div class="tt-hdr"><strong>${L('Text টুলস', 'Text tools')}</strong><button class="btn btn-secondary" data-tt="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
     <div class="tt-tabs" role="tablist">
-      <button class="btn btn-secondary" role="tab" data-tab="clean">🧹 ${L('Cleanup', 'Cleanup')}</button>
-      <button class="btn btn-secondary" role="tab" data-tab="bn">🔤 ${L('বাংলা fix', 'Bangla fixes')}</button>
-      <button class="btn btn-secondary" role="tab" data-tab="fr">🔎 ${L('Find & Replace', 'Find & Replace')}</button></div>
+      <button class="btn btn-secondary" role="tab" data-tab="clean">${L('Cleanup', 'Cleanup')}</button>
+      <button class="btn btn-secondary" role="tab" data-tab="bn">${L('বাংলা fix', 'Bangla fixes')}</button>
+      <button class="btn btn-secondary" role="tab" data-tab="fr">${L('Find & Replace', 'Find & Replace')}</button></div>
     <div id="ttOpts" class="tt-opts"></div>
     <div class="ex-row"><label for="ttScope">${L('কোথায়', 'Scope')}</label>
       <select id="ttScope"><option value="all">${L('সব পেজ', 'All pages')}</option><option value="cur">${L('শুধু এই পেজ', 'This page only')}</option></select>
-      <button class="btn btn-primary" data-tt="preview">👁 ${L('Preview', 'Preview')}</button></div>
+      <button class="btn btn-primary" data-tt="preview">${L('Preview', 'Preview')}</button></div>
     <div id="ttSum" class="tt-sum" aria-live="polite"></div>
     <div id="ttPrev" class="tt-prev"></div>
     <div class="dc-actions">
@@ -4055,7 +4385,7 @@ function toggleBookmark(i) {
   if (!pg) return;
   pg.bookmark = !pg.bookmark;
   renderAll(); updateStats();
-  toast(pg.bookmark ? L('🔖 Bookmark করা হয়েছে', '🔖 Bookmarked') : L('Bookmark সরানো হয়েছে', 'Bookmark removed'), '', 1500);
+  toast(pg.bookmark ? L('Bookmark করা হয়েছে', 'Bookmarked') : L('Bookmark সরানো হয়েছে', 'Bookmark removed'), '', 1500);
 }
 function gotoPage(n) {
   const k = parseInt(n, 10);
@@ -4071,8 +4401,8 @@ function openBookmarks() {
   wrap.id = 'bmDlg';
   wrap.setAttribute('role', 'dialog');
   wrap.setAttribute('aria-modal', 'true');
-  wrap.innerHTML = `<div class="tt-box"><div class="tt-hdr"><strong>🔖 ${L('Bookmark ও note', 'Bookmarks & notes')}</strong><button class="btn btn-secondary" data-bm="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>`
-    + (rows.length ? rows.map(({ p, i }) => `<button class="bm-row" data-bm="go" data-i="${i}"><b>#${i + 1}</b> ${p.bookmark ? '🔖' : ''}${p.note ? '📝' : ''} <span>${esc((p.note || p.text || '').replace(/\s+/g, ' ').slice(0, 90))}</span></button>`).join('')
+  wrap.innerHTML = `<div class="tt-box"><div class="tt-hdr"><strong>${L('Bookmark ও note', 'Bookmarks & notes')}</strong><button class="btn btn-secondary" data-bm="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>`
+    + (rows.length ? rows.map(({ p, i }) => `<button class="bm-row" data-bm="go" data-i="${i}"><b>#${i + 1}</b> ${p.bookmark ? '' : ''}${p.note ? '' : ''} <span>${esc((p.note || p.text || '').replace(/\s+/g, ' ').slice(0, 90))}</span></button>`).join('')
       : `<div class="tt-hint">${L('এখনো কোনো bookmark বা note নেই। B চেপে bookmark করুন।', 'No bookmarks or notes yet. Press B to bookmark a page.')}</div>`)
     + '</div>';
   wrap.addEventListener('click', e => {
@@ -4097,10 +4427,10 @@ function renderPhase4UI() {
   if (g) { g.max = state.pages.length; g.placeholder = L('পেজ #', 'Go to #'); g.setAttribute('aria-label', L('পেজ নম্বরে যান', 'Go to page number')); }
   if (!pg) return;
   const bm = $('bookmarkBtn');
-  if (bm) { bm.textContent = pg.bookmark ? '🔖' : '＋🔖'; bm.setAttribute('aria-pressed', pg.bookmark ? 'true' : 'false'); bm.title = L('Bookmark (B)', 'Bookmark (B)'); }
+  if (bm) { bm.textContent = pg.bookmark ? '' : '＋'; bm.setAttribute('aria-pressed', pg.bookmark ? 'true' : 'false'); bm.title = L('Bookmark (B)', 'Bookmark (B)'); }
   if (state._p4page !== pg.id) { state._p4page = pg.id; state.noteOpen = !!pg.note; }
   const nb = $('noteBtn');
-  if (nb) { nb.textContent = '📝' + (pg.note ? ' •' : ''); nb.setAttribute('aria-pressed', state.noteOpen ? 'true' : 'false'); nb.title = L('এই page-এর note', 'Note for this page'); }
+  if (nb) { nb.textContent = '' + (pg.note ? ' •' : ''); nb.setAttribute('aria-pressed', state.noteOpen ? 'true' : 'false'); nb.title = L('এই page-এর note', 'Note for this page'); }
   $('noteBar').classList.toggle('hidden', !state.noteOpen);
   const na = $('noteArea');
   na.placeholder = L('এই page-এর জন্য note (export-এ যায় না)…', 'Note for this page (not included in exports)…');
@@ -4179,7 +4509,7 @@ async function runLibSearch(q) {
     if (!res.length) { $('libSearchRes').innerHTML = `<div class="lib-note">${L('কিছু পাওয়া যায়নি', 'No matches found')}</div>`; return; }
     const total = res.reduce((s, r) => s + r.total, 0);
     $('libSearchRes').innerHTML = `<div class="lib-note">${L(`${res.length}টি project-এ ${total}টি page`, `${total} page(s) in ${res.length} project(s)`)}</div>`
-      + res.map(r => `<div class="lib-shead">📁 ${esc(r.name)} <span class="lib-tag">${r.total}</span></div>`
+      + res.map(r => `<div class="lib-shead">${esc(r.name)} <span class="lib-tag">${r.total}</span></div>`
         + r.hits.map(h => `<button class="lib-hit" data-act="open-hit" data-id="${esc(r.pid)}" data-page="${h.page}"><b>${L('পেজ', 'p.')} ${h.page}</b> ${esc(h.snippet.before)}<mark>${esc(h.snippet.match)}</mark>${esc(h.snippet.after)}</button>`).join('')).join('');
   } catch (e) {
     if (my === _lsSeq && $('libSearchRes')) $('libSearchRes').innerHTML = `<div class="lib-note">❌ ${esc(e.message)}</div>`;
@@ -4194,7 +4524,7 @@ $('libContent').addEventListener('input', e => {
 
 // ══════════════════════════════════════════
 // PHASE 6 — OPTIONAL OCR ENGINE (Tesseract.js in the browser; Lens stays the default and imgbb stays the image host)
-// Nothing here runs unless the user opens 🤖 Auto-OCR… and presses Start. No paid service, no server, no API key.
+// Nothing here runs unless the user opens Auto-OCR… and presses Start. No paid service, no server, no API key.
 // The vision-LLM engine from the plan is NOT implemented (needs a paid provider — to be decided with the owner).
 // ══════════════════════════════════════════
 const TESS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js'; // pinned, lazy-loaded on first use
@@ -4305,7 +4635,7 @@ function openOcrDlg() {
   const wrap = document.createElement('div');
   wrap.id = 'ocrDlg'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
   wrap.innerHTML = `<div class="tt-box">
-    <div class="tt-hdr"><strong>🤖 ${L('Auto-OCR (Tesseract)', 'Auto-OCR (Tesseract)')}</strong><button class="btn btn-secondary" data-oc="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
+    <div class="tt-hdr"><strong>${L('Auto-OCR (Tesseract)', 'Auto-OCR (Tesseract)')}</strong><button class="btn btn-secondary" data-oc="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
     <div class="tt-hint">${L('ঐচ্ছিক। Google Lens-ই ডিফল্ট ও বেশি নির্ভুল। Tesseract ব্রাউজারেই চলে (বিনামূল্যে), তাই ভুল বেশি হতে পারে — কম-confidence পেজে ⚠️ বসবে, পরে Review থেকে Lens-এ আবার করুন। প্রথমবার ভাষার ডেটা ডাউনলোড হয়।', 'Optional. Google Lens stays the default and is more accurate. Tesseract runs in your browser (free), so it may make more mistakes — low-confidence pages get ⚠️, then use Review → Redo with Lens. Language data is downloaded on first use.')}</div>
     <div class="ex-row"><label for="ocRange">${L('কোন পেজে', 'Pages')}</label><input id="ocRange" type="text" value="1-${state.pages.length}" placeholder="3, 5-8"></div>
     <div class="ex-row"><label for="ocMode">${L('কোন পেজ', 'Which pages')}</label><select id="ocMode"><option value="auto"${eng === 'auto' ? ' selected' : ''}>${L('Auto — শুধু text-ছাড়া পেজ', 'Auto — only pages without text')}</option><option value="redo"${eng === 'redo' ? ' selected' : ''}>${L('Redo — ওভাররাইট (Undo যাবে)', 'Redo — overwrite (undoable)')}</option></select></div>
@@ -4483,7 +4813,7 @@ function setEnhance(on) {
   // links created with the other setting are stale → re-upload next time
   state.pages.forEach(pg => { if (pg.remoteUrl) { pg.remoteUrl = ''; pg.remoteAt = 0; if (pg.status === 'ready') pg.status = 'pending'; } });
   renderAll();
-  toast(on ? L('✨ Lens-এ পাঠানো কপি enhance হবে (আসল ছবি অপরিবর্তিত)', '✨ The copy sent to Lens will be enhanced (original untouched)')
+  toast(on ? L('Lens-এ পাঠানো কপি enhance হবে (আসল ছবি অপরিবর্তিত)', 'The copy sent to Lens will be enhanced (original untouched)')
            : L('Enhance বন্ধ', 'Enhance off'), '', 2500);
 }
 
@@ -4614,7 +4944,7 @@ async function splitSpreads(idxs, pos, rtl) {
   } finally {
     if (n) { commitImgSnap(snap); zoomReset(); renderAll(); scheduleSave(); }
   }
-  if (n) editToast(L(`📖 ${n}টি spread দুই পেজে ভাগ হয়েছে`, `📖 Split ${n} spread(s) into two pages`));
+  if (n) editToast(L(`${n}টি spread দুই পেজে ভাগ হয়েছে`, `Split ${n} spread(s) into two pages`));
   return n;
 }
 
@@ -4676,7 +5006,7 @@ async function mergeProjectIntoCurrent(pid) {
   clearImgUndo();
   renderAll();
   await saveNow();
-  toast(L(`➕ "${proj.name}" থেকে ${n}টি পেজ যোগ হয়েছে`, `➕ Added ${n} page(s) from "${proj.name}"`), 'ok', 3000);
+  toast(L(`"${proj.name}" থেকে ${n}টি পেজ যোগ হয়েছে`, `Added ${n} page(s) from "${proj.name}"`), 'ok', 3000);
   if (n && confirm(L(`"${proj.name}" project-টা Library থেকে মুছে ফেলবেন? (পেজগুলো এই project-এ কপি হয়ে গেছে)`, `Delete "${proj.name}" from the Library? (its pages are now copied into this project)`))) await deleteLocalProject(pid);
   return n;
 }
@@ -4770,11 +5100,11 @@ function openPageTools() {
   wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
   const mrow = (k, bn, en) => `<label class="pt-m"><span>${L(bn, en)}</span><input type="range" min="0" max="45" step="1" value="0" data-m="${k}" aria-label="${L(bn, en)}"><output data-mv="${k}">0%</output></label>`;
   wrap.innerHTML = `<div class="tt-box">
-    <div class="tt-hdr"><strong>🛠 ${L('Page টুলস', 'Page tools')}</strong><button class="btn btn-secondary" data-pt="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
+    <div class="tt-hdr"><strong>${L('Page টুলস', 'Page tools')}</strong><button class="btn btn-secondary" data-pt="close" aria-label="${L('বন্ধ', 'Close')}">✕</button></div>
     <div class="ex-row"><label for="ptRange">${L('কোন পেজে', 'Pages')}</label><input id="ptRange" type="text" inputmode="text" value="${state.current + 1}" placeholder="3, 5-8"><span class="tt-hint" id="ptCur"></span></div>
     <div class="tt-hint">${L('Rotate / Crop / Split / Move উপরের range-এর পেজে চলে। Reorder শুধু এখনকার পেজে।', 'Rotate / Crop / Split / Move use the pages above. Reorder moves the current page.')}</div>
     <h4 class="pt-h">↔ ${L('Reorder', 'Reorder')} <small>(${L('থাম্বনেইল টেনেও সরানো যায়; Alt+←/→', 'or drag thumbnails; Alt+←/→')})</small></h4>
-    <div class="dc-actions"><button class="btn btn-secondary" data-pt="first" title="${L('একদম শুরুতে', 'To the start')}">⏮</button><button class="btn btn-secondary" data-pt="left">◀</button><button class="btn btn-secondary" data-pt="right">▶</button><button class="btn btn-secondary" data-pt="last" title="${L('একদম শেষে', 'To the end')}">⏭</button>
+    <div class="dc-actions"><button class="btn btn-secondary" data-pt="first" title="${L('একদম শুরুতে', 'To the start')}">${IC('first')}</button><button class="btn btn-secondary" data-pt="left">◀</button><button class="btn btn-secondary" data-pt="right">▶</button><button class="btn btn-secondary" data-pt="last" title="${L('একদম শেষে', 'To the end')}">${IC('last')}</button>
       <input id="ptTo" type="number" min="1" inputmode="numeric" placeholder="#" aria-label="${L('এই নম্বরে সরান', 'Move to number')}" style="width:5rem;min-height:44px"><button class="btn btn-secondary" data-pt="goto">${L('এই নম্বরে সরান', 'Move to #')}</button></div>
     <h4 class="pt-h">⟳ ${L('Rotate', 'Rotate')}</h4>
     <div class="dc-actions"><button class="btn btn-secondary" data-pt="rot" data-deg="270">↺ 90°</button><button class="btn btn-secondary" data-pt="rot" data-deg="90">↻ 90°</button><button class="btn btn-secondary" data-pt="rot" data-deg="180">⟲ 180°</button></div>
@@ -4785,12 +5115,12 @@ function openPageTools() {
     <div class="dc-actions"><button class="btn btn-primary" data-pt="crop">✂ ${L('Crop করুন', 'Apply crop')}</button><button class="btn btn-secondary" data-pt="cropreset">${L('Margin রিসেট', 'Reset margins')}</button></div>
     <label class="pt-m"><span>${L('দুই-পেজ spread কাটার জায়গা', 'Spread split position')}</span><input type="range" id="ptSplit" min="${SPLIT_MIN * 100}" max="${SPLIT_MAX * 100}" step="1" value="50"><output id="ptSplitVal">50%</output></label>
     <label class="pt-chk"><input type="checkbox" id="ptRtl"> ${L('ডান অর্ধেক আগে পড়া হয় (RTL)', 'Right half is read first (RTL)')}</label>
-    <div class="dc-actions"><button class="btn btn-primary" data-pt="split">📖 ${L('Spread ভাগ করুন', 'Split spread into 2 pages')}</button></div>
-    <h4 class="pt-h">✨ ${L('Lens-এর জন্য Enhance', 'Enhance for Lens')}</h4>
+    <div class="dc-actions"><button class="btn btn-primary" data-pt="split">${L('Spread ভাগ করুন', 'Split spread into 2 pages')}</button></div>
+    <h4 class="pt-h">${L('Lens-এর জন্য Enhance', 'Enhance for Lens')}</h4>
     <label class="pt-chk"><input type="checkbox" id="ptEnh"> ${L('Lens-এ যাওয়া কপির contrast/sharpness বাড়ান (আসল ছবি একই থাকে)', 'Boost contrast/sharpness of the copy sent to Lens (the original stays as is)')}</label>
-    <h4 class="pt-h">📂 ${L('অন্য project-এ সরান', 'Move to another project')}</h4>
-    <div class="ex-row"><select id="ptTarget" aria-label="${L('Project', 'Project')}"><option value="__new">➕ ${L('নতুন project', 'New project')}</option></select><input id="ptNewName" type="text" placeholder="${L('নতুন project-এর নাম', 'New project name')}"></div>
-    <div class="dc-actions"><button class="btn btn-primary" data-pt="move">📂 ${L('পেজগুলো সরান', 'Move pages')}</button></div>
+    <h4 class="pt-h">${L('অন্য project-এ সরান', 'Move to another project')}</h4>
+    <div class="ex-row"><select id="ptTarget" aria-label="${L('Project', 'Project')}"><option value="__new">${L('নতুন project', 'New project')}</option></select><input id="ptNewName" type="text" placeholder="${L('নতুন project-এর নাম', 'New project name')}"></div>
+    <div class="dc-actions"><button class="btn btn-primary" data-pt="move">${L('পেজগুলো সরান', 'Move pages')}</button></div>
     <div class="dc-actions" style="margin-top:1rem"><button class="btn btn-secondary" data-pt="undo" disabled>↩ ${L('শেষ page-edit undo', 'Undo last page edit')}</button><button class="btn btn-secondary" data-pt="close">${L('বন্ধ', 'Close')}</button></div>
   </div>`;
   wrap.addEventListener('click', e => {
@@ -4819,7 +5149,7 @@ function openPageTools() {
       if (idx.length === state.pages.length && !confirm(L('সব পেজ সরালে এই project খালি হয়ে মুছে যাবে। চালিয়ে যাবেন?', 'Moving every page empties this project and removes it. Continue?'))) return;
       const res = await movePagesToProject(idx, sel === '__new' ? { name: ptEl('#ptNewName').value } : { pid: sel });
       if (res) {
-        toast(L(`📂 ${res.count}টি পেজ "${res.name}"-এ সরানো হয়েছে`, `📂 Moved ${res.count} page(s) to "${res.name}"`), 'ok', 5000, { label: L('খুলুন', 'Open it'), fn: () => { openLocalProject(res.pid).catch(err => toast('❌ ' + err.message, 'err', 4000)); } });
+        toast(L(`${res.count}টি পেজ "${res.name}"-এ সরানো হয়েছে`, `Moved ${res.count} page(s) to "${res.name}"`), 'ok', 5000, { label: L('খুলুন', 'Open it'), fn: () => { openLocalProject(res.pid).catch(err => toast('❌ ' + err.message, 'err', 4000)); } });
         if (!state.pages.length) closePageTools();
       }
     });
@@ -5168,7 +5498,7 @@ function openExportDlg() {
     <div class="ex-row"><label><input type="checkbox" id="exHeadings" checked> ${L('পেজ heading দেখান', 'Show page headings')}</label></div>
     <div class="dc-actions">
       <button class="btn btn-primary" data-ex="go">⬇ ${L('Download', 'Download')}</button>
-      <button class="btn btn-secondary" data-ex="md">📝 ${L('Markdown copy', 'Copy as Markdown')}</button>
+      <button class="btn btn-secondary" data-ex="md">${L('Markdown copy', 'Copy as Markdown')}</button>
       <button class="btn btn-secondary" data-ex="close">✕ (Esc)</button>
     </div></div>`;
   const read = () => ({ fmt: wrap.querySelector('#exFmt').value, merged: wrap.querySelector('#exLayout').value === 'merged', headings: wrap.querySelector('#exHeadings').checked });
@@ -5230,7 +5560,7 @@ async function importProjectToLibrary(proj) {
     if (hasImg) blobs.push({ id, blob: new Blob([p.data], { type: p.mime || 'image/jpeg' }) });
   });
   const rec = {
-    id: pid, name: proj.name, sourceFileName: proj.sourceFileName || '', createdAt: proj.createdAt, updatedAt: proj.updatedAt,
+    id: pid, name: proj.name, sourceFileName: proj.sourceFileName || '', owner: currentOwner(), createdAt: proj.createdAt, updatedAt: proj.updatedAt,
     pageCount: recs.length, doneCount: recs.filter(r => r.status === 'done').length, current: 0,
     driveFolderId: null, driveMetaId: null, driveTextId: null, firstPageHash: recs[0] ? recs[0].hash : null,
   };
@@ -5278,7 +5608,7 @@ async function loadDocx(file) {
   clearWorkspace();
   state.sourceFileName = file.name;
   pages.forEach((txt, i) => addTxtPage(pages.length > 1 ? base + ' — ' + (i + 1) : file.name, txt, placeholder));
-  toast(L(`📄 ${pages.length}টি পেজ import হয়েছে`, `📄 Imported ${pages.length} page(s)`), 'ok', 3000);
+  toast(L(`${pages.length}টি পেজ import হয়েছে`, `Imported ${pages.length} page(s)`), 'ok', 3000);
 }
 
 // A ZIP is either a Textriva backup (→ Library) or a ZIP of page images (→ added as pages). Returns 'backup' | 'images'.
@@ -5296,7 +5626,7 @@ async function loadZip(file) {
     const blob = new Blob([u8], { type: mimeForExt(ent.name) });
     await addPage(ent.name.split('/').pop(), blob, URL.createObjectURL(blob));
   }
-  toast(L(`🖼 ${entries.length}টি ছবি যোগ হয়েছে`, `🖼 Added ${entries.length} image(s)`), 'ok', 3000);
+  toast(L(`${entries.length}টি ছবি যোগ হয়েছে`, `Added ${entries.length} image(s)`), 'ok', 3000);
   return 'images';
 }
 
@@ -5447,8 +5777,8 @@ async function allClear() {
     `⚠️ All Clear — ধাপ ১/২\n\nএই project-এর ${n}টা page, সব লেখা text, note, bookmark আর upload মুছে অ্যাপ একদম শুরুর অবস্থায় ফিরবে।\n\nচালিয়ে যাবেন?`,
     `⚠️ All Clear — step 1/2\n\nThis removes all ${n} pages, every piece of text, notes, bookmarks and uploads, and returns the app to its starting state.\n\nContinue?`))) return;
   if (!confirm(L(
-    `🛑 শেষবারের মতো নিশ্চিত করুন — ধাপ ২/২\n\nএটা আর ফেরত আনা যাবে না (Undo নেই)। এই project এই device-এর Library থেকেও মুছে যাবে।\n(Google Drive-এ আগে save করা কপি আর Library-র অন্য project ছোঁয়া হবে না।)\n\nসত্যিই সব মুছবেন?`,
-    `🛑 Final confirmation — step 2/2\n\nThis cannot be undone. The project is also removed from this device's Library.\n(A copy already saved to Google Drive and other Library projects are not touched.)\n\nReally delete everything?`))) return;
+    `শেষবারের মতো নিশ্চিত করুন — ধাপ ২/২\n\nএটা আর ফেরত আনা যাবে না (Undo নেই)। এই project এই device-এর Library থেকেও মুছে যাবে।\n(Google Drive-এ আগে save করা কপি আর Library-র অন্য project ছোঁয়া হবে না।)\n\nসত্যিই সব মুছবেন?`,
+    `Final confirmation — step 2/2\n\nThis cannot be undone. The project is also removed from this device's Library.\n(A copy already saved to Google Drive and other Library projects are not touched.)\n\nReally delete everything?`))) return;
 
   // upload queue থামাও
   _bgFail.clear(); _bgDidWork = false; clearTimeout(_bgTimer); clearTimeout(_dtimer);
@@ -5491,6 +5821,7 @@ function renderAll() {
   if (has) $('resumeCard')?.classList.add('hidden');
   stripWrap.classList.toggle('hidden', !has);
   actionRow.classList.toggle('hidden', !has);
+  try { updateStepBar(); } catch {}
   workspace.classList.toggle('hidden', !has);
   lensSection.classList.toggle('hidden', !has);
   if (!has) return;
@@ -5508,9 +5839,10 @@ function renderAll() {
 
 function renderStrip(opts) {
   opts = opts || {};
+  const prevScroll = strip.scrollLeft;   // innerHTML='' resets it; keep it so the glide to centre starts from where the user was
   strip.innerHTML = '';
   const total = state.pages.length;
-  const win = stripWindow(total, strip.scrollLeft, strip.clientWidth, opts.fromScroll ? null : state.current);
+  const win = stripWindow(total, prevScroll, strip.clientWidth, opts.fromScroll ? null : state.current);
   _stripRange = win.virtual ? win : null;
   const spacer = n => { const d = document.createElement('div'); d.className = 'strip-spacer'; d.style.cssText = `flex:0 0 ${n * STRIP_STEP - 8}px;`; return d; };
   if (win.virtual && win.from > 0) strip.appendChild(spacer(win.from));
@@ -5521,11 +5853,11 @@ function renderStrip(opts) {
     el.dataset.i = i;
     el.draggable = true;
     const thumbContent = pg.txtOnly
-      ? `<div class="pt-img" style="display:flex;align-items:center;justify-content:center;background:var(--card2);aspect-ratio:.7;font-size:1.4rem;color:var(--accent);">📄</div>`
+      ? `<div class="pt-img" style="display:flex;align-items:center;justify-content:center;background:var(--card2);aspect-ratio:.7;color:var(--accent);">${IC('file')}</div>`
       : `<img class="pt-img" src="${pg.url}" alt="page ${i+1}" draggable="false" loading="lazy" decoding="async"/>`;
     el.innerHTML = `
       ${thumbContent}
-      ${(pg.bookmark || pg.note) ? `<div class="pt-marks">${pg.bookmark ? `<span class="pt-badge bm" title="${L('Bookmark', 'Bookmark')}">🔖</span>` : ''}${pg.note ? `<span class="pt-badge note" title="${esc(pg.note.slice(0, 80))}">📝</span>` : ''}</div>` : ''}
+      ${(pg.bookmark || pg.note) ? `<div class="pt-marks">${pg.bookmark ? `<span class="pt-badge bm" title="${L('Bookmark', 'Bookmark')}">${IC('bookmark')}</span>` : ''}${pg.note ? `<span class="pt-badge note" title="${esc(pg.note.slice(0, 80))}">${IC('note')}</span>` : ''}</div>` : ''}
       <div class="pt-foot">
         <span class="pt-num">#${i+1}</span>
         ${pg.possibleDupOf ? `<span class="pt-badge possible-dup" title="${L('সম্ভাব্য duplicate', 'Possible duplicate')}">⚠️ dup?</span>` : ''}
@@ -5549,7 +5881,19 @@ function renderStrip(opts) {
     strip.appendChild(el);
   });
   if (win.virtual && win.to < total) strip.appendChild(spacer(total - win.to));
-  if (!opts.fromScroll) { const active = strip.querySelector('.active'); if (active) active.scrollIntoView({ inline: 'nearest', behavior: win.virtual ? 'auto' : 'smooth' }); }
+  strip.scrollLeft = prevScroll;
+  // Selected page always sits in the middle. Near the start/end the strip cannot scroll further,
+  // so the selection naturally starts at the left, glides to the centre, and lands on the right at the end.
+  if (!opts.fromScroll) centerActiveThumb(win.virtual);
+}
+function centerActiveThumb(instant) {
+  const active = strip.querySelector('.active'); if (!active) return;
+  const left = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2;
+  const max = Math.max(0, strip.scrollWidth - strip.clientWidth);
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const target = Math.min(max, Math.max(0, left));
+  if (typeof strip.scrollTo === 'function') strip.scrollTo({ left: target, behavior: (instant || reduce) ? 'auto' : 'smooth' });
+  else strip.scrollLeft = target;
 }
 strip.addEventListener('scroll', onStripScroll, { passive: true });
 
@@ -5569,7 +5913,7 @@ function renderLensGrid() {
       <div class="lpc-num">PAGE ${i+1}</div>
       <div class="lpc-name" title="${pg.name}">${pg.name}</div>
       <div class="lpc-status ${pg.status}">${statusLabel(pg.status)}</div>
-      <div class="lpc-flag">${pg.bookmark ? '🔖 ' : ''}${pg.note ? '📝 ' : ''}${isFlagged(pg) ? '⚠️ ' + esc(flagsText(pg)) : ''}</div>
+      <div class="lpc-flag">${pg.bookmark ? '' : ''}${pg.note ? '' : ''}${isFlagged(pg) ? '⚠️ ' + esc(flagsText(pg)) : ''}</div>
       <button class="lpc-btn ${btnClass}" data-i="${i}" ${!canLens ? 'disabled' : ''}>
         ${btnLabel}
       </button>
@@ -5605,7 +5949,7 @@ function renderWorkspace() {
         border-left:3px solid var(--accent);
       ">
         <div style="font-size:.65rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:.7rem;opacity:.8;">
-          📄 TEXT PAGE ${state.current + 1}
+          TEXT PAGE ${state.current + 1}
         </div>
         <div style="white-space:pre-wrap;word-break:break-word;flex:1;overflow:hidden;color:var(--fg);opacity:.85;">${preview.replace(/</g,'&lt;')}</div>
       </div>
@@ -5616,7 +5960,7 @@ function renderWorkspace() {
   textArea.value = pg.text || '';
   // Lens button always works via base64 direct
   const lensBtn = $('lensCurrentBtn');
-  lensBtn.textContent = '🔍 Lens';
+  lensBtn.textContent = 'Lens';
   lensBtn.onclick = () => openLens(state.current);
   updateTxtStats();
   if (!pg.txtOnly) prefetchAhead(state.current);
@@ -5928,7 +6272,7 @@ async function openLens(i) {
   pendingWin.document.close();
 
   const uploadingMsg = attempt === 1
-    ? `⏳ পেজ ${i + 1} upload হচ্ছে Lens এর জন্য…`
+    ? `পেজ ${i + 1} upload হচ্ছে Lens এর জন্য…`
     : `↺ পেজ ${i + 1} retry ${attempt}/${MAX_LENS_RETRIES}… (${MAX_LENS_RETRIES - attempt} বাকি)`;
   toast(uploadingMsg, attempt === 1 ? '' : 'warn', 4000);
   const prevStatus = pg.status;
@@ -6340,7 +6684,7 @@ if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 
 <!-- ── PWA Install Banner ── -->
 <div id="pwa-install-bar" class="hidden">
-  <span class="pwa-icon">📲</span>
+  <span class="pwa-icon"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg></span>
   <div class="pwa-text">
     <strong>Textriva Install করুন</strong>
     App হিসেবে ব্যবহার করুন

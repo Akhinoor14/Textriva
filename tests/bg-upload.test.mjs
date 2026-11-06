@@ -10,7 +10,7 @@ async function waitFor(fn, ms = 8000) {
   return false;
 }
 
-test('all pages upload automatically, in parallel but capped', async () => {
+test('all pages upload automatically, strictly one at a time', async () => {
   const w = await bootApp({ bgUpload: true });
   const A = w.__app;
   let inFlight = 0, maxInFlight = 0, calls = 0;
@@ -22,11 +22,11 @@ test('all pages upload automatically, in parallel but capped', async () => {
   };
   addPages(w, Array(30).fill(''), 'big.pdf');
   A.pumpUploads();
-  const ok = await waitFor(() => A.state.pages.every(p => p.status === 'ready' && p.remoteUrl));
+  const ok = await waitFor(() => A.state.pages.every(p => p.status === 'ready' && p.remoteUrl), 20000);
   assert.ok(ok, 'not every page reached ready');
   assert.equal(calls, 30, 'each page uploaded exactly once');
-  assert.ok(maxInFlight > 3, 'should upload many pages at once, not just 3');
-  assert.ok(maxInFlight <= A.UPLOAD_CONCURRENCY, 'must respect concurrency cap');
+  assert.equal(A.UPLOAD_CONCURRENCY, 1, 'uploads are sequential by design');
+  assert.equal(maxInFlight, 1, 'never more than one upload in flight');
   w.close();
 });
 

@@ -16,13 +16,14 @@ export async function bootApp(opts) {
   w.URL.createObjectURL = () => 'blob:test'; w.URL.revokeObjectURL = () => {};
   w.navigator.storage = { persist: async () => true };
   w.confirm = () => true;
+  if (!opts.welcome) w.__textrivaNoWelcome = true;   // welcome card is tested separately (accounts.test.mjs)
   if (!opts.bgUpload) w.__textrivaNoBgUpload = true;   // background uploader is tested separately (bg-upload.test.mjs)
   w.fetch = async () => { throw new Error('no network in tests'); };
   let src = getModuleSource()
     .replace(/^import \* as pdfjs from [^\n]*\n/m, 'const pdfjs = { GlobalWorkerOptions: {} };\n')
     .replace(/const GOOGLE_CLIENT_ID = '[^']*';/, opts.drive ? "const GOOGLE_CLIENT_ID = 'test-client';" : "const GOOGLE_CLIENT_ID = '';")
     // expose internals for the test
-    + '\n;window.__app = { state, openTextTools, undoBulk, saveNow, searchLibrary, runLibSearch, renderAll, openLib, localList, openLocalProject, toggleBookmark, gotoPage, applyTextChanges, resetWorkspaceState, newId, movePage, rotatePages, cropPages, splitSpreads, undoPageEdit, movePagesToProject, mergeProjectIntoCurrent, imgIO, setEnhance, lensCopyBlob, syncSig, openPageTools, setPageBlob, localLoad, cutPage, runOcr, ocrIO, pagesForOcr, sanitizeOcr, cleanOcrText, refreshFlags, openOcrDlg, hashStr, undoPage, ocrIsLowConf, gdrive, syncToDrive, openDriveProject, queueDriveSync, refreshDriveChip, planMerge, matchPagesForMerge, applyMerge, openSyncConflict, freeUpSpace, isFreeable, storageMeterHtml, deviceId, mergeProjectIntoCurrent, dbDeleteProject, planPdfPages, stripWindow, renderStrip, consumeSharedFiles, scanName, isOffline, handleFiles, STRIP_VIRT_MIN, PDF_WARN_PAGES, allClear, pumpUploads, pickNextUpload, needsUpload, isFresh, UPLOAD_CONCURRENCY, _bgFail };';
+    + '\n;window.__app = { state, openTextTools, undoBulk, saveNow, searchLibrary, runLibSearch, renderAll, openLib, localList, openLocalProject, toggleBookmark, gotoPage, applyTextChanges, resetWorkspaceState, newId, movePage, rotatePages, cropPages, splitSpreads, undoPageEdit, movePagesToProject, mergeProjectIntoCurrent, imgIO, setEnhance, lensCopyBlob, syncSig, openPageTools, setPageBlob, localLoad, cutPage, runOcr, ocrIO, pagesForOcr, sanitizeOcr, cleanOcrText, refreshFlags, openOcrDlg, hashStr, undoPage, ocrIsLowConf, gdrive, syncToDrive, openDriveProject, queueDriveSync, refreshDriveChip, planMerge, matchPagesForMerge, applyMerge, openSyncConflict, freeUpSpace, isFreeable, storageMeterHtml, deviceId, mergeProjectIntoCurrent, dbDeleteProject, planPdfPages, stripWindow, renderStrip, consumeSharedFiles, scanName, isOffline, handleFiles, STRIP_VIRT_MIN, PDF_WARN_PAGES, allClear, pumpUploads, pickNextUpload, needsUpload, isFresh, UPLOAD_CONCURRENCY, _bgFail, storedUser, currentOwner, localListAll, handleOwnerSwitch, gSignOut, claimGuestProjects, refreshAcctUi, openWelcome, closeWelcome, shouldShowWelcome, LS_USER, updateStepBar, runWorkflowStep };';
   w.eval(src);
   return w;
 }
