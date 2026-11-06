@@ -2763,7 +2763,13 @@ const isFresh = pg => !!pg.remoteUrl && (Date.now() - (pg.remoteAt || 0)) < REMO
 //  • fail করলে নিজে নিজে আবার চেষ্টা (backoff সহ) — কখনো হাল ছাড়ে না
 //  • link পুরনো হয়ে গেলে নিজে নতুন করে upload
 //  • internet গেলে থামে, ফিরলে আবার চলে; tab-এ ফিরলেও চলে
-const UPLOAD_CONCURRENCY = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? 4 : 8;   // queue একটানা চলে; এটা শুধু একসাথে কয়টা request ওড়ে
+const UPLOAD_CONCURRENCY = 1;   // একটার পর একটা — একসাথে শুধু ১টা file upload হবে   // queue একটানা চলে; এটা শুধু একসাথে কয়টা request ওড়ে
+let _bgConc = UPLOAD_CONCURRENCY;   // adaptive: halves on network failures, recovers on success
+function _bgNetFail() {
+  _bgConc = Math.max(1, Math.floor(_bgConc / 2));
+  _bgPauseUntil = Math.max(_bgPauseUntil, Date.now() + 15000);
+}
+function _bgNetOk() { if (_bgConc < UPLOAD_CONCURRENCY) _bgConc++; }
 const UPLOAD_RETRY_BASE_MS = 4000, UPLOAD_RETRY_MAX_MS = 60000;
 const UPLOAD_KEEPER_MS = 30000;
 const _bgFail = new Map();            // page id -> { n, nextAt }
@@ -2824,7 +2830,7 @@ async function _uploadWorker() {
       const pg = state.pages[i];
       _bgDidWork = true;
       const r = await uploadPage(i, true);
-      if (r === true) _bgFail.delete(pg.id);
+      if (r === true) { _bgFail.delete(pg.id); _bgNetOk(); }
       else if (r === false) {
         const f = _bgFail.get(pg.id) || { n: 0, nextAt: 0 };
         f.n++;
@@ -2850,7 +2856,7 @@ function pumpUploads() {
   const wait = _bgPauseUntil - Date.now();
   if (wait > 0) { scheduleUploadKeeper(wait + 50); return; }
   if (navigator.onLine) {
-    while (_bgActive < UPLOAD_CONCURRENCY && pickNextUpload() >= 0) _uploadWorker();
+    while (_bgActive < _bgConc && pickNextUpload() >= 0) _uploadWorker();
   }
   if (_bgActive === 0) scheduleUploadKeeper(); else bgUploadProgress();
 }
@@ -5655,7 +5661,7 @@ function updateStats() {
 }
 
 // ══════════════════════════════════════════
-// IMAGE UPLOAD — /api/upload → Vercel Blob (server-side, vercel-storage.com)
+// IMAGE UPLOAD — /api/upload → imgbb (server-side proxy)
 // Upload is optional — openLens() uses base64 direct as primary path.
 // ══════════════════════════════════════════
 function blobToBase64(blob) {
@@ -5701,7 +5707,9 @@ async function uploadToImgbb(b64) {
     });
   } catch (e) {
     clearTimeout(killer);
-    throw new Error(L('সার্ভারে পৌঁছানো যাচ্ছে না — ইন্টারনেট চেক করো', 'Could not reach the upload server — check your connection'));
+    const ne = new Error(L('সার্ভারে পৌঁছানো যাচ্ছে না — ইন্টারনেট চেক করো', 'Could not reach the upload server — check your connection'));
+    ne.network = true;   // connection timed out / blocked / offline — no HTTP response at all
+    throw ne;
   }
   try {
     data = await res.json();
@@ -5730,6 +5738,7 @@ async function uploadImageWithRetry(blob, maxAttempts = 3) {
       return url;
     } catch (e) {
       lastErr = e;
+      if (e && e.network) { _bgNetFail(); break; }   // no response at all: retrying instantly just wastes CPU/data
       if (e && e.status === 429) _bgPauseUntil = Math.max(_bgPauseUntil, Date.now() + 10000);   // too many requests → সবাই একটু থামুক
       if (attempt < maxAttempts) {
         // exponential backoff: 1s, 2s, 4s (429 হলে 8s+)
