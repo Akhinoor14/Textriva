@@ -1078,7 +1078,40 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
   #flowBtn:active:not(:disabled) { transform:scale(.97) }
   body.has-stepbar .wrap { padding-bottom:9.5rem }
   body.has-stepbar #pwa-install-bar { bottom:112px }
+
+  /* toasts: compact, newest 2 only, always ABOVE the Auto Step bar (never cover it) */
+  .toasts { left:.7rem; right:.7rem; bottom:calc(.7rem + env(safe-area-inset-bottom, 0px)) }
+  body.has-stepbar .toasts { bottom:calc(112px + env(safe-area-inset-bottom, 0px)) }
+  .toasts > .toast:not(:nth-last-child(-n+2)) { display:none }
+  .toast { padding:.5rem .75rem; font-size:.8rem; line-height:1.4; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.22) }
+  .toast-action { min-height:36px; padding:0 .7rem; font-size:.78rem }
+
+  /* once pages are loaded the big drop-zone shrinks to a slim "add more" bar */
+  body.has-stepbar .upload-area { padding:.7rem .9rem; margin-top:.6rem !important; border-radius:14px }
+  body.has-stepbar .upload-area .upload-icon, body.has-stepbar .upload-area .upload-sub { display:none }
+  body.has-stepbar .upload-area .upload-title { font-size:.95rem; margin:0; text-align:center }
+
+  /* strip header: label on one line (empty actions box must not squeeze it) */
+  .strip-actions:empty { display:none }
+  .strip-label { white-space:nowrap }
+  .strip-wrap { margin-top:.8rem }
+
+  /* action row: 2 columns instead of a tall stack; More is a full-width sheet */
+  .action-row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.8rem }
+  .action-row > .hidden { display:none !important }
+  .action-spacer { display:none }
+  .action-row .more-wrap { grid-column:1 / -1; position:relative }
+  .action-row .more-wrap > .btn { width:100% }
+  .more-menu { left:0; right:0; min-width:0; max-height:55vh; overflow-y:auto }
+  .more-menu .btn { min-height:48px }
+
+  /* preview: never taller than ~half the screen, so the text box stays reachable */
+  .preview-img-wrap img { max-height:46vh }
+
+  /* back from Lens: nudge the thumb toward the big button */
+  #flowBtn.attn { animation:tx-attn 1.1s ease-in-out 3 }
 }
+@keyframes tx-attn { 0%,100% { box-shadow:0 0 0 0 var(--accent-gm) } 50% { box-shadow:0 0 0 10px transparent } }
 </style>
 </head>
 <body>
@@ -1515,7 +1548,7 @@ const ZOOM_STEP = 0.4;
 const ZOOM_MAX = 5;
 const PAN_STEP = 80;
 const HIRES_THRESHOLD = 1.5;
-const isMobile = () => window.matchMedia('(max-width:900px)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const isMobile = () => (typeof window.matchMedia === 'function' && window.matchMedia('(max-width:900px)').matches) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 // ══════════════════════════════════════════
 // DOM REFS
@@ -1875,6 +1908,7 @@ $('helpModal').onclick = e => { if (e.target === $('helpModal')) $('helpModal').
 // ══════════════════════════════════════════
 function toast(msg, type = '', dur = 3000, action = null) {
   msg = String(msg ?? '').replace(/^(?:\u2705|\u274C|\u26A0\uFE0F?|\u2139\uFE0F?)\s*/u, '');
+  if (!action) { for (const t of $('toasts').children) { if (t.firstChild && t.firstChild.textContent === msg && !t.classList.contains('out')) return; } }
   const el = document.createElement('div');
   el.className = `toast${type ? ' ' + type : ''}`;
   const span = document.createElement('span');
@@ -2095,7 +2129,7 @@ function pushRestoredPage(o) {
 
 function afterProjectLoaded(startIdx) {
   state.current = Math.max(0, Math.min(startIdx || 0, state.pages.length - 1));
-  state.kWorkflowStarted = false; state.kWorkflowComplete = false; state.lastClip = '';
+  state.kWorkflowStarted = false; state.kWorkflowComplete = false; state.kLensPending = false; state.lastClip = '';
   renderAll();
 }
 
@@ -3006,6 +3040,7 @@ function updateStepBar() {
   let label, hint;
   if (state.kWorkflowComplete) { label = L('সব page সম্পন্ন', 'All pages done'); hint = L('OCR শেষ', 'OCR complete'); }
   else if (_waitingForCopy) { label = L('নতুন copy-এর অপেক্ষায়…', 'Waiting for new copy…'); hint = L('Lens থেকে নতুন text copy করুন', 'Copy fresh text from Lens'); }
+  else if (state.kLensPending) { label = L(`Lens খুলুন — পেজ ${state.current + 1}`, `Open Lens — page ${state.current + 1}`); hint = L('খুলে text copy করে ফিরে আসুন', 'Open it, copy the text, then come back'); }
   else if (!state.kWorkflowStarted) { label = L('শুরু করুন', 'Start'); hint = L('প্রথম page Lens-এ খুলবে', 'Opens the first page in Lens'); }
   else { label = L('Paste ও পরের page', 'Paste & next page'); hint = L(`Page ${state.current + 1} — Lens থেকে copy করে ফিরে আসুন`, `Page ${state.current + 1} — copy from Lens, then return`); }
   $('flowBtnTxt').textContent = label; $('stepHint').textContent = hint;
@@ -3018,6 +3053,11 @@ function runWorkflowStep() {
   if (_stepBusy) return;
   _stepBusy = true; setTimeout(() => { _stepBusy = false; }, 450);
   if (state.kWorkflowComplete) { toast(L('✅ সব page-এর OCR শেষ — আর Space চাপার দরকার নেই।', '✅ All pages are done.'), 'ok', 3000); return; }
+  if (state.kLensPending) {   // phone: this tap IS the user gesture that lets the browser open the Lens tab
+    state.kLensPending = false; updateStepBar();
+    openLens(state.current);
+    return;
+  }
   if (!state.kWorkflowStarted) {
     setWaitingForNewCopy(false);
     const start = state.pages.findIndex(p => !p.txtOnly && !(p.text || '').trim());
@@ -3059,10 +3099,20 @@ function runWorkflowStep() {
       toast(L('শেষ page-ও save হয়েছে — সব OCR complete!', 'Last page saved — all OCR complete!'), 'ok', UNDO_TOAST_MS, undoAction);
       return;
     }
-    toast(L('✅ Paste → Save → Next → Lens ', '✅ Paste → Save → Next → Lens '), 'ok', UNDO_TOAST_MS, undoAction);
-    state.current = next; renderAll();
-    setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
-  }).catch(() => toast(L('Clipboard access নেই — manually paste করুন', 'No clipboard access — paste manually'), '', 3000));
+    toast(isMobile() ? L('✅ Paste → Save → Next — এবার নিচের বাটনে Lens খুলুন', '✅ Pasted & saved — tap the big button to open Lens') : L('✅ Paste → Save → Next → Lens ', '✅ Paste → Save → Next → Lens '), 'ok', UNDO_TOAST_MS, undoAction);
+    state.current = next;
+    if (isMobile()) {
+      // After an async clipboard read, phone browsers block window.open(). Ask for one more tap instead of failing silently.
+      state.kLensPending = true; renderAll();
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch {}
+    } else {
+      renderAll();
+      setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
+    }
+  }).catch(() => {
+    toast(L('Clipboard access নেই — text box-এ চেপে ধরে Paste করুন', 'No clipboard access — long-press the text box and Paste'), 'warn', 4500);
+    if (isMobile()) { try { textArea.scrollIntoView({ block: 'center', behavior: 'smooth' }); textArea.focus({ preventScroll: true }); } catch {} }
+  });
 }
 $('flowBtn').onclick = runWorkflowStep;
 $('flowBtn').addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && navigator.vibrate) { try { navigator.vibrate(12); } catch {} } });
@@ -3080,7 +3130,13 @@ window.addEventListener('focus', () => {
   state.awaitingLens = false;
   if (document.activeElement?.tagName === 'TEXTAREA') document.activeElement.blur();
 });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { saveNow(); return; }
+  if (state.awaitingLens && isMobile() && state.kWorkflowStarted && !state.kWorkflowComplete) {
+    const b = $('flowBtn'); b.classList.remove('attn'); void b.offsetWidth; b.classList.add('attn');
+    setTimeout(() => b.classList.remove('attn'), 3600);
+  }
+});
 window.addEventListener('pagehide', () => { saveNow(); });
 
 // imgbb link এখন expire হয় না (server expiration দেয় না)। তবু নিরাপত্তার জন্য 7 দিন পর নিজে থেকে নতুন করে upload করা হয়।
@@ -3211,6 +3267,7 @@ async function handleFiles(files) {
   if (arr.length) {
     state.kWorkflowStarted = false;
     state.kWorkflowComplete = false;
+    state.kLensPending = false;
   }
   const prevSource = state.sourceFileName;
   if (arr[0]) state.sourceFileName = arr[0].name;
@@ -6218,7 +6275,7 @@ async function openLens(i) {
       state.current = i; renderAll();
       toast(t('lensOpened', { num: i + 1 }), 'ok', 3000);
     } else {
-      toast(t('popupBlocked'), 'err', 5000);
+      toast(t('popupBlocked'), 'err', 8000, { label: L('আবার খুলুন', 'Open again'), fn: () => openLens(i) });
     }
     return;
   }
@@ -6251,24 +6308,25 @@ async function openLens(i) {
 
   if (!pendingWin) {
     // Even about:blank was blocked — user has popups fully disabled
-    toast(t('popupBlocked'), 'err', 5000);
+    toast(t('popupBlocked'), 'err', 8000, { label: L('আবার খুলুন', 'Open again'), fn: () => openLens(i) });
     lensRetryCount[pg.id] = attempt - 1; // don't count this as an attempt
     return;
   }
 
   // Show a loading page in the blank window so user knows it's working
-  pendingWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  pendingWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Textriva → Google Lens</title>
     <style>body{margin:0;display:flex;align-items:center;justify-content:center;
-    height:100vh;font-family:system-ui,sans-serif;background:#0f172a;color:#94a3b8;
+    height:100vh;height:100dvh;font-family:system-ui,sans-serif;background:#0f172a;color:#94a3b8;text-align:center;padding:0 24px;box-sizing:border-box;
     flex-direction:column;gap:16px;}
     .spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#3b82f6;
     border-radius:50%;animation:spin 0.8s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
-    p{margin:0;font-size:14px;}strong{color:#e2e8f0}</style></head>
+    p{margin:0;font-size:16px;line-height:1.5}strong{color:#e2e8f0}</style></head>
     <body><div class="spinner"></div>
     <p>পেজ ${i + 1} upload হচ্ছে…</p>
-    <p><strong>Textriva</strong> → Google Lens</p></body></html>`);
+    <p><strong>Textriva</strong> → Google Lens</p>
+    <p style="font-size:13px;opacity:.8">${isMobile() ? 'Text copy করে ব্রাউজারের tab switcher থেকে Textriva-তে ফিরে যান' : ''}</p></body></html>`);
   pendingWin.document.close();
 
   const uploadingMsg = attempt === 1
