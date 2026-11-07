@@ -77,13 +77,20 @@ export default async function handler(req, res) {
 
     const imgbbRes = await fetch(
       `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}`,
-      { method: 'POST', body: form }
+      { method: 'POST', body: form, signal: AbortSignal.timeout(25000) }
     );
 
-    const data = await imgbbRes.json();
+    // imgbb কখনো JSON-এর বদলে HTML/empty দেয় (rate limit, outage) → আগে এটা 500 হয়ে যেত
+    const raw = await imgbbRes.text();
+    let data = null;
+    try { data = JSON.parse(raw); } catch (_) { /* non-JSON */ }
 
-    if (!data.success) {
-      throw new Error(data.error?.message || 'imgbb upload failed');
+    if (!data || !data.success) {
+      const upstreamMsg = data?.error?.message || data?.status_txt || `HTTP ${imgbbRes.status}`;
+      // Vercel Logs-এ আসল কারণ দেখা যাবে (key কখনো log হয় না)
+      console.error('imgbb upstream failure:', imgbbRes.status, upstreamMsg, raw.slice(0, 200).replace(/key=[^&\s]+/g, 'key=***'));
+      const status = imgbbRes.status === 429 ? 429 : 502;
+      return res.status(status).json({ success: false, error: 'Image host error: ' + upstreamMsg });
     }
 
     return res.status(200).json({ success: true, url: data.data.url });
