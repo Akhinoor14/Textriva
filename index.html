@@ -971,6 +971,86 @@ a { color:inherit; text-decoration:none }
 .lib-empty { text-align:center; color:var(--dim); padding:1.6rem .5rem; font-size:.82rem; line-height:1.8 }
 @media (max-width:600px) { .lib-actions { width:100% } .lib-actions .btn { flex:1; justify-content:center } }
 
+/* ── Library groups: breadcrumb, tree, group cards, dialogs ── */
+.grp-bar { display:flex; align-items:center; gap:.5rem; margin-bottom:.7rem }
+.grp-crumbs { flex:1; min-width:0; display:flex; align-items:center; gap:.1rem; overflow-x:auto; white-space:nowrap; font-size:.8rem; scrollbar-width:thin; -webkit-overflow-scrolling:touch }
+.grp-crumb { display:inline-flex; align-items:center; gap:.3rem; flex:none; background:none; border:0; color:var(--accent); padding:.35rem .5rem; border-radius:8px; cursor:pointer; font:inherit; min-height:36px }
+.grp-crumb:hover:not(.cur) { background:var(--accent-gl) }
+.grp-crumb.cur { color:var(--bright); font-weight:700; cursor:default }
+.grp-sep { color:var(--dim); flex:none }
+.grp-bar .btn { flex:none; min-height:36px; padding:.4rem .75rem; font-size:.76rem; display:inline-flex; align-items:center; gap:.35rem }
+.grp-grid { display:block }
+.grp-tree { display:none; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--card2); padding:.4rem; margin-bottom:.75rem; max-height:40vh; overflow:auto }
+.grp-trow { display:flex; align-items:center; border-radius:8px }
+.grp-trow.active { background:var(--accent-gl) }
+.grp-tog, .grp-tog-sp { flex:none; width:28px; height:34px }
+.grp-tog { display:inline-flex; align-items:center; justify-content:center; background:none; border:0; color:var(--mid); cursor:pointer; border-radius:6px }
+.grp-tog .ic { transition:transform .15s }
+.grp-tog[aria-expanded="false"] .ic { transform:rotate(-90deg) }
+.grp-tl { flex:1; min-width:0; display:flex; align-items:center; gap:.4rem; text-align:left; background:none; border:0; color:var(--text); font:inherit; font-size:.8rem; padding:.4rem .4rem; min-height:34px; border-radius:8px; cursor:pointer }
+.grp-tl:hover { background:var(--accent-gl) }
+.grp-tl .nm { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.grp-tl .n { flex:none; font-size:.68rem; color:var(--dim) }
+.grp-main { min-width:0 }
+.grp-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:.55rem; margin-bottom:.8rem }
+.grp-card { display:flex; align-items:center; gap:.6rem; padding:.6rem .6rem .6rem .7rem; min-height:60px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--card); cursor:pointer; transition:border-color .15s, background .15s }
+.grp-card:hover, .grp-card:focus-visible { border-color:var(--accent); background:var(--accent-gl); outline:none }
+.grp-ico { flex:none; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--accent-gl); color:var(--accent) }
+.grp-ico .ic { width:20px; height:20px }
+.grp-info { flex:1; min-width:0 }
+.grp-name { font-weight:600; font-size:.86rem; color:var(--bright); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.grp-meta { font-size:.7rem; color:var(--dim); margin-top:2px }
+.grp-cact { flex:none; display:flex; gap:.1rem }
+.grp-ib { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid transparent; background:transparent; color:var(--mid); cursor:pointer }
+.grp-ib:hover { background:var(--card2); border-color:var(--line2); color:var(--accent) }
+.grp-ib.danger:hover { color:var(--red) }
+.lib-actions .btn .ic { margin-right:.15rem }
+
+.grp-dlg-bg { position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:1rem }
+.grp-dlg { width:100%; max-width:400px; max-height:80vh; display:flex; flex-direction:column; background:var(--modal-bg); border:1px solid var(--modal-border); border-radius:var(--r-lg); box-shadow:0 16px 44px rgba(0,0,0,.35) }
+.grp-dlg h3 { margin:0; padding:.95rem 1rem .4rem; font-size:.95rem; color:var(--bright); font-family:var(--font-display) }
+.grp-dlg-body { padding:.3rem 1rem .8rem; overflow:auto; font-size:.82rem; color:var(--mid); line-height:1.6 }
+.grp-dlg-body p { margin:0 0 .6rem }
+.grp-dlg input { width:100%; box-sizing:border-box; padding:.62rem .75rem; font-size:16px; border-radius:var(--r-sm); border:1px solid var(--line2); background:var(--card); color:var(--text) }
+.grp-dlg input:focus { outline:2px solid var(--accent); outline-offset:1px }
+.grp-err { color:var(--red); font-size:.76rem; min-height:1.2em; margin-top:.35rem }
+.grp-dlg-ftr { display:flex; gap:.5rem; justify-content:flex-end; padding:.7rem 1rem; border-top:1px solid var(--line) }
+.grp-pick { display:flex; flex-direction:column; gap:2px }
+.grp-pk { display:flex; align-items:center; gap:.45rem; text-align:left; padding:.5rem .6rem; min-height:42px; border-radius:8px; border:1px solid transparent; background:none; color:var(--text); font:inherit; font-size:.82rem; cursor:pointer }
+.grp-pk .nm { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.grp-pk:hover:not(:disabled) { background:var(--accent-gl) }
+.grp-pk .n { flex:none; font-size:.7rem; color:var(--dim) }
+.grp-pk.here { background:var(--accent-gl) }
+.grp-pk.sel { border-color:var(--accent); background:var(--accent-gl) }
+.grp-pk:disabled { opacity:.4; cursor:not-allowed }
+
+@media (min-width:820px) {
+  #libModal .modal { max-width:940px }
+  .grp-grid.has-groups { display:grid; grid-template-columns:240px minmax(0, 1fr); gap:.9rem; align-items:start }
+  .grp-grid.has-groups .grp-tree { display:block; position:sticky; top:0; max-height:62vh; margin-bottom:0 }
+  .grp-tree-btn { display:none !important }
+}
+@media (max-width:600px) {
+  .grp-bar { flex-wrap:wrap }
+  .grp-crumbs { flex:1 1 100%; order:-1 }
+  .grp-bar .btn { flex:1; justify-content:center }
+  .grp-cards { grid-template-columns:1fr }
+  .grp-ib { width:40px; height:40px }
+  .grp-card { min-height:64px }
+}
+@media (max-width:480px) {
+  .grp-dlg-bg { align-items:flex-end; padding:0 }
+  .grp-dlg { max-width:none; max-height:85vh; border-radius:16px 16px 0 0 }
+  .grp-dlg-ftr .btn { flex:1; justify-content:center; min-height:44px }
+}
+@media (max-width:819px) {
+  .grp-dlg-bg.full { padding:0; align-items:stretch }
+  .grp-dlg-bg.full .grp-dlg { max-width:none; width:100%; height:100%; max-height:none; border-radius:0; border:0 }
+  .grp-dlg-bg.full .grp-dlg-body { flex:1 }
+  .grp-dlg-bg.full .grp-pk { min-height:48px; font-size:.9rem }
+}
+@media (prefers-reduced-motion: reduce) { .grp-tog .ic, .grp-card { transition:none } }
+
 /* ── account state + welcome card ── */
 #acctBtn { position:relative }
 #acctBtn.acct-stale::after { content:''; position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%; background:#f59e0b; box-shadow:0 0 0 2px var(--card); }
@@ -1203,6 +1283,12 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
   <symbol id="i-offline" viewBox="0 0 24 24"><path d="M3 3l18 18M8.5 8.5A8 8 0 0 0 4 11M12 12a4 4 0 0 0-3 1.3M16 8.3A8 8 0 0 1 20 11M12 18h.01"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M3 12h13M11 6l6 6-6 6"/><path d="M21 5v14"/></symbol>
+  <symbol id="i-tree" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="10" width="7" height="5" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/><path d="M6.5 8v10a1 1 0 0 0 1 1H14M6.5 12.5H14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 10v10h12V10"/></symbol>
 </svg>
 
 <!-- ═══════════ HEADER ═══════════ -->
@@ -2868,6 +2954,322 @@ function renderLib() {
   return libTab === 'local' ? renderLocalTab(box).then(() => { if (libSearchQ) runLibSearch(libSearchQ); }) : renderDriveTab(box);
 }
 
+// ══════════════════════════════════════════
+// LIBRARY GROUPS — user-made nested folders (tree) to organise projects, on both Library tabs
+// Stored per account in IndexedDB `settings` ('groups:<owner>'): { groups:[{id,name,parent,createdAt}], assign:{ itemKey: groupId } }
+// itemKey = project id (This device) or 'd:'+Drive folder id (Google Drive). Project data itself is never touched.
+// ══════════════════════════════════════════
+const GRP_MAX_DEPTH = 6, GRP_NAME_MAX = 60;
+let libGroup = '', _grp = { owner: null, groups: [], assign: {} }, _grpCollapsed = new Set(), _driveCache = null, _grpLast = { counts: {}, total: 0 };
+
+const grpRecKey = o => 'groups:' + (o || 'guest');
+async function grpRead(owner) {
+  try {
+    const db = await idb();
+    const rec = await idbReq(db.transaction('settings').objectStore('settings').get(grpRecKey(owner)));
+    const groups = Array.isArray(rec?.groups) ? rec.groups.filter(g => g && g.id && typeof g.name === 'string') : [];
+    const assign = rec?.assign && typeof rec.assign === 'object' ? { ...rec.assign } : {};
+    return { groups, assign };
+  } catch { return { groups: [], assign: {} }; }
+}
+const grpById = id => _grp.groups.find(g => g.id === id) || null;
+async function grpLoad() {
+  const owner = currentOwner();
+  if (_grp.owner !== owner) { libGroup = ''; _grpCollapsed = new Set(); _driveCache = null; }
+  _grp = { owner, ...(await grpRead(owner)) };
+  if (libGroup && !grpById(libGroup)) libGroup = '';
+  return _grp;
+}
+async function grpSave() {
+  const db = await idb();
+  await new Promise((res, rej) => {
+    const tx = db.transaction('settings', 'readwrite');
+    tx.oncomplete = res; tx.onerror = tx.onabort = () => rej(tx.error || new Error('save failed'));
+    tx.objectStore('settings').put({ key: grpRecKey(_grp.owner), groups: _grp.groups, assign: _grp.assign });
+  });
+}
+const grpKids = pid => _grp.groups.filter(g => (g.parent || '') === (pid || '')).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+function grpPath(id) { const out = []; let g = grpById(id), n = 0; while (g && n++ < 20) { out.unshift(g); g = g.parent ? grpById(g.parent) : null; } return out; }
+const grpDepth = id => id ? grpPath(id).length : 0;
+function grpHeight(id) { const k = grpKids(id); return k.length ? 1 + Math.max(...k.map(c => grpHeight(c.id))) : 0; }
+function grpSubtree(id) { const s = new Set([id]); const walk = x => grpKids(x).forEach(c => { if (!s.has(c.id)) { s.add(c.id); walk(c.id); } }); walk(id); return s; }
+const itemGroup = key => { const g = _grp.assign[key]; return g && grpById(g) ? g : ''; };
+const grpNorm = s => String(s || '').trim().replace(/\s+/g, ' ');
+
+function grpCheckName(raw, parent, exceptId) {
+  const n = grpNorm(raw);
+  if (!n) return L('একটা নাম দিন', 'Enter a name');
+  if (n.length > GRP_NAME_MAX) return L(`নাম ${GRP_NAME_MAX} অক্ষরের মধ্যে রাখুন`, `Keep the name within ${GRP_NAME_MAX} characters`);
+  if (grpKids(parent).some(g => g.id !== exceptId && g.name.toLowerCase() === n.toLowerCase())) return L('এই জায়গায় একই নামের group আছে', 'A group with this name already exists here');
+  return '';
+}
+function grpUniq(name, parent, exceptId) {
+  let n = name, i = 2;
+  while (grpKids(parent).some(g => g.id !== exceptId && g.name.toLowerCase() === n.toLowerCase())) n = `${name} (${i++})`;
+  return n;
+}
+
+async function grpCreate(name, parent = '') {
+  const err = grpCheckName(name, parent, ''); if (err) throw new Error(err);
+  if (parent && !grpById(parent)) throw new Error(L('Parent group পাওয়া যায়নি', 'Parent group not found'));
+  if (grpDepth(parent) + 1 > GRP_MAX_DEPTH) throw new Error(L(`সর্বোচ্চ ${GRP_MAX_DEPTH} স্তর পর্যন্ত group বানানো যায়`, `Groups can be nested up to ${GRP_MAX_DEPTH} levels`));
+  const g = { id: 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), name: grpNorm(name), parent: parent || '', createdAt: Date.now() };
+  _grp.groups.push(g); await grpSave(); return g;
+}
+async function grpRename(id, name) {
+  const g = grpById(id); if (!g) throw new Error(L('Group পাওয়া যায়নি', 'Group not found'));
+  const err = grpCheckName(name, g.parent || '', id); if (err) throw new Error(err);
+  g.name = grpNorm(name); await grpSave(); return g;
+}
+async function grpMove(id, parent = '') {
+  const g = grpById(id); if (!g) throw new Error(L('Group পাওয়া যায়নি', 'Group not found'));
+  if ((g.parent || '') === (parent || '')) return g;
+  if (parent && (!grpById(parent) || grpSubtree(id).has(parent))) throw new Error(L('Group-কে নিজের ভিতরে সরানো যায় না', 'A group cannot be moved into itself'));
+  if (grpDepth(parent) + 1 + grpHeight(id) > GRP_MAX_DEPTH) throw new Error(L(`সর্বোচ্চ ${GRP_MAX_DEPTH} স্তরের বেশি হয়ে যাবে`, `That would exceed ${GRP_MAX_DEPTH} levels`));
+  const err = grpCheckName(g.name, parent, id); if (err) throw new Error(err);
+  g.parent = parent || ''; await grpSave(); return g;
+}
+// Deleting a group never deletes projects: its sub-groups and projects move up one level.
+async function grpDelete(id) {
+  const g = grpById(id); if (!g) return;
+  const up = g.parent || '';
+  if (grpSubtree(id).has(libGroup)) libGroup = up;
+  _grp.groups.forEach(c => { if (c.parent === id) { c.name = grpUniq(c.name, up, c.id); c.parent = up; } });
+  for (const k of Object.keys(_grp.assign)) if (_grp.assign[k] === id) { if (up) _grp.assign[k] = up; else delete _grp.assign[k]; }
+  _grp.groups = _grp.groups.filter(x => x.id !== id);
+  await grpSave();
+}
+async function grpSetItems(keys, gid) {
+  if (gid && !grpById(gid)) throw new Error(L('Group পাওয়া যায়নি', 'Group not found'));
+  keys.forEach(k => { if (gid) _grp.assign[k] = gid; else delete _grp.assign[k]; });
+  await grpSave();
+}
+// A project saved to Drive is one item in two tabs — keep both keys in step so it sits in the same group everywhere.
+async function grpRelatedKeys(key) {
+  const keys = new Set([key]);
+  let list = []; try { list = await localList(); } catch {}
+  if (key.startsWith('d:')) { const fid = key.slice(2); list.filter(p => p.driveFolderId === fid).forEach(p => keys.add(p.id)); }
+  else { const p = list.find(p => p.id === key); if (p?.driveFolderId) keys.add('d:' + p.driveFolderId); }
+  return [...keys];
+}
+async function grpLocalByDrive() {
+  const m = new Map();
+  try { (await localList()).forEach(p => { if (p.driveFolderId) m.set(p.driveFolderId, p); }); } catch {}
+  return m;
+}
+// Guest work claimed into an account brings its groups along.
+async function grpAdoptGuest() {
+  const me = currentOwner(); if (!me) return;
+  const g = await grpRead(''); if (!g.groups.length && !Object.keys(g.assign).length) return;
+  const mine = await grpRead(me);
+  const ids = new Set(mine.groups.map(x => x.id));
+  const merged = { groups: mine.groups.concat(g.groups.filter(x => !ids.has(x.id))), assign: { ...g.assign, ...mine.assign } };
+  const db = await idb();
+  await new Promise((res, rej) => {
+    const tx = db.transaction('settings', 'readwrite');
+    tx.oncomplete = res; tx.onerror = tx.onabort = () => rej(tx.error || new Error('save failed'));
+    tx.objectStore('settings').put({ key: grpRecKey(me), ...merged });
+    tx.objectStore('settings').delete(grpRecKey(''));
+  });
+}
+
+function grpCounts(rows) {
+  const c = {};
+  rows.forEach(r => { let g = r.g, n = 0; while (g && n++ < 20) { c[g] = (c[g] || 0) + 1; g = grpById(g)?.parent || ''; } });
+  return c;
+}
+const grpMoveBtn = (key, cur) => `<button class="btn btn-secondary" data-act="grp-move-item" data-key="${esc(key)}" data-cur="${esc(cur || '')}" title="${L('Group-এ সরান', 'Move to group')}">${IC('move')} ${L('সরান', 'Move')}</button>`;
+
+function grpTreeHtml(counts, total) {
+  const row = (g, d) => {
+    const id = g ? g.id : '', kids = grpKids(id), collapsed = !!g && _grpCollapsed.has(id), n = g ? (counts[id] || 0) : total;
+    return `<div class="grp-trow${libGroup === id ? ' active' : ''}" style="padding-left:${d * 14}px">`
+      + (g && kids.length ? `<button class="grp-tog" data-act="grp-tog" data-gid="${esc(id)}" aria-label="${collapsed ? L('খুলুন', 'Expand') : L('গুটান', 'Collapse')}" aria-expanded="${!collapsed}">${IC('chev')}</button>` : '<span class="grp-tog-sp"></span>')
+      + `<button class="grp-tl" data-act="grp-open" data-gid="${esc(id)}"${libGroup === id ? ' aria-current="true"' : ''}>${IC(g ? 'folder' : 'home')}<span class="nm">${esc(g ? g.name : 'Library')}</span><span class="n">${n}</span></button></div>`
+      + (collapsed ? '' : kids.map(k => row(k, d + 1)).join(''));
+  };
+  return row(null, 0);
+}
+
+// rows: [{ g: groupId|'', html }] — everything a tab wants to list; returns breadcrumb + tree + group cards + this level's items.
+function grpViewHtml(rows, emptyAllHtml) {
+  const counts = grpCounts(rows), hasGroups = _grp.groups.length > 0;
+  _grpLast = { counts, total: rows.length };
+  const path = grpPath(libGroup), cur = path[path.length - 1] || null;
+  const atMax = grpDepth(libGroup) + 1 > GRP_MAX_DEPTH;
+  const up = L('এক ধাপ উপরে', 'Up one level');
+  const crumbs = (cur ? `<button class="grp-crumb grp-up" data-act="grp-open" data-gid="${esc(cur.parent || '')}" title="${up}" aria-label="${up}">${IC('up')}</button>` : '')
+    + `<button class="grp-crumb${cur ? '' : ' cur'}" data-act="grp-open" data-gid=""${cur ? '' : ' aria-current="page"'}>${IC('home')} Library</button>`
+    + path.map((g, i) => '<span class="grp-sep" aria-hidden="true">›</span>' + (i === path.length - 1
+      ? `<span class="grp-crumb cur" aria-current="page">${esc(g.name)}</span>`
+      : `<button class="grp-crumb" data-act="grp-open" data-gid="${esc(g.id)}">${esc(g.name)}</button>`)).join('');
+  const bar = `<div class="grp-bar"><nav class="grp-crumbs" aria-label="${L('Group পথ', 'Group path')}">${crumbs}</nav>`
+    + (hasGroups ? `<button class="btn btn-secondary grp-tree-btn" data-act="grp-tree">${IC('tree')} <span>Tree</span></button>` : '')
+    + `<button class="btn btn-secondary grp-new" data-act="grp-new"${atMax ? ' disabled' : ''}>${IC('folder-plus')} <span>${L('নতুন group', 'New group')}</span></button></div>`;
+  const kids = grpKids(libGroup);
+  const cards = kids.length ? '<div class="grp-cards">' + kids.map(g => {
+    const subs = grpKids(g.id).length, n = counts[g.id] || 0, nm = esc(g.name);
+    return `<div class="grp-card" role="button" tabindex="0" data-act="grp-open" data-gid="${esc(g.id)}" aria-label="${nm}"><span class="grp-ico">${IC('folder')}</span>`
+      + `<div class="grp-info"><div class="grp-name" title="${nm}">${nm}</div><div class="grp-meta">${n} ${L('টি project', 'items')}${subs ? ` · ${subs} ${L('টি sub-group', 'sub-groups')}` : ''}</div></div>`
+      + `<div class="grp-cact"><button class="grp-ib" data-act="grp-rename" data-gid="${esc(g.id)}" title="${L('নাম বদলান', 'Rename')}" aria-label="${L('নাম বদলান', 'Rename')}">${IC('edit')}</button>`
+      + `<button class="grp-ib" data-act="grp-move" data-gid="${esc(g.id)}" title="${L('অন্য group-এ সরান', 'Move group')}" aria-label="${L('অন্য group-এ সরান', 'Move group')}">${IC('move')}</button>`
+      + `<button class="grp-ib danger" data-act="grp-del" data-gid="${esc(g.id)}" title="${L('Group মুছুন', 'Delete group')}" aria-label="${L('Group মুছুন', 'Delete group')}">${IC('trash')}</button></div></div>`;
+  }).join('') + '</div>' : '';
+  const shown = rows.filter(r => r.g === libGroup);
+  let body = shown.map(r => r.html).join('');
+  if (!rows.length && !hasGroups) body = emptyAllHtml || '';
+  else if (!shown.length && !kids.length && libGroup) body = `<div class="lib-empty">${L('এই group খালি।<br>কোনো project-এর <b>সরান</b> বাটন চেপে এখানে আনুন।', 'This group is empty.<br>Use <b>Move</b> on a project to bring it here.')}</div>`;
+  return bar + `<div class="grp-grid${hasGroups ? ' has-groups' : ''}">`
+    + (hasGroups ? `<aside class="grp-tree" aria-label="${L('Group tree', 'Group tree')}">${grpTreeHtml(counts, rows.length)}</aside>` : '')
+    + `<div class="grp-main">${cards}${body}</div></div>`;
+}
+
+function grpPickHtml(isDisabled, curId, counts, total) {
+  const row = (g, d) => {
+    const id = g ? g.id : '';
+    return `<button type="button" class="grp-pk${counts && id === curId ? ' here' : ''}" data-gid="${esc(id)}" style="padding-left:${(.6 + d * .9).toFixed(2)}rem"${isDisabled(id) ? ' disabled' : ''}>${IC(g ? 'folder' : 'home')}<span class="nm">${esc(g ? g.name : 'Library (' + L('মূল', 'root') + ')')}</span>${counts ? `<span class="n">${g ? (counts[id] || 0) : total}</span>` : ''}${id === curId ? `<span class="lib-tag">${L('এখানে আছে', 'current')}</span>` : ''}</button>`
+      + grpKids(id).map(k => row(k, d + 1)).join('');
+  };
+  return `<div class="grp-pick">${row(null, 0)}</div>`;
+}
+
+// One small dialog for everything: text input, confirm, or "pick a destination" (bottom sheet on phones).
+// Resolves: input → trimmed string · pick → { gid } · confirm → true · cancel → null
+function grpDialog({ title, body = '', input = null, ok, cancel, danger = false, pick = null, full = false, instant = false }) {
+  return new Promise(resolve => {
+    const bg = document.createElement('div');
+    bg.className = 'grp-dlg-bg' + (full ? ' full' : ''); bg.setAttribute('role', 'dialog'); bg.setAttribute('aria-modal', 'true'); bg.setAttribute('aria-label', title);
+    bg.innerHTML = `<div class="grp-dlg"><h3>${esc(title)}</h3><div class="grp-dlg-body">${body}`
+      + (input ? `<input id="grpInp" type="text" maxlength="${GRP_NAME_MAX}" autocomplete="off" value="${esc(input.value || '')}" placeholder="${esc(input.placeholder || '')}" aria-label="${esc(title)}"><div class="grp-err" id="grpErr" role="alert"></div>` : '')
+      + (pick ? pick.html : '')
+      + `</div><div class="grp-dlg-ftr"><button type="button" class="btn btn-secondary" data-d="x">${esc(cancel || L('বাতিল', 'Cancel'))}</button>${instant ? '' : `<button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-d="ok"${pick ? ' disabled' : ''}>${esc(ok || L('ঠিক আছে', 'OK'))}</button>`}</div></div>`;
+    let sel = null, done = false;
+    const prevFocus = document.activeElement;
+    const fin = v => { if (done) return; done = true; document.removeEventListener('keydown', onKey, true); bg.remove(); try { prevFocus?.focus?.(); } catch {} resolve(v); };
+    const submit = () => {
+      if (pick) { if (sel !== null) fin({ gid: sel }); return; }
+      if (input) {
+        const inp = bg.querySelector('#grpInp'), err = input.validate ? input.validate(inp.value) : '';
+        if (err) { bg.querySelector('#grpErr').textContent = err; inp.focus(); return; }
+        fin(grpNorm(inp.value)); return;
+      }
+      fin(true);
+    };
+    const onKey = e => {
+      if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); fin(null); }
+      else if (e.key === 'Enter' && input && e.target === bg.querySelector('#grpInp')) { e.preventDefault(); submit(); }
+    };
+    document.addEventListener('keydown', onKey, true);
+    bg.addEventListener('click', e => {
+      if (e.target === bg) return fin(null);
+      const b = e.target.closest('[data-d]'); if (b) return b.dataset.d === 'ok' ? submit() : fin(null);
+      const p = e.target.closest('.grp-pk');
+      if (p && !p.disabled && instant) return fin({ gid: p.dataset.gid });
+      if (p && !p.disabled) { sel = p.dataset.gid; bg.querySelectorAll('.grp-pk').forEach(x => x.classList.toggle('sel', x === p)); bg.querySelector('[data-d="ok"]').disabled = false; }
+    });
+    document.body.appendChild(bg);
+    setTimeout(() => { const i = bg.querySelector('#grpInp'); if (i) { i.focus(); i.select(); } else bg.querySelector('[data-d="ok"]')?.focus(); }, 0);
+  });
+}
+
+function grpRerender() {
+  if (libTab === 'drive' && _driveCache && gdrive.token) return paintDriveCached();
+  return renderLib();
+}
+
+async function grpHandle(act, b) {
+  const gid = b.dataset.gid || '';
+  if (act === 'grp-open') {
+    libGroup = grpById(gid) ? gid : '';
+    grpPath(libGroup).forEach(g => _grpCollapsed.delete(g.id));
+    await grpRerender();
+    const mb = $('libModal').querySelector('.modal-body'); if (mb) mb.scrollTop = 0;
+  } else if (act === 'grp-tree') {   // phones: the tree is its own full-screen page; tapping a group goes straight there
+    const res = await grpDialog({ title: L('Group tree', 'Group tree'), full: true, instant: true, cancel: L('বন্ধ করুন', 'Close'), pick: { html: grpPickHtml(() => false, libGroup, _grpLast.counts, _grpLast.total) } });
+    if (res == null) return;
+    return grpHandle('grp-open', { dataset: { gid: res.gid } });
+  }
+  else if (act === 'grp-tog') { _grpCollapsed.has(gid) ? _grpCollapsed.delete(gid) : _grpCollapsed.add(gid); await grpRerender(); }
+  else if (act === 'grp-new') {
+    const here = grpById(libGroup);
+    const name = await grpDialog({
+      title: here ? L('নতুন sub-group', 'New sub-group') : L('নতুন group', 'New group'),
+      body: here ? `<p>${L('এর ভিতরে বানানো হবে:', 'Will be created inside:')} <b>${esc(here.name)}</b></p>` : '',
+      input: { placeholder: L('যেমন: Semester 1, Physics…', 'e.g. Semester 1, Physics…'), validate: v => grpCheckName(v, libGroup, '') },
+      ok: L('বানান', 'Create'),
+    });
+    if (name == null) return;
+    await grpCreate(name, libGroup); await grpRerender();
+  } else if (act === 'grp-rename') {
+    const g = grpById(gid); if (!g) return;
+    const name = await grpDialog({ title: L('Group-এর নাম বদলান', 'Rename group'), input: { value: g.name, validate: v => grpCheckName(v, g.parent || '', g.id) }, ok: L('সেভ', 'Save') });
+    if (name == null) return;
+    await grpRename(gid, name); await grpRerender();
+  } else if (act === 'grp-del') {
+    const g = grpById(gid); if (!g) return;
+    const ok = await grpDialog({
+      title: L('Group মুছবেন?', 'Delete group?'),
+      body: `<p>${L(`"${esc(g.name)}" group-টি মুছে যাবে। ভিতরের project ও sub-group <b>মুছবে না</b> — এক ধাপ উপরে চলে যাবে।`, `Group "${esc(g.name)}" will be removed. Its projects and sub-groups are <b>not deleted</b> — they move up one level.`)}</p>`,
+      ok: L('মুছুন', 'Delete'), danger: true,
+    });
+    if (!ok) return;
+    await grpDelete(gid); await grpRerender();
+  } else if (act === 'grp-move') {
+    const g = grpById(gid); if (!g) return;
+    const sub = grpSubtree(g.id), h = grpHeight(g.id);
+    const res = await grpDialog({
+      title: L(`"${g.name}" কোথায় সরাবেন?`, `Move "${g.name}" to…`),
+      pick: { html: grpPickHtml(id => id === (g.parent || '') || sub.has(id) || grpDepth(id) + 1 + h > GRP_MAX_DEPTH || !!grpCheckName(g.name, id, g.id), g.parent || '') },
+      ok: L('এখানে সরান', 'Move here'),
+    });
+    if (res == null) return;
+    await grpMove(gid, res.gid); await grpRerender();
+  } else if (act === 'grp-move-item') {
+    const key = b.dataset.key, cur = b.dataset.cur || '';
+    const res = await grpDialog({
+      title: L('কোন group-এ রাখবেন?', 'Move to which group?'),
+      pick: { html: grpPickHtml(id => id === cur, cur) },
+      ok: L('এখানে সরান', 'Move here'),
+    });
+    if (res == null) return;
+    await grpSetItems(await grpRelatedKeys(key), res.gid);
+    toast(res.gid ? L(`✅ "${grpById(res.gid).name}" group-এ সরানো হয়েছে`, `✅ Moved to "${grpById(res.gid).name}"`) : L('✅ মূল Library-তে ফেরানো হয়েছে', '✅ Moved back to Library'), 'ok', 2500);
+    await grpRerender();
+  }
+}
+const grpApi = { load: grpLoad, create: grpCreate, rename: grpRename, move: grpMove, del: grpDelete, setItems: grpSetItems, related: grpRelatedKeys, adoptGuest: grpAdoptGuest, state: () => _grp, cur: () => libGroup, setCur: g => { libGroup = g; }, path: grpPath, MAX: GRP_MAX_DEPTH };
+
+function paintDrive(box, items, localByDrive) {
+  const rows = items.map(f => {
+    const pages = Number(f.appProperties?.pages || 0), done = Number(f.appProperties?.done || 0);
+    const lp = localByDrive.get(f.id);
+    const gk = (`d:${f.id}` in _grp.assign) ? `d:${f.id}` : (lp ? lp.id : `d:${f.id}`);
+    const g = itemGroup(gk);
+    return {
+      g, html: itemHtml({
+        name: f.name.replace(/ · [a-z0-9]{4}$/i, ''), current: f.id === state.proj?.driveFolderId,
+        pct: pages ? Math.round(done / pages * 100) : 0,
+        meta: `${pages || '?'} ${L('পেজ', 'pages')} · ${done} done · ${esc(fmtDate(f.modifiedTime))}`,
+        actions: `<button class="btn btn-primary" data-act="open-drive" data-id="${f.id}">▶ ${L('খুলুন', 'Open')}</button><a class="btn btn-secondary" href="https://drive.google.com/drive/folders/${f.id}" target="_blank" rel="noopener" title="Drive-এ দেখুন">↗</a>${grpMoveBtn('d:' + f.id, g ? g.id : '')}<button class="btn btn-danger" data-act="del-drive" data-id="${f.id}" title="${L('Trash-এ পাঠান', 'Move to trash')}">${IC('trash')}</button>`,
+      }),
+    };
+  });
+  const empty = `<div class="lib-empty">${L('Drive-এ এখনো কিছু save করা হয়নি।<br>উপরের বাটনে চাপ দিয়ে বর্তমান project save করুন।', 'Nothing in Drive yet.<br>Use the button above to save the current project.')}</div>`;
+  box.innerHTML = driveHeadHtml() + grpViewHtml(rows, empty);
+}
+// Navigating groups must not re-download the Drive list each time — repaint from the last fetch.
+async function paintDriveCached() {
+  if (!_driveCache) return renderLib();
+  const my = ++_libSeq;
+  await grpLoad(); const lbd = await grpLocalByDrive();
+  if (my !== _libSeq) return;
+  paintDrive($('libContent'), _driveCache.items, lbd);
+}
+$('libContent').addEventListener('keydown', e => {
+  const c = e.target.closest?.('.grp-card');
+  if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.click(); }
+});
+
 function itemHtml({ name, meta, pct, tags = '', actions, current }) {
   return `<div class="lib-item${current ? ' current' : ''}"><div class="lib-info"><div class="lib-name">${esc(name)}${tags}</div><div class="lib-meta">${meta}</div><div class="lib-prog"><i style="width:${pct}%"></i></div></div><div class="lib-actions">${actions}</div></div>`;
 }
@@ -2877,6 +3279,7 @@ async function renderLocalTab(box) {
   let list;
   try { list = await localList(); } catch { box.innerHTML = `<div class="lib-note">${L('এই browser-এ local storage চালু নেই (private mode?)', 'Local storage is unavailable (private mode?)')}</div>`; return; }
   if (my !== _libSeq) return;
+  await grpLoad(); if (my !== _libSeq) return;
   const me = storedUser();
   let guestN = 0; if (me) { try { guestN = (await guestProjects()).length; } catch {} }
   const who = me ? `${esc(me.email || me.name || '')}` : `${L('Guest (Sign in করা নেই)', 'Guest (not signed in)')}`;
@@ -2884,7 +3287,7 @@ async function renderLocalTab(box) {
     + (guestN ? `<div class="lib-note lib-row"><span>${L(`Sign in ছাড়া করা ${guestN}টি project এই device-এ আছে।`, `${guestN} project(s) made without signing in are on this device.`)}</span><span class="lib-actions"><button class="btn btn-secondary" data-act="claim-guest">${L('আমার account-এ নিন', 'Add to my account')}</button></span></div>` : '');
   const srch = `<div class="lib-search"><input id="libSearch" type="search" autocomplete="off" value="${esc(libSearchQ)}" placeholder="${L('সব project-এ text খুঁজুন…', 'Search text across all projects…')}" aria-label="${L('Library-তে খুঁজুন', 'Search the Library')}"><div id="libSearchRes"></div></div>`;
   const bk = `<div class="lib-note lib-row"><span>${L('সব project এক ZIP-এ backup / backup থেকে ফেরত আনুন', 'Back up everything to one ZIP / restore from a backup')}</span><span class="lib-actions"><button class="btn btn-secondary" data-act="export-all" ${list.length ? '' : 'disabled'}>${L('সব Export (.zip)', 'Export all (.zip)')}</button><button class="btn btn-secondary" data-act="import-backup">${L('Backup import', 'Import backup')}</button></span></div>`;
-  if (!list.length) { box.innerHTML = head + bk + `<div class="lib-empty">${L('এখনো কোনো project নেই।<br>কিছু upload করলেই এখানে জমা হবে।', 'No projects yet.<br>Upload something and it will show up here.')}</div>`; return; }
+  if (!list.length && !_grp.groups.length) { box.innerHTML = head + bk + `<div class="lib-empty">${L('এখনো কোনো project নেই।<br>কিছু upload করলেই এখানে জমা হবে।', 'No projects yet.<br>Upload something and it will show up here.')}</div>`; return; }
   // Library-level duplicate detection: same (source file name + page count + first-page hash).
   const dupKey = p => `${(p.sourceFileName || '').trim().toLowerCase()}|${p.pageCount || 0}|${p.firstPageHash || ''}`;
   const groups = new Map();
@@ -2898,7 +3301,7 @@ async function renderLocalTab(box) {
   groups.forEach(g => { if (g.length > 1) g.forEach(p => dupIds.add(p.id)); });
   const meter = storageMeterHtml(await storageInfo(), list);
   if (my !== _libSeq) return;
-  box.innerHTML = head + srch + bk + meter + list.map(p => itemHtml({
+  const rows = list.map(p => ({ g: itemGroup(p.id), html: itemHtml({
     name: p.name, current: p.id === state.projectId,
     pct: p.pageCount ? Math.round(p.doneCount / p.pageCount * 100) : 0,
     meta: `${p.pageCount} ${L('পেজ', 'pages')} · ${p.doneCount} done · ${esc(fmtDate(p.updatedAt))}`,
@@ -2909,37 +3312,39 @@ async function renderLocalTab(box) {
     actions: `<button class="btn btn-primary" data-act="open-local" data-id="${p.id}">▶ ${L('খুলুন', 'Open')}</button><button class="btn btn-secondary" data-act="dl-local" data-id="${p.id}" title=".txt download">⬇ .txt</button>`
       + (dupIds.has(p.id) ? `<button class="btn btn-secondary" data-act="merge-dup" data-id="${p.id}" title="${L('একই রকম আরেকটা project মুছুন', 'Delete the other identical project')}">${L('Duplicate সরান', 'Remove duplicate')}</button>` : '')
       + (state.pages.length && p.id !== state.projectId ? `<button class="btn btn-secondary" data-act="merge-into" data-id="${p.id}" title="${L('এই project-এর সব পেজ খোলা project-এর শেষে যোগ করুন', 'Append all pages of this project to the open project')}">${L('খোলা project-এ মেশান', 'Merge into open')}</button>` : '')
-      + `<button class="btn btn-danger" data-act="del-local" data-id="${p.id}" title="${L('মুছুন', 'Delete')}">${IC('trash')}</button>`,
-  })).join('');
+      + grpMoveBtn(p.id, (itemGroup(p.id) || '') && itemGroup(p.id).id) + `<button class="btn btn-danger" data-act="del-local" data-id="${p.id}" title="${L('মুছুন', 'Delete')}">${IC('trash')}</button>`,
+  }) }));
+  box.innerHTML = (libGroup ? '' : head) + srch + (libGroup ? '' : bk + meter) + grpViewHtml(rows);
 }
 
 function setupNote() {
   return `<div class="lib-note"><b>${L('Google Drive এখনো চালু করা হয়নি', 'Google Drive is not set up yet')}</b><br>${L('একবারের setup: Google Cloud Console → Drive API enable → OAuth Client ID (Web) বানিয়ে index.html-এর <code>GOOGLE_CLIENT_ID</code>-এ বসান। বিস্তারিত README-তে।', 'One-time setup: enable Drive API in Google Cloud Console, create a Web OAuth Client ID and paste it into <code>GOOGLE_CLIENT_ID</code> in index.html. See README.')}<br><br>${L('এর মধ্যে "এই device" ট্যাবের local library আগের মতোই কাজ করবে।', 'The "This device" tab keeps working meanwhile.')}</div>`;
 }
 
+function driveHeadHtml() {
+  return `<div class="lib-note lib-row"><span>${esc(gdrive.user?.email || '')}<br><small>Drive › Textriva</small></span><span class="lib-actions"><button class="btn btn-primary" data-act="sync" ${state.pages.length ? '' : 'disabled'}>${L('এই project Drive-এ save', 'Save current project')}</button><button class="btn btn-secondary" data-act="signout">${L('Sign out', 'Sign out')}</button></span></div>`;
+}
+
 async function renderDriveTab(box) {
   const my = ++_libSeq;
   if (!GOOGLE_CLIENT_ID) { box.innerHTML = setupNote(); return; }
   if (!gdrive.token) {
+    _driveCache = null;
     const hint = readSaved('textriva-g-hint');
     box.innerHTML = `<div class="lib-note">${L('Sign in করলে আপনার file গুলো Google Drive → <b>Textriva</b> folder-এ project অনুযায়ী জমা হবে। এখান থেকে দেখা, খোলা ও delete করা যাবে।', 'Sign in to keep your files in Google Drive → <b>Textriva</b> folder, one folder per project. You can view, open and delete them here.')}</div><div style="text-align:center"><button class="btn btn-primary" data-act="signin">${hint && hint.includes('@') ? L('চালিয়ে যান — ', 'Continue as ') + esc(hint) : L('Google দিয়ে Sign in', 'Sign in with Google')}</button></div>`;
     return;
   }
-  const head = `<div class="lib-note lib-row"><span>${esc(gdrive.user?.email || '')}<br><small>Drive › Textriva</small></span><span class="lib-actions"><button class="btn btn-primary" data-act="sync" ${state.pages.length ? '' : 'disabled'}>${L('এই project Drive-এ save', 'Save current project')}</button><button class="btn btn-secondary" data-act="signout">${L('Sign out', 'Sign out')}</button></span></div>`;
+  const head = driveHeadHtml();
   box.innerHTML = head + `<div class="lib-empty">${L('Drive থেকে আনা হচ্ছে…', 'Loading from Drive…')}</div>`;
   try {
+    await grpLoad();
     const root = await dRoot();
     const items = await dList(`'${root}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
     if (my !== _libSeq) return;
-    box.innerHTML = head + (items.length ? items.map(f => {
-      const pages = Number(f.appProperties?.pages || 0), done = Number(f.appProperties?.done || 0);
-      return itemHtml({
-        name: f.name.replace(/ · [a-z0-9]{4}$/i, ''), current: f.id === state.proj?.driveFolderId,
-        pct: pages ? Math.round(done / pages * 100) : 0,
-        meta: `${pages || '?'} ${L('পেজ', 'pages')} · ${done} done · ${esc(fmtDate(f.modifiedTime))}`,
-        actions: `<button class="btn btn-primary" data-act="open-drive" data-id="${f.id}">▶ ${L('খুলুন', 'Open')}</button><a class="btn btn-secondary" href="https://drive.google.com/drive/folders/${f.id}" target="_blank" rel="noopener" title="Drive-এ দেখুন">↗</a><button class="btn btn-danger" data-act="del-drive" data-id="${f.id}" title="${L('Trash-এ পাঠান', 'Move to trash')}">${IC('trash')}</button>`,
-      });
-    }).join('') : `<div class="lib-empty">${L('Drive-এ এখনো কিছু save করা হয়নি।<br>উপরের বাটনে চাপ দিয়ে বর্তমান project save করুন।', 'Nothing in Drive yet.<br>Use the button above to save the current project.')}</div>`);
+    const lbd = await grpLocalByDrive();
+    if (my !== _libSeq) return;
+    _driveCache = { items };
+    paintDrive(box, items, lbd);
   } catch (e) {
     if (my !== _libSeq) return;
     box.innerHTML = head + `<div class="lib-note" style="border-color:var(--red)">❌ ${esc(e.message)}<br><br><button class="btn btn-secondary" data-act="retry">↺ ${L('আবার চেষ্টা', 'Retry')}</button></div>`;
@@ -2950,6 +3355,7 @@ $('libContent').addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = b.dataset.id;
   try {
+    if (act.startsWith('grp-')) { await grpHandle(act, b); return; }
     if (act === 'open-local') await openLocalProject(id);
     else if (act === 'open-hit') await openLocalProject(id, parseInt(b.dataset.page, 10) - 1);
     else if (act === 'dl-local') await downloadLocalText(id);
@@ -2966,7 +3372,7 @@ $('libContent').addEventListener('click', async e => {
       if (!confirm(L('Sign out করবেন?\n\nআপনার কাজ এই device-এর Library-তে (এবং Drive-এ) নিরাপদ থাকবে। শুধু screen পরিষ্কার হবে, আর পরের user আপনার project দেখতে পাবে না।', 'Sign out?\n\nYour work stays safe in this device\'s Library (and on Drive). The screen is cleared and the next person will not see your projects.'))) return;
       await gSignOut(); closeLib();
     }
-    else if (act === 'claim-guest') { const n = await claimGuestProjects(); renderLib(); initResumeCard(); toast(L(`✅ ${n}টি project আপনার account-এ নেওয়া হয়েছে`, `✅ ${n} project(s) added to your account`), 'ok', 3000); }
+    else if (act === 'claim-guest') { const n = await claimGuestProjects(); try { await grpAdoptGuest(); } catch {} renderLib(); initResumeCard(); toast(L(`✅ ${n}টি project আপনার account-এ নেওয়া হয়েছে`, `✅ ${n} project(s) added to your account`), 'ok', 3000); }
     else if (act === 'sync') { await syncToDrive(); renderLib(); }
     else if (act === 'open-drive') await openDriveProject(id);
     else if (act === 'merge-dup') {
