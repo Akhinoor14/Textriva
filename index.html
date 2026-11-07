@@ -976,6 +976,12 @@ a { color:inherit; text-decoration:none }
 #acctBtn.acct-stale::after { content:''; position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%; background:#f59e0b; box-shadow:0 0 0 2px var(--card); }
 .wl-bg { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(3,8,20,.62); backdrop-filter:blur(3px); animation:wlFade .18s ease-out }
 .wl-card { position:relative; width:100%; max-width:460px; max-height:calc(100vh - 32px); overflow:auto; background:var(--card); color:var(--text); border:1px solid var(--line2); border-radius:18px; padding:26px 24px 18px; box-shadow:0 24px 64px rgba(0,0,0,.45); animation:wlPop .22s cubic-bezier(.2,.9,.3,1.1) }
+.cs-check { display:flex; gap:.7rem; align-items:flex-start; margin:.9rem 0 .2rem; padding:.7rem .8rem; border:1.5px solid var(--line2); border-radius:12px; background:var(--card2, var(--card)); font-size:.84rem; line-height:1.45; cursor:pointer }
+.cs-check input { flex:none; width:22px; height:22px; margin-top:1px; accent-color:var(--accent) }
+.cs-check a { color:var(--accent) }
+.wl-go[disabled] { opacity:.45; cursor:not-allowed }
+.wl-secure { margin:.7rem 0 0; font-size:.74rem; line-height:1.5; color:var(--mid) }
+.upload-warn { display:block; margin-top:.35rem; font-size:.74rem; color:var(--yellow) }
 .wl-x { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; border:1px solid var(--line2); background:transparent; color:var(--mid); cursor:pointer; font-size:.9rem }
 .wl-x:hover { color:var(--text); border-color:var(--accent) }
 .wl-brand { display:flex; align-items:center; gap:8px; font-weight:700; letter-spacing:.02em; color:var(--accent); margin-bottom:10px }
@@ -1058,6 +1064,9 @@ a { color:inherit; text-decoration:none }
 @media (hover:none), (max-width:700px) { .step-kbd { display:none } }
 @media (max-width:560px) { .step-bar { padding-left:1rem; padding-right:1rem } #flowBtn { padding:.7rem 1.2rem; min-height:50px; font-size:1rem } }
 body.has-stepbar .wrap { padding-bottom:6rem }
+.step-prog, .step-side, .step-undo, .step-cnt, #flowBtnSub, .m-only, .ws-tabs { display:none }
+.step-main { display:contents }
+.step-lbl { display:inline }
 body.has-stepbar #pwa-install-bar { bottom:76px }
 
 /* ── MOBILE ONLY (phones / touch): thumb-zone Auto Step + swipe-friendly strip. Desktop is untouched. ── */
@@ -1069,19 +1078,90 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
   .page-thumb { scroll-snap-align:center; -webkit-tap-highlight-color:transparent }
   .page-thumb.active { transform:scale(1.18) }
   .page-thumb .pt-remove { display:none }
-  /* Auto Step: full-width, thumb-reach button; progress sits on a slim line above it */
-  .step-bar { flex-direction:column; align-items:stretch; gap:.45rem; padding:.55rem .9rem calc(.6rem + env(safe-area-inset-bottom, 0px)); box-shadow:0 -6px 20px rgba(0,0,0,.18) }
-  .step-info { flex-direction:row; align-items:baseline; justify-content:space-between; gap:.6rem }
-  .step-info b { font-size:.85rem }
-  .step-info span { font-size:.72rem; text-align:right }
-  #flowBtn { width:100%; margin-left:0; min-height:58px; justify-content:center; font-size:1.1rem; border-radius:14px; touch-action:manipulation; -webkit-tap-highlight-color:transparent }
-  #flowBtn:active:not(:disabled) { transform:scale(.97) }
-  body.has-stepbar .wrap { padding-bottom:9.5rem }
-  body.has-stepbar #pwa-install-bar { bottom:112px }
+  /* ===== AUTOMATION DOCK — one slim thumb-zone row ===== */
+  .step-bar { flex-direction:column; align-items:stretch; justify-content:flex-start; gap:0; padding:0 .7rem calc(.5rem + env(safe-area-inset-bottom, 0px)); border-top:0; border-radius:18px 18px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.2) }
+  .step-prog { display:block; height:4px; margin:0 -.7rem .5rem; background:var(--line); border-radius:18px 18px 0 0; overflow:hidden }
+  .step-prog i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--green)); border-radius:0 3px 3px 0; transition:width .45s ease }
+  .step-info { display:none }
+  .step-main { display:flex; gap:.45rem; align-items:stretch }
+  .step-side { display:inline-flex; align-items:center; justify-content:center; flex:0 0 46px; min-height:56px; border-radius:14px; border:1.5px solid var(--line2); background:var(--card); color:var(--mid); touch-action:manipulation; -webkit-tap-highlight-color:transparent }
+  .step-side .ic { width:20px; height:20px }
+  .step-side:active { transform:scale(.94); background:var(--accent-gl) }
+  .step-side:disabled { opacity:.3 }
+  #flowBtn { flex:1; width:auto; margin-left:0; min-height:56px; justify-content:flex-start; gap:.65rem; padding:.4rem .8rem .4rem 1rem; border-radius:14px; text-align:left; touch-action:manipulation; -webkit-tap-highlight-color:transparent; box-shadow:0 5px 16px var(--accent-gm) }
+  #flowBtn > .ic { width:24px; height:24px; flex:none }
+  .step-lbl { display:flex; flex-direction:column; min-width:0; line-height:1.2 }
+  #flowBtnTxt { font-size:1.02rem; font-weight:800; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  #flowBtnSub { display:block; margin-top:1px; font-size:.68rem; font-weight:500; opacity:.88; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .step-kbd { display:none }
+  .step-cnt { display:inline-flex; margin-left:auto; flex:none; padding:.15rem .55rem; border-radius:999px; background:rgba(255,255,255,.22); font-size:.72rem; font-weight:700; font-variant-numeric:tabular-nums }
+  #flowBtn.waiting-copy .step-cnt { background:rgba(0,0,0,.08) }
+  #flowBtn:active:not(:disabled) { transform:scale(.98) }
+  #flowBtn.mode-paste { background:var(--green); box-shadow:0 5px 16px var(--green-gl) }
+  #flowBtn.waiting-copy { background:var(--yellow-gl); color:var(--yellow); box-shadow:none }
+  #flowBtn.is-complete { box-shadow:none }
+  .step-undo { display:inline-flex; align-items:center; gap:.4rem; position:absolute; right:.8rem; top:-46px; min-height:36px; padding:0 .85rem; border-radius:999px; border:1.5px solid var(--line2); background:var(--card); color:var(--text); font:inherit; font-size:.8rem; font-weight:600; box-shadow:0 4px 14px rgba(0,0,0,.18); touch-action:manipulation }
+  .step-undo[hidden] { display:none }
+  .step-undo .ic { width:14px; height:14px }
+  body.has-stepbar .wrap { padding-bottom:calc(var(--dock-h, 90px) + 1rem) }
+  body.has-stepbar #pwa-install-bar { bottom:calc(var(--dock-h, 90px) + 8px) }
+  body.kbd-open .step-bar { display:none }
+
+  /* ===== COMPACT SCREEN: only what the work needs, side by side ===== */
+  .m-only { display:flex !important }
+  .more-menu .m-only[aria-pressed="true"]::after { content:"✓"; margin-left:auto; color:var(--green); font-weight:800 }
+  .strip-hdr { display:none }                                   /* count lives in the dock */
+  .strip-wrap { margin-top:.5rem }
+  .page-thumb .pt-img { aspect-ratio:.95; object-position:top }  /* shorter thumbnails */
+  body.has-stepbar #folderBtn, body.has-stepbar #folderBtn ~ .upload-sub { display:none }
+  /* one row: Drive · Export · ⋯  (status chips take their own full row only when present) */
+  .action-row { display:grid; grid-template-columns:1fr 1fr 52px; gap:.45rem; margin-top:.5rem }
+  .action-row > .btn-warning { grid-column:1 / -1 }
+  .action-row .more-wrap { grid-column:auto; position:relative }
+  .action-row .more-wrap > .btn { width:100%; padding:0; justify-content:center }
+  #moreBtnTxt { display:none }
+  .more-menu { left:auto; right:0; width:min(280px, calc(100vw - 1.4rem)); min-width:0; max-height:60vh; overflow-y:auto }
+  .more-menu .btn { min-height:48px }
+  /* preview: slim header (prev/next/jump live in the dock + strip), image ≤ 34vh */
+  #gotoPage, #prevPage, #nextPage { display:none !important }   /* !important: .btn-icon gets an inline display from JS */
+  .panel-hdr { padding:.35rem .6rem }
+  /* text panel: title + Paste + Lens; bookmarks/notes live under More → Page tools */
+  #undoPageBtn, #redoPageBtn, #quickSaveBtn, #pageMetaBar, #cutTxtBtn, #txtStats { display:none }
+  .txt-body { padding:.5rem }
+  .txt-foot { flex-wrap:nowrap; padding-top:.45rem }
+  #clearTxtBtn { flex:0 0 auto; min-height:44px; padding:0 .9rem; justify-content:center; white-space:nowrap }
+  #saveTxtBtn { flex:1 }
+  /* the per-page Lens grid is a long list: collapsed by default, tap its title to open */
+  /* ===== HORIZONTAL PAGER: Preview ⇄ Text, one full screen each (swipe or tap the tabs) ===== */
+  body.has-stepbar .ws-tabs { display:grid; grid-template-columns:1fr 1fr; position:sticky; top:var(--hdr-h, 52px); z-index:60; margin:.5rem 0 0; padding:3px; background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.08) }
+  .ws-ind { position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:11px; background:var(--accent-gl); box-shadow:inset 0 0 0 1.5px var(--accent); transform:translateX(calc(var(--ws-p, 0) * 100%)); will-change:transform; pointer-events:none }
+  .ws-tab { position:relative; z-index:1; display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:40px; border:0; background:transparent; color:var(--mid); font:inherit; font-size:.88rem; font-weight:700; border-radius:11px; touch-action:manipulation; -webkit-tap-highlight-color:transparent }
+  .ws-tab[aria-selected="true"] { color:var(--accent) }
+  .ws-dot { display:none; width:8px; height:8px; border-radius:50%; background:var(--green) }
+  .ws-tab.done .ws-dot { display:inline-block }
+  .workspace { --pane-h:max(340px, calc(100dvh - var(--hdr-h, 52px) - var(--dock-h, 76px) - 64px)); position:relative; display:flex; gap:.6rem; margin-top:.5rem; min-height:0; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+  .workspace::-webkit-scrollbar { display:none }
+  .workspace > .preview-panel, .workspace > .text-panel { flex:0 0 100%; min-width:0; height:var(--pane-h); scroll-snap-align:start; scroll-snap-stop:always }
+  .preview-img-wrap { min-height:0; touch-action:pan-x pan-y }
+  .preview-img-wrap.zoomed { touch-action:none }
+  .preview-img-wrap img { max-height:calc(var(--pane-h) - 56px) }
+  .text-panel { display:flex; flex-direction:column }
+  .txt-body { flex:1; min-height:0 }
+  .txt-body textarea { flex:1; min-height:0; max-height:none; height:auto }
+  /* everything else that was a tall list becomes a swipe row */
+  .progress-block.show { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; padding:.6rem .7rem }
+  .lens-pages-grid { display:flex; overflow-x:auto; gap:.5rem; scroll-snap-type:x proximity; padding-bottom:.4rem; scrollbar-width:none }
+  .lens-pages-grid > * { flex:0 0 46%; scroll-snap-align:start }
+  .ftr-inner { display:flex; overflow-x:auto; gap:.7rem; scroll-snap-type:x mandatory; scrollbar-width:none }
+  .ftr-inner > .ftr-col { flex:0 0 86%; scroll-snap-align:center }
+  .lens-launch-hdr { cursor:pointer; position:relative; padding-right:2rem }
+  .lens-launch-hdr::after { content:"▾"; position:absolute; right:.4rem; top:50%; transform:translateY(-50%); color:var(--dim); transition:transform .2s }
+  #lensSection.m-collapsed .lens-pages-grid, #lensSection.m-collapsed .ll-sub { display:none }
+  #lensSection.m-collapsed .lens-launch-hdr::after { transform:translateY(-50%) rotate(-90deg) }
 
   /* toasts: compact, newest 2 only, always ABOVE the Auto Step bar (never cover it) */
   .toasts { left:.7rem; right:.7rem; bottom:calc(.7rem + env(safe-area-inset-bottom, 0px)) }
-  body.has-stepbar .toasts { bottom:calc(112px + env(safe-area-inset-bottom, 0px)) }
+  body.has-stepbar .toasts { bottom:calc(var(--dock-h, 150px) + 10px) }
   .toasts > .toast:not(:nth-last-child(-n+2)) { display:none }
   .toast { padding:.5rem .75rem; font-size:.8rem; line-height:1.4; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.22) }
   .toast-action { min-height:36px; padding:0 .7rem; font-size:.78rem }
@@ -1092,21 +1172,9 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
   body.has-stepbar .upload-area .upload-title { font-size:.95rem; margin:0; text-align:center }
 
   /* strip header: label on one line (empty actions box must not squeeze it) */
-  .strip-actions:empty { display:none }
-  .strip-label { white-space:nowrap }
-  .strip-wrap { margin-top:.8rem }
 
-  /* action row: 2 columns instead of a tall stack; More is a full-width sheet */
-  .action-row { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.8rem }
   .action-row > .hidden { display:none !important }
   .action-spacer { display:none }
-  .action-row .more-wrap { grid-column:1 / -1; position:relative }
-  .action-row .more-wrap > .btn { width:100% }
-  .more-menu { left:0; right:0; min-width:0; max-height:55vh; overflow-y:auto }
-  .more-menu .btn { min-height:48px }
-
-  /* preview: never taller than ~half the screen, so the text box stays reachable */
-  .preview-img-wrap img { max-height:46vh }
 
   /* back from Lens: nudge the thumb toward the big button */
   #flowBtn.attn { animation:tx-attn 1.1s ease-in-out 3 }
@@ -1222,7 +1290,7 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
     <div class="upload-title" id="uploadTitle">ছবি বা PDF drag করুন / click করুন</div>
     <div class="upload-sub">
       <strong>JPG · PNG · WEBP · GIF · BMP · PDF</strong><br/>
-      <span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে</span>
+      <span class="upload-warn" id="uploadWarnTxt">Lens-এর জন্য ছবি সাময়িক public লিংকে যায় — সংবেদনশীল নথি আপলোড করবেন না</span><span id="uploadSubNote">PDF হলে প্রতিটি page আলাদাভাবে process হবে · বড় PDF হলে সময় বেশি লাগতে পারে</span>
     </div>
   </div>
 
@@ -1288,6 +1356,7 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
         <button class="btn btn-secondary" id="pageToolsBtn" role="menuitem"><span id="pageToolsBtnTxt">Page tools…</span></button>
         <button class="btn btn-secondary" id="cameraBtn" role="menuitem"><span id="cameraBtnTxt">Scan page</span></button>
         <button class="btn btn-secondary" id="ocrBtn" role="menuitem"><span id="ocrBtnTxt">Auto-OCR…</span></button>
+        <button class="btn btn-secondary m-only" id="autoPasteBtn" role="menuitem" aria-pressed="true" title="Lens থেকে ফিরে এলে নিজে paste হবে"><span id="autoPasteTxt">Auto-paste</span></button>
         <div class="more-sep" role="separator"></div>
         <button class="btn btn-danger" id="allClearBtn" role="menuitem" title="সব মুছে একদম শুরুর অবস্থায় ফিরুন"><span id="allClearBtnTxt">All Clear</span></button>
       </div>
@@ -1296,8 +1365,21 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
 
   <!-- STICKY STEP BAR — same action as the Space key -->
   <div class="step-bar hidden" id="stepBar" role="region" aria-label="Auto step">
+    <button type="button" class="step-undo" id="stepUndo" hidden><svg class="ic" aria-hidden="true"><use href="#i-sync"/></svg><span>Undo</span></button>
+    <div class="step-prog" id="stepProg" aria-hidden="true"><i id="stepProgFill"></i></div>
     <div class="step-info"><b id="stepCount">0 / 0</b><span id="stepHint"></span></div>
-    <button class="btn btn-primary" id="flowBtn" title="Space"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><span id="flowBtnTxt">Auto Step</span><kbd class="step-kbd" aria-hidden="true">Space</kbd></button>
+    <div class="step-main">
+      <button type="button" class="step-side" id="stepPrev" aria-label="আগের page"><svg class="ic" aria-hidden="true"><use href="#i-first"/></svg></button>
+      <button class="btn btn-primary" id="flowBtn" title="Space"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><span class="step-lbl"><span id="flowBtnTxt">Auto Step</span><small id="flowBtnSub"></small></span><kbd class="step-kbd" aria-hidden="true">Space</kbd><span class="step-cnt" id="flowCnt" aria-hidden="true"></span></button>
+      <button type="button" class="step-side" id="stepSkip" aria-label="এই page বাদ দিন"><svg class="ic" aria-hidden="true"><use href="#i-last"/></svg></button>
+    </div>
+  </div>
+
+  <!-- PHONE PAGER TABS (hidden on desktop) -->
+  <div class="ws-tabs" id="wsTabs" role="tablist" aria-label="Preview / Text">
+    <span class="ws-ind" aria-hidden="true"></span>
+    <button type="button" role="tab" class="ws-tab" id="wsTabPrev" aria-selected="true">Preview</button>
+    <button type="button" role="tab" class="ws-tab" id="wsTabText" aria-selected="false"><span>Text</span><i class="ws-dot" aria-hidden="true"></i></button>
   </div>
 
   <!-- WORKSPACE -->
@@ -1670,6 +1752,7 @@ const i18n = {
     how3Title: 'Google Lens', how3Text: 'সেই link দিয়ে Google Lens খুলবে',
     how4Title: 'Space দিয়ে সব চালান', how4Text: 'Upload করুন, Lens থেকে copy করুন, তারপর শুধু Space চাপুন — সব page নিজে manage হবে',
     uploadTitle: 'ছবি, PDF বা .txt drag করুন / click করুন',
+    uploadWarnTxt: 'Lens-এর জন্য ছবি সাময়িক public লিংকে যায় — সংবেদনশীল নথি আপলোড করবেন না',
     uploadSubNote: 'PDF হলে প্রতিটি page আলাদাভাবে process হবে · আগের export করা .txt আবার import করা যাবে',
     stripLabelPrefix: 'পেজ:', stripLabelSuffix: 'টি লোড হয়েছে',
     copyAllBtnTxt: 'সব Text Copy', copyAllMergedBtnTxt: 'Merged Copy',
@@ -1752,6 +1835,7 @@ const i18n = {
     how3Title: 'Google Lens', how3Text: 'The link opens in Google Lens for text extraction.',
     how4Title: 'Run it with Space', how4Text: 'Upload, copy from Lens, then press Space — every page is managed automatically.',
     uploadTitle: 'Drag image, PDF or .txt here / click to browse',
+    uploadWarnTxt: 'For Lens, page images sit on a temporary public link — do not upload sensitive documents',
     uploadSubNote: 'PDF pages are processed separately · previously exported .txt files can be re-imported',
     stripLabelPrefix: 'Pages:', stripLabelSuffix: 'loaded',
     copyAllBtnTxt: 'Copy All Text', copyAllMergedBtnTxt: 'Merged Copy',
@@ -1853,7 +1937,7 @@ function syncLangButton() {
 function applyLanguage() {
   html.lang = currentLang === 'en' ? 'en' : 'bn';
   const ids = ['chipFree','chipNoApi','how1Title','how1Text','how2Title','how2Text','how3Title','how3Text','how4Title','how4Text',
-    'uploadTitle','uploadSubNote','stripLabelPrefix','stripLabelSuffix','copyAllBtnTxt','copyAllMergedBtnTxt',
+    'uploadTitle','uploadWarnTxt','uploadSubNote','stripLabelPrefix','stripLabelSuffix','copyAllBtnTxt','copyAllMergedBtnTxt',
     'copyClipBtnTxt','downloadBtnTxt','exportBtnTxt','allClearBtnTxt','folderBtnTxt','previewTitleTxt','previewEmptyTxt','textTitleTxt',
     'lensSectionTitleTxt','lensSectionSubTxt','allExtractedTitleTxt','allCopyBtnTxt','allDlBtnTxt',
     'ftrText1','ftrBadge1','ftrBadge2','ftrBadge3','ftrKicker2','ftrText2','ftrOwnerLine1','ftrOwnerLine2','ftrOwnerLine3',
@@ -2129,7 +2213,7 @@ function pushRestoredPage(o) {
 
 function afterProjectLoaded(startIdx) {
   state.current = Math.max(0, Math.min(startIdx || 0, state.pages.length - 1));
-  state.kWorkflowStarted = false; state.kWorkflowComplete = false; state.kLensPending = false; state.lastClip = '';
+  state.kWorkflowStarted = false; state.kWorkflowComplete = false; state.kLensPending = false; state.autoPasteArmed = false; state.lastPasteId = null; state.lastClip = '';
   renderAll();
 }
 
@@ -2915,6 +2999,36 @@ $('acctBtn').onclick = async () => {
 };
 
 // ── Welcome card (সাইন-ইন না থাকলে শুরুতে একবার; "Sign in ছাড়াই চালান" দিলে ৭ দিন আর আসে না) ──
+const LS_CONSENT = 'textriva-consent', CONSENT_VERSION = 1;
+function hasConsent() { try { const c = JSON.parse(readSaved(LS_CONSENT) || 'null'); return !!c && c.v >= CONSENT_VERSION; } catch { return false; } }
+function openConsent() {
+  if ($('consentDlg') || window.__textrivaNoWelcome) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'consentDlg'; wrap.className = 'wl-bg'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-labelledby', 'csTitle');
+  const rows = [
+    ['lock', L('আপনার ডেটা আপনার কাছেই', 'Your data stays with you'), L('ছবি, text ও সেটিং আপনার browser-এ থাকে (চাইলে আপনার নিজের Google Drive-এ)। আমাদের কোনো database নেই — আমরা আপনার ডেটা store করি না।', 'Images, text and settings stay in your browser (or your own Google Drive if you sign in). We have no database — we do not store your data.')],
+    ['sync', L('Lens খুলতে ছবি সাময়িক public link-এ যায়', 'Lens needs a temporary public link'), L('Google Lens পড়তে পারে বলে প্রতিটি page-এর ছবি imgbb-তে একটা লিংকে প্রায় ৭ দিন থাকে। লিংক যার কাছে থাকবে সে ছবিটা দেখতে পারবে।', 'So Google Lens can read it, each page image sits on imgbb behind a link for about 7 days. Anyone who has the link can view that image.')],
+    ['lock', L('তাই সংবেদনশীল কিছু আপলোড করবেন না', 'So please do not upload anything sensitive'), L('পাসপোর্ট/NID, ব্যাংক বা কার্ডের তথ্য, মেডিকেল রিপোর্ট, ব্যক্তিগত ছবি বা অন্যের গোপন নথি এখানে দেবেন না।', 'No passports/ID cards, bank or card details, medical reports, private photos or other people’s confidential documents.')]
+  ];
+  wrap.innerHTML = `<div class="wl-card">
+    <div class="wl-brand"><img src="assets/brand/icon-64.svg" alt="" width="28" height="28"><span>Textriva</span></div>
+    <h2 id="csTitle">${L('শুরুর আগে একটু জেনে নিন', 'Before you start')}</h2>
+    <ul class="wl-list">${rows.map(([i, t1, d]) => `<li><span class="wl-ico" aria-hidden="true">${IC(i)}</span><div><b>${t1}</b><small>${d}</small></div></li>`).join('')}</ul>
+    <label class="cs-check"><input type="checkbox" id="csAgree"><span>${L('আমি উপরের কথাগুলো বুঝেছি এবং <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> ও <a href="terms.html" target="_blank" rel="noopener">Terms</a> মেনে নিচ্ছি।', 'I understand the above and accept the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="terms.html" target="_blank" rel="noopener">Terms</a>.')}</span></label>
+    <div class="wl-actions"><button class="btn btn-primary wl-go" id="csGo" disabled>${L('বুঝেছি, চালিয়ে যান', 'I understand — continue')}</button></div>
+  </div>`;
+  const agree = wrap.querySelector('#csAgree'), go = wrap.querySelector('#csGo');
+  agree.addEventListener('change', () => { go.disabled = !agree.checked; });
+  go.addEventListener('click', () => {
+    if (!agree.checked) return;
+    saveSetting(LS_CONSENT, JSON.stringify({ v: CONSENT_VERSION, t: Date.now() }));
+    wrap.remove(); document.removeEventListener('keydown', trap, true);
+    if (shouldShowWelcome()) setTimeout(openWelcome, 350);
+  });
+  const trap = e => { if (e.key === 'Escape') e.preventDefault(); if (e.key === 'Tab') { const f = [agree, wrap.querySelector('a'), wrap.querySelectorAll('a')[1], go].filter(x => x && !x.disabled); const i = f.indexOf(document.activeElement); e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus(); } };
+  document.addEventListener('keydown', trap, true);
+  document.body.appendChild(wrap); agree.focus();
+}
 const LS_WELCOME = 'textriva-welcome-at', WELCOME_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 function shouldShowWelcome() {
   if (!GOOGLE_CLIENT_ID || storedUser() || window.__textrivaNoWelcome) return false;
@@ -2960,6 +3074,7 @@ function openWelcome() {
     <p class="wl-sub">${L('Sign in ছাড়াই Textriva-র সব feature ব্যবহার করা যায়। Google দিয়ে Sign in করলে বাড়তি যা পাবেন:', 'Every Textriva feature works without signing in. Signing in with Google adds:')}</p>
     <ul class="wl-list">${items.map(([i, t1, d]) => `<li><span class="wl-ico" aria-hidden="true">${IC(i)}</span><div><b>${t1}</b><small>${d}</small></div></li>`).join('')}</ul>
     <div class="wl-note">${L('Sign in না করলে কাজ শুধু এই browser-এ save থাকে — browser data মুছলে বা অন্য device-এ গেলে পাওয়া যাবে না।', 'Without signing in, your work is saved only in this browser — it will not be available on other devices or after clearing browser data.')}</div>
+    <p class="wl-secure">${L('শুধু <b>drive.file</b> অনুমতি — Textriva শুধু নিজের বানানো “Textriva” folder দেখতে পারে, আপনার অন্য Drive ফাইল নয়। Google token আমাদের server-এ যায় না; যেকোনো সময় myaccount.google.com/permissions থেকে বাতিল করা যায়।', 'Only the <b>drive.file</b> permission — Textriva sees just the “Textriva” folder it creates, never your other Drive files. Your Google token never reaches our server; revoke any time at myaccount.google.com/permissions.')}</p>
     <div class="wl-actions">
       <button class="btn btn-primary wl-go" data-wl="signin"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M21.35 11.1H12v2.9h5.35c-.5 2.4-2.5 3.5-5.35 3.5a6 6 0 1 1 0-12c1.5 0 2.8.55 3.8 1.45l2.1-2.1A9 9 0 1 0 12 21c5 0 8.6-3.5 8.6-8.4 0-.5-.1-1-.25-1.5z"/></svg>${L('Google দিয়ে Sign in', 'Sign in with Google')}</button>
       <button class="btn btn-secondary" data-wl="skip">${L('Sign in ছাড়াই চালিয়ে যান', 'Continue without signing in')}</button>
@@ -2985,7 +3100,8 @@ function openWelcome() {
 // না থাকলে (guest) welcome card।
 setTimeout(() => {
   if (storedUser()) { if (GOOGLE_CLIENT_ID && !driveValid() && navigator.onLine) silentTokenRefresh(); }
-  else if (shouldShowWelcome()) openWelcome();
+  else if (shouldShowWelcome() && hasConsent()) openWelcome();
+  if (!hasConsent()) openConsent();
 }, 1200);
 $('acctPromptBtn').onclick = () => $('acctBtn').click();
 $('acctPromptX').onclick = () => { try { sessionStorage.setItem('tx-acct-x', '1'); } catch {} $('acctPrompt').classList.add('hidden'); };
@@ -3034,88 +3150,238 @@ function updateStepBar() {
   const total = state.pages.length;
   bar.classList.toggle('hidden', !total);
   document.body.classList.toggle('has-stepbar', total > 0);
-  if (!total) return;
+  if (!total) { wakeOff(); return; }
   const done = state.pages.filter(p => p.status === 'done').length;
   $('stepCount').textContent = `${done} / ${total}`;
-  let label, hint;
+  const fill = $('stepProgFill'); if (fill) fill.style.width = Math.round(done / total * 100) + '%';
+  const mob = isMobile();
+  let label, hint, mode = '';
   if (state.kWorkflowComplete) { label = L('সব page সম্পন্ন', 'All pages done'); hint = L('OCR শেষ', 'OCR complete'); }
   else if (_waitingForCopy) { label = L('নতুন copy-এর অপেক্ষায়…', 'Waiting for new copy…'); hint = L('Lens থেকে নতুন text copy করুন', 'Copy fresh text from Lens'); }
-  else if (state.kLensPending) { label = L(`Lens খুলুন — পেজ ${state.current + 1}`, `Open Lens — page ${state.current + 1}`); hint = L('খুলে text copy করে ফিরে আসুন', 'Open it, copy the text, then come back'); }
-  else if (!state.kWorkflowStarted) { label = L('শুরু করুন', 'Start'); hint = L('প্রথম page Lens-এ খুলবে', 'Opens the first page in Lens'); }
-  else { label = L('Paste ও পরের page', 'Paste & next page'); hint = L(`Page ${state.current + 1} — Lens থেকে copy করে ফিরে আসুন`, `Page ${state.current + 1} — copy from Lens, then return`); }
+  else if (state.kLensPending) { label = L(`Lens খুলুন — পেজ ${state.current + 1}`, `Open Lens — page ${state.current + 1}`); hint = L('খুলে text copy করে ফিরে আসুন', 'Open it, copy the text, then come back'); mode = 'lens'; }
+  else if (!state.kWorkflowStarted) { label = L('শুরু করুন', 'Start'); hint = L('প্রথম page Lens-এ খুলবে', 'Opens the first page in Lens'); mode = 'lens'; }
+  else { label = L('Paste ও পরের page', 'Paste & next page'); hint = (mob && state.autoPaste) ? L(`Page ${state.current + 1} — ফিরে এলে নিজে paste হবে, না হলে চাপুন`, `Page ${state.current + 1} — pastes itself on return; tap if it doesn't`) : L(`Page ${state.current + 1} — Lens থেকে copy করে ফিরে আসুন`, `Page ${state.current + 1} — copy from Lens, then return`); mode = 'paste'; }
   $('flowBtnTxt').textContent = label; $('stepHint').textContent = hint;
-  $('flowBtn').classList.toggle('is-complete', !!state.kWorkflowComplete);
+  const sub = $('flowBtnSub'); if (sub) sub.textContent = hint;
+  const fc = $('flowCnt'); if (fc) fc.textContent = `${done}/${total}`;
+  const fb = $('flowBtn');
+  fb.classList.toggle('is-complete', !!state.kWorkflowComplete);
+  fb.classList.toggle('mode-paste', mode === 'paste');
+  fb.classList.toggle('mode-lens', mode === 'lens');
+  const ap = $('autoPasteBtn'); if (ap) { ap.setAttribute('aria-pressed', String(!!state.autoPaste)); $('autoPasteTxt').textContent = L('Lens থেকে ফিরলে নিজে paste', 'Auto-paste on return'); }
+  const wtt = $('wsTabText'); if (wtt) { const cp = state.pages[state.current]; wtt.classList.toggle('done', !!(cp && (cp.text || '').trim())); }
+  const un = $('stepUndo'); if (un) un.hidden = !(state.lastPasteId && state.pages.some(p => p.id === state.lastPasteId));
+  const pv = $('stepPrev'), sk = $('stepSkip'); if (pv) pv.disabled = state.current <= 0; if (sk) sk.disabled = state.current >= total - 1;
+  if (!state.kWorkflowStarted || state.kWorkflowComplete) wakeOff();
 }
 let _stepBusy = false;   // button and Space share this: one step at a time
+
+// ── phone helpers: haptics, screen wake lock, clipboard baseline ──
+function buzz(pat) { try { if (isMobile() && navigator.vibrate) navigator.vibrate(pat); } catch {} }
+let _wake = null;
+async function wakeOn() { try { if (!isMobile() || !navigator.wakeLock || _wake) return; _wake = await navigator.wakeLock.request('screen'); _wake.addEventListener('release', () => { _wake = null; }); } catch {} }
+function wakeOff() { try { if (_wake) _wake.release(); } catch {} _wake = null; }
+function snapClipBaseline() {   // what is on the clipboard BEFORE Lens opens, so an untouched clipboard is never auto-pasted
+  state.clipBaseline = null;
+  try { if (isMobile() && navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(t => { state.clipBaseline = (t || '').trim(); }).catch(() => {}); } catch {}
+}
+function openLensFromWorkflow(i) {   // phone: arm auto-paste, remember clipboard, keep the screen awake, open Lens (must stay synchronous inside the tap)
+  if (isMobile()) { state.autoPasteArmed = !!state.autoPaste; if (state.autoPaste) snapClipBaseline(); wakeOn(); }
+  openLens(i);
+}
+
+// First tap of a run, or (phone) the tap that opens Lens for the next page. Returns true when it handled the tap.
+function workflowOpenLens() {
+  if (state.kLensPending) {   // phone: this tap IS the user gesture that lets the browser open the Lens tab
+    state.kLensPending = false; updateStepBar();
+    openLensFromWorkflow(state.current);
+    return true;
+  }
+  if (!state.kWorkflowStarted) {
+    setWaitingForNewCopy(false);
+    const start = state.pages.findIndex(p => !p.txtOnly && !(p.text || '').trim());
+    if (start === -1) { state.kWorkflowComplete = true; toast(L('✅ সব page-এ text আছে — OCR শেষ।', '✅ Every page already has text.'), 'ok', 3000); return true; }
+    state.kWorkflowStarted = true; state.current = start; state.lastClip = '';
+    renderAll();
+    toast(L(`Page ${start + 1}-এর Lens খুলছে — OCR copy করে ফিরে এসে Space চাপুন।`, `Opening Lens for page ${start + 1} — copy the text, come back and press Space.`), 'ok', 3000);
+    openLensFromWorkflow(start);
+    return true;
+  }
+  return false;
+}
 
 function runWorkflowStep() {
   if (!state.pages.length) return;
   if (_stepBusy) return;
   _stepBusy = true; setTimeout(() => { _stepBusy = false; }, 450);
   if (state.kWorkflowComplete) { toast(L('✅ সব page-এর OCR শেষ — আর Space চাপার দরকার নেই।', '✅ All pages are done.'), 'ok', 3000); return; }
-  if (state.kLensPending) {   // phone: this tap IS the user gesture that lets the browser open the Lens tab
-    state.kLensPending = false; updateStepBar();
-    openLens(state.current);
-    return;
+  if (workflowOpenLens()) return;
+  navigator.clipboard.readText().then(clipText => { processClip(clipText, false); })
+  .catch(() => {
+    toast(L('Clipboard access নেই — text box-এ চেপে ধরে Paste করুন', 'No clipboard access — long-press the text box and Paste'), 'warn', 4500);
+    if (isMobile()) { try { showPane('text'); textArea.focus({ preventScroll: true }); } catch {} }
+  });
+}
+
+// One paste step. `auto` = triggered by returning from Lens (silent when there is nothing new to paste).
+function processClip(clipText, auto) {
+  const clip = (clipText || '').trim();
+  if (!clip) { if (!auto) toast(L('Clipboard-এ OCR text নেই — Lens থেকে text copy করে আবার Space চাপুন।', 'Clipboard is empty — copy the text from Lens, then press Space.'), 'warn', 3000); return false; }
+  if (clip === state.lastClip || (auto && state.clipBaseline != null && clip === state.clipBaseline)) {
+    if (!auto) toast(L('⚠️ Clipboard-এ আগের page-এর text-ই আছে — Lens থেকে নতুন text copy করুন।', '⚠️ Clipboard still has the previous page’s text — copy fresh text from Lens.'), 'warn', 3500);
+    setWaitingForNewCopy(true);
+    return false;
   }
-  if (!state.kWorkflowStarted) {
-    setWaitingForNewCopy(false);
-    const start = state.pages.findIndex(p => !p.txtOnly && !(p.text || '').trim());
-    if (start === -1) { state.kWorkflowComplete = true; toast(L('✅ সব page-এ text আছে — OCR শেষ।', '✅ Every page already has text.'), 'ok', 3000); return; }
-    state.kWorkflowStarted = true; state.current = start; state.lastClip = '';
-    renderAll();
-    toast(L(`Page ${start + 1}-এর Lens খুলছে — OCR copy করে ফিরে এসে Space চাপুন।`, `Opening Lens for page ${start + 1} — copy the text, come back and press Space.`), 'ok', 3000);
-    openLens(start);
-    return;
-  }
-  navigator.clipboard.readText().then(clipText => {
-    const clip = clipText.trim();
-    if (!clip) { toast(L('Clipboard-এ OCR text নেই — Lens থেকে text copy করে আবার Space চাপুন।', 'Clipboard is empty — copy the text from Lens, then press Space.'), 'warn', 3000); return; }
-    if (clip === state.lastClip) {
-      toast(L('⚠️ Clipboard-এ আগের page-এর text-ই আছে — Lens থেকে নতুন text copy করুন।', '⚠️ Clipboard still has the previous page’s text — copy fresh text from Lens.'), 'warn', 3500);
-      setWaitingForNewCopy(true);
-      return;
-    }
-    setWaitingForNewCopy(false);
-    const similar = findSimilarSavedPage(clip, state.current);
-    if (similar && !confirm(L(
+  setWaitingForNewCopy(false);
+  const similar = findSimilarSavedPage(clip, state.current);
+  if (similar) {
+    if (auto) { toast(L(`এই text পেজ ${similar.index + 1}-এর মতো — ঠিক থাকলে বাটন চেপে paste করুন`, `Looks like page ${similar.index + 1} — tap the button to paste anyway`), 'warn', 4500); buzz([30, 60, 30]); return false; }
+    if (!confirm(L(
       `⚠️ এই text পেজ ${similar.index + 1}-এর মতো দেখাচ্ছে (${Math.round(similar.similarity * 100)}% মিল)। তবুও paste করবেন? (Enter = হ্যাঁ, Esc = না)`,
       `⚠️ This text looks like page ${similar.index + 1} (${Math.round(similar.similarity * 100)}% similar). Paste anyway? (Enter = yes, Esc = no)`
     ))) {
       toast(L('Paste বাতিল করা হলো — Lens থেকে সঠিক page copy করুন।', 'Paste cancelled — copy the correct page from Lens.'), 'warn', 3000);
-      return;
+      return false;
     }
-    const pg = state.pages[state.current];
-    if (pg) recordUndo(pg); // snapshot BEFORE the paste (text, status, lastClip)
-    const undoId = pg && pg.id;
-    const undoAction = { label: L('↩ Undo', '↩ Undo'), fn: () => undoPage(state.pages.find(p => p.id === undoId)) };
-    textArea.value = clipText; textArea.dispatchEvent(new Event('input'));
-    if (pg) { pg.text = textArea.value.trim(); if (pg.text) pg.status = 'done'; }
-    state.lastClip = clip;
-    let next = state.current + 1;
-    while (next < state.pages.length && state.pages[next].status === 'done' && (state.pages[next].text || '').trim()) next++;
-    if (next >= state.pages.length) {
-      state.kWorkflowComplete = true; renderAll();
-      toast(L('শেষ page-ও save হয়েছে — সব OCR complete!', 'Last page saved — all OCR complete!'), 'ok', UNDO_TOAST_MS, undoAction);
-      return;
-    }
-    toast(isMobile() ? L('✅ Paste → Save → Next — এবার নিচের বাটনে Lens খুলুন', '✅ Pasted & saved — tap the big button to open Lens') : L('✅ Paste → Save → Next → Lens ', '✅ Paste → Save → Next → Lens '), 'ok', UNDO_TOAST_MS, undoAction);
-    state.current = next;
-    if (isMobile()) {
-      // After an async clipboard read, phone browsers block window.open(). Ask for one more tap instead of failing silently.
-      state.kLensPending = true; renderAll();
-      try { if (navigator.vibrate) navigator.vibrate(12); } catch {}
-    } else {
-      renderAll();
-      setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
-    }
+  }
+  const pg = state.pages[state.current];
+  if (pg) recordUndo(pg); // snapshot BEFORE the paste (text, status, lastClip)
+  const undoId = pg && pg.id;
+  const undoAction = { label: L('↩ Undo', '↩ Undo'), fn: () => undoPage(state.pages.find(p => p.id === undoId)) };
+  textArea.value = clipText; textArea.dispatchEvent(new Event('input'));
+  if (pg) { pg.text = textArea.value.trim(); if (pg.text) pg.status = 'done'; }
+  state.lastClip = clip; state.lastPasteId = undoId || null;
+  let next = state.current + 1;
+  while (next < state.pages.length && state.pages[next].status === 'done' && (state.pages[next].text || '').trim()) next++;
+  if (next >= state.pages.length) {
+    state.kWorkflowComplete = true; renderAll();
+    toast(L('শেষ page-ও save হয়েছে — সব OCR complete!', 'Last page saved — all OCR complete!'), 'ok', UNDO_TOAST_MS, undoAction);
+    buzz([20, 50, 20, 50, 60]);
+    return true;
+  }
+  toast(isMobile() ? L(`✅ পেজ ${state.current + 1} save — এবার Lens খুলুন`, `✅ Page ${state.current + 1} saved — open Lens`) : L('✅ Paste → Save → Next → Lens ', '✅ Paste → Save → Next → Lens '), 'ok', UNDO_TOAST_MS, undoAction);
+  state.current = next;
+  if (isMobile()) {
+    // After an async clipboard read, phone browsers block window.open(). The next tap on the big button opens Lens.
+    state.kLensPending = true; state.autoPasteArmed = false; renderAll();
+    buzz(auto ? [10, 40, 10] : 12);
+  } else {
+    renderAll();
+    setTimeout(() => { if (state.pages[state.current]) openLens(state.current); }, 350);
+  }
+  return true;
+}
+
+// Back from Lens on a phone → paste by itself (no tap). Falls back to the big button if the browser refuses.
+let _autoBusy = false;
+function tryAutoPaste(attempt) {
+  attempt = attempt || 0;
+  if (!isMobile() || !state.autoPaste || !state.autoPasteArmed || !state.kWorkflowStarted || state.kWorkflowComplete || state.kLensPending) return;
+  if (document.visibilityState !== 'visible' || !navigator.clipboard || !navigator.clipboard.readText) return;
+  if (_autoBusy) return; _autoBusy = true;
+  navigator.clipboard.readText().then(t => {
+    _autoBusy = false;
+    if (processClip(t, true)) state.autoPasteArmed = false;
   }).catch(() => {
-    toast(L('Clipboard access নেই — text box-এ চেপে ধরে Paste করুন', 'No clipboard access — long-press the text box and Paste'), 'warn', 4500);
-    if (isMobile()) { try { textArea.scrollIntoView({ block: 'center', behavior: 'smooth' }); textArea.focus({ preventScroll: true }); } catch {} }
+    _autoBusy = false;
+    if (attempt < 2) setTimeout(() => tryAutoPaste(attempt + 1), 700);
+    else { toast(L('Auto-paste হয়নি (browser অনুমতি দেয়নি) — বাটন চাপুন', 'Auto-paste was blocked — tap the big button'), 'warn', 4000); buzz([30, 60, 30]); }
   });
 }
+
+function stepGo(delta, skip) {   // prev / skip on the dock
+  if (!state.pages.length) return;
+  let n = state.current + delta;
+  if (skip) while (n < state.pages.length - 1 && state.pages[n].status === 'done' && (state.pages[n].text || '').trim()) n++;
+  n = Math.max(0, Math.min(state.pages.length - 1, n));
+  if (n === state.current) return;
+  state.current = n; state.kWorkflowComplete = false;
+  if (state.kWorkflowStarted && isMobile()) { state.kLensPending = true; state.autoPasteArmed = false; }
+  renderAll(); buzz(10);
+}
+
 $('flowBtn').onclick = runWorkflowStep;
-$('flowBtn').addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && navigator.vibrate) { try { navigator.vibrate(12); } catch {} } });
+$('flowBtn').addEventListener('pointerdown', e => { if (e.pointerType === 'touch') buzz(12); });
+// ── dock extras (phone) ──
+try { state.autoPaste = localStorage.getItem('tx_autopaste') !== '0'; } catch { state.autoPaste = true; }
+$('autoPasteBtn').onclick = () => {
+  state.autoPaste = !state.autoPaste; state.autoPasteArmed = state.autoPaste && state.kWorkflowStarted && !state.kLensPending;
+  try { localStorage.setItem('tx_autopaste', state.autoPaste ? '1' : '0'); } catch {}
+  updateStepBar(); buzz(10);
+  toast(state.autoPaste ? L('Auto-paste চালু — Lens থেকে ফিরলেই paste হবে', 'Auto-paste on — pastes when you return from Lens') : L('Auto-paste বন্ধ — বাটন চেপে paste করুন', 'Auto-paste off — tap the button to paste'), '', 2200);
+};
+(() => {   // phone: the per-page Lens list starts collapsed
+  const sec = $('lensSection'), hdr = sec && sec.querySelector('.lens-launch-hdr'); if (!sec || !hdr) return;
+  if (isMobile()) sec.classList.add('m-collapsed');
+  hdr.addEventListener('click', () => { if (isMobile()) sec.classList.toggle('m-collapsed'); });
+})();
+// ── phone pager: Preview ⇄ Text ──
+function showPane(name, instant) {
+  const ws = $('workspace'); if (!ws) return;
+  const panels = ws.querySelectorAll(':scope > .preview-panel, :scope > .text-panel');
+  const t = panels[name === 'text' ? 1 : 0]; if (!t) return;
+  if (typeof ws.scrollTo === 'function') ws.scrollTo({ left: t.offsetLeft - ws.offsetLeft, behavior: instant ? 'auto' : 'smooth' }); else ws.scrollLeft = t.offsetLeft;
+}
+(() => {
+  const ws = $('workspace'), tabs = $('wsTabs'), tp = $('wsTabPrev'), tt = $('wsTabText'); if (!ws || !tabs || !tp || !tt) return;
+  let raf = 0;
+  const sync = () => {
+    raf = 0;
+    const second = ws.querySelector(':scope > .text-panel'); const max = second ? second.offsetLeft - ws.offsetLeft : ws.clientWidth;
+    const p = max > 0 ? Math.max(0, Math.min(1, ws.scrollLeft / max)) : 0;
+    tabs.style.setProperty('--ws-p', p.toFixed(3));
+    tp.setAttribute('aria-selected', String(p < .5)); tt.setAttribute('aria-selected', String(p >= .5));
+  };
+  ws.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(sync); }, { passive: true });
+  tp.onclick = () => { showPane('preview'); buzz(8); };
+  tt.onclick = () => { showPane('text'); buzz(8); };
+})();
+// phone: double-tap or pinch to zoom the page image (single-finger pan already exists)
+(() => {
+  const wrap = $('previewImgWrap'); if (!wrap) return;
+  let pinch = null, lastTap = 0, tapX = 0, tapY = 0, moved = false;
+  const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  const zoomTo = (ns, cx, cy) => {
+    const r = wrap.getBoundingClientRect(), px = cx - r.left - r.width / 2, py = cy - r.top - r.height / 2;
+    ns = Math.max(1, Math.min(ZOOM_MAX, ns)); const k = ns / zoomState.scale;
+    zoomState.tx = px - k * (px - zoomState.tx); zoomState.ty = py - k * (py - zoomState.ty);
+    zoomState.scale = parseFloat(ns.toFixed(3));
+    if (zoomState.scale <= 1) { zoomState.scale = 1; zoomState.tx = 0; zoomState.ty = 0; }
+    applyZoom();
+  };
+  wrap.addEventListener('touchstart', e => {
+    moved = false;
+    if (e.touches.length === 2) { pinch = { d0: dist(e.touches[0], e.touches[1]), s0: zoomState.scale }; }
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    moved = true;
+    if (pinch && e.touches.length === 2) {
+      e.preventDefault();
+      const d = dist(e.touches[0], e.touches[1]);
+      zoomTo(pinch.s0 * d / pinch.d0, (e.touches[0].clientX + e.touches[1].clientX) / 2, (e.touches[0].clientY + e.touches[1].clientY) / 2);
+    }
+  }, { passive: false });
+  wrap.addEventListener('touchend', e => {
+    if (pinch) { if (e.touches.length < 2) pinch = null; return; }
+    if (moved || e.changedTouches.length !== 1 || !state.pages.length) return;
+    const t = e.changedTouches[0], now = Date.now();
+    if (now - lastTap < 320 && Math.hypot(t.clientX - tapX, t.clientY - tapY) < 28) {
+      if (zoomState.scale > 1) zoomTo(1, t.clientX, t.clientY); else zoomTo(2.5, t.clientX, t.clientY);
+      buzz(8); lastTap = 0;
+    } else { lastTap = now; tapX = t.clientX; tapY = t.clientY; }
+  }, { passive: true });
+})();
+$('stepPrev').onclick = () => stepGo(-1, false);
+$('stepSkip').onclick = () => stepGo(1, true);
+$('stepUndo').onclick = () => {
+  const pg = state.pages.find(p => p.id === state.lastPasteId); if (!pg) return;
+  if (undoPage(pg)) { state.lastPasteId = null; if (state.kWorkflowStarted && isMobile()) { state.kLensPending = true; state.autoPasteArmed = false; } renderAll(); }
+};
+// dock height → CSS var (toasts / page padding sit exactly above it); hide dock while the keyboard is open
+try { if (typeof ResizeObserver === 'function') new ResizeObserver(() => { const h = Math.round($('stepBar').getBoundingClientRect().height); if (h) document.documentElement.style.setProperty('--dock-h', h + 'px'); }).observe($('stepBar')); } catch {}
+try { const hd = document.querySelector('.hdr'); if (hd && typeof ResizeObserver === 'function') new ResizeObserver(() => document.documentElement.style.setProperty('--hdr-h', Math.round(hd.getBoundingClientRect().height) + 'px')).observe(hd); } catch {}
+textArea.addEventListener('focus', () => { if (isMobile()) document.body.classList.add('kbd-open'); });
+textArea.addEventListener('blur', () => document.body.classList.remove('kbd-open'));
 (() => {   // "More" menu for the less-used tools
   const b = $('moreBtn'), m = $('moreMenu');
   const close = () => { m.classList.add('hidden'); b.setAttribute('aria-expanded', 'false'); };
@@ -3132,11 +3398,14 @@ window.addEventListener('focus', () => {
 });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') { saveNow(); return; }
-  if (state.awaitingLens && isMobile() && state.kWorkflowStarted && !state.kWorkflowComplete) {
+  if (state.kWorkflowStarted && !state.kWorkflowComplete) wakeOn();   // wake locks are dropped while the tab is hidden
+  if (isMobile() && state.kWorkflowStarted && !state.kWorkflowComplete && (state.awaitingLens || state.autoPasteArmed)) {
     const b = $('flowBtn'); b.classList.remove('attn'); void b.offsetWidth; b.classList.add('attn');
     setTimeout(() => b.classList.remove('attn'), 3600);
+    setTimeout(() => tryAutoPaste(0), 450);   // give the tab a moment to regain focus before reading the clipboard
   }
 });
+window.addEventListener('focus', () => { if (isMobile() && state.autoPasteArmed) setTimeout(() => tryAutoPaste(0), 300); });
 window.addEventListener('pagehide', () => { saveNow(); });
 
 // imgbb link এখন expire হয় না (server expiration দেয় না)। তবু নিরাপত্তার জন্য 7 দিন পর নিজে থেকে নতুন করে upload করা হয়।
