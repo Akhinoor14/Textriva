@@ -171,3 +171,22 @@ test('LaTeX is the default math style; LaTeX output may be longer (up to 190%) t
   assert.ok(w.__app.aiAccept('a'.repeat(100), 'a'.repeat(180), 1.9));
   assert.ok(!w.__app.aiAccept('a'.repeat(100), 'a'.repeat(180)));
 });
+
+test('new AQ. auth keys are accepted; ACCESS_TOKEN_TYPE_UNSUPPORTED falls back to ?key=', async () => {
+  const w = await bootApp(); const a = w.__app;
+  const AQ = 'AQ.test-token-for-unit-tests-1234567890';
+  addPages(w, [BEFORE]);
+  a.openTextTools('ai'); await tick(20);
+  const seen = [];
+  w.fetch = async (url, init) => {
+    seen.push({ url, h: init && init.headers });
+    const viaQ = url.includes('key=');
+    if (!viaQ) return { ok: false, status: 401, json: async () => ({ error: { message: 'Expected OAuth 2 access token', details: [{ reason: 'ACCESS_TOKEN_TYPE_UNSUPPORTED' }] } }) };
+    return { ok: true, status: 200, json: async () => MODELS };
+  };
+  w.document.getElementById('aiKeyIn').value = AQ;
+  await a.aiTtAction('ai-savekey');
+  assert.equal(a.aiKey(), AQ);
+  assert.ok(seen.length >= 2 && seen[0].h['x-goog-api-key'] === AQ && seen[1].url.includes('key=') && !seen[1].h['x-goog-api-key']);
+  assert.ok(!/^⚠️/.test(w.document.getElementById('ttSum').textContent));
+});

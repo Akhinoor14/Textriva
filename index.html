@@ -4609,7 +4609,8 @@ $('textToolsBtn').onclick = () => openTextTools();
 const AI_HOST = 'https://generativelanguage.googleapis.com/v1beta';
 const LS_AI_KEY = 'textriva-ai-key', LS_AI_OPTS = 'textriva-ai-opts', LS_AI_MODELS = 'textriva-ai-models';
 const AI_DEFAULTS = { remember: true, auto: false, useImage: true, redo: false, math: 'latex' };
-const AI_KEY_RE = /^AIza[0-9A-Za-z_\-]{30,60}$/;
+// AI Studio now issues "AQ." auth keys; older keys start with "AIza". Real validation = models.list.
+const AI_KEY_RE = /^(?:AIza[0-9A-Za-z_\-]{30,60}|AQ\.[0-9A-Za-z_.\-]{20,200})$/;
 const AI_LEN_MIN = 0.5, AI_LEN_MAX = 1.4, AI_LEN_MAX_LATEX = 1.9;   // output/input size guard (non-space chars)
 const AI_CHUNK = 7000, AI_GAP_MS = 1200;
 let _aiSessionKey = '', _aiModels = null;
@@ -4646,14 +4647,17 @@ class AiError extends Error {
 const aiErrText = e => (e && e.message) || String(e);
 
 // One raw call. Only x-goog-api-key + Content-Type headers → no CORS preflight problems.
-async function aiFetch(path, body, key) {
+async function aiFetch(path, body, key, viaQuery) {
   if (isOffline()) throw new AiError('offline');
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 90000);
   let r;
   try {
-    r = await fetch(AI_HOST + path, {
+    const url = AI_HOST + path + (viaQuery ? (path.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(key) : '');
+    const hdr = viaQuery ? {} : { 'x-goog-api-key': key };
+    if (body) hdr['Content-Type'] = 'application/json';
+    r = await fetch(url, {
       method: body ? 'POST' : 'GET',
-      headers: body ? { 'x-goog-api-key': key, 'Content-Type': 'application/json' } : { 'x-goog-api-key': key },
+      headers: hdr,
       body: body ? JSON.stringify(body) : undefined, signal: ctl.signal,
     });
   } catch (e) { throw new AiError('net'); } finally { clearTimeout(t); }
@@ -4666,6 +4670,7 @@ async function aiFetch(path, body, key) {
     const m = /retry(?:Delay)?\D{0,12}(\d+(?:\.\d+)?)\s*s/i.exec(raw);
     throw new AiError('rate', m ? Math.ceil(+m[1]) : 30, msg);
   }
+  if (r.status === 401 && !viaQuery && /ACCESS_TOKEN_TYPE_UNSUPPORTED/.test(raw)) return aiFetch(path, body, key, true);   // some AQ. keys only work as ?key=
   if (r.status === 401) throw new AiError('key', 0, msg);
   if (r.status === 403 || r.status === 404) throw new AiError('model', 0, msg);
   if (r.status >= 500) throw new AiError('server', 0, msg);
@@ -4918,7 +4923,7 @@ function aiOptsHtml() {
        <div class="dc-actions"><button class="btn btn-secondary" data-tt="ai-test">${L('যাচাই', 'Test')}</button><button class="btn btn-secondary" data-tt="ai-delkey">${L('Key মুছুন', 'Remove key')}</button></div>`
     : `<div class="tt-hint"><b>${L('বিনামূল্যে — ৩ ধাপ:', 'Free — 3 steps:')}</b><br>① ${L('নিচের বাটনে AI Studio খুলবে → Google account দিয়ে ঢুকে “Create API key” চাপুন', 'The button opens AI Studio → sign in with Google → press “Create API key”')}<br>② ${L('Key-টা copy করুন', 'Copy the key')}<br>③ ${L('এখানে ফিরে “Clipboard থেকে বসান” চাপুন (বা নিচে paste করুন)', 'Come back and press “Paste from clipboard” (or paste below)')}</div>
        <div class="ex-row"><button class="btn btn-secondary" data-tt="ai-getkey">① ${L('Key নিন (AI Studio)', 'Get key (AI Studio)')}</button><button class="btn btn-primary" data-tt="ai-paste">③ 📋 ${L('Clipboard থেকে বসান', 'Paste from clipboard')}</button></div>
-       <div class="ex-row"><input id="aiKeyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…" aria-label="Gemini API key"><button class="btn btn-secondary" data-tt="ai-savekey">${L('সংরক্ষণ ও যাচাই', 'Save & check')}</button></div>
+       <div class="ex-row"><input id="aiKeyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… / AIza…" aria-label="Gemini API key"><button class="btn btn-secondary" data-tt="ai-savekey">${L('সংরক্ষণ ও যাচাই', 'Save & check')}</button></div>
        ${chk('remember', 'এই device-এ key মনে রাখো (বন্ধ থাকলে tab বন্ধ করলেই মুছে যাবে)', 'Remember the key on this device (off = forgotten when the tab closes)')}`;
   return keyBox
     + `<div class="tt-hint">🔒 ${L('Key শুধু এই browser-এ থাকে — Drive, backup বা export-এ যায় না। Page-এর text (ও ছবি) সরাসরি Google Gemini-তে যায়। Free tier-এ EEA/UK/Switzerland-এর বাইরে Google এই data নিজেদের product উন্নয়নে ব্যবহার করতে পারে — গোপন কিছু হলে এটা ব্যবহার করবেন না।', 'The key stays in this browser only — never in Drive, backups or exports. Page text (and image) goes straight to Google Gemini. On the free tier, outside the EEA/UK/Switzerland, Google may use this data to improve its products — do not use it for confidential material.')}</div>`
@@ -4944,7 +4949,7 @@ async function aiTtAction(a) {
     else if (a === 'ai-paste') {
       try { k = ((await navigator.clipboard.readText()) || '').trim(); } catch { sum.textContent = '⚠️ ' + L('Clipboard পড়া যায়নি — key নিচের ঘরে paste করুন', 'Cannot read the clipboard — paste the key in the box below'); return; }
     } else { const inp = $('aiKeyIn'); k = inp ? inp.value.trim() : ''; }
-    if (!AI_KEY_RE.test(k)) { sum.textContent = '⚠️ ' + L('এটা key-এর মতো দেখাচ্ছে না (AIza… দিয়ে শুরু হয়)', 'That does not look like a key (it starts with AIza…)'); return; }
+    if (!AI_KEY_RE.test(k)) { sum.textContent = '⚠️ ' + L('এটা key-এর মতো দেখাচ্ছে না (AQ. বা AIza দিয়ে শুরু হয়)', 'That does not look like a key (it starts with AQ. or AIza)'); return; }
     sum.textContent = L('যাচাই হচ্ছে…', 'Checking…');
     const list = await aiModels(k, true);
     if (a !== 'ai-test') { const r = document.querySelector('#ttOpts [data-o="remember"]'); aiSetKey(k, r ? r.checked : true); }
