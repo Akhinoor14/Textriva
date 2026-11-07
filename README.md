@@ -79,6 +79,22 @@ Scope শুধু `drive.file` — অ্যাপ কেবল নিজের
 
 `GOOGLE_CLIENT_ID` ফাঁকা থাকলে Drive অংশ বন্ধ থাকে, কিন্তু local Library পুরোপুরি চলে।
 
+## ✨ AI fix (Phase 10) — Gemini, প্রত্যেকে নিজের free key
+
+OCR-এর ভাঙা অক্ষর/শব্দ, line wrap, formatting ও math sign ঠিক করে। **Provider একটাই: Gemini**; model ভেতরে নিজে বাছাই হয় (নতুন Flash → ছোট Flash → Flash-Lite, limit পেলে পরেরটায়)।
+
+**Key নেওয়া (একবার, ৩ ধাপ):** Export… → *Text tools…* → **✨ AI fix** tab → ① *Key নিন* (AI Studio খুলবে, Google account দিয়ে *Create API key*) → ② copy → ③ *Clipboard থেকে বসান*।
+
+- Key শুধু ওই browser-এর `localStorage`-এ (বা "মনে রাখো" বন্ধ থাকলে শুধু memory-তে)। Drive sync, backup ZIP, `.json/.docx` export — কোথাও যায় না। শুধু Google-এ যায়। *Key মুছুন* চাপলে সব মোছে।
+- **Preview → Apply:** প্রতিটা page-এর diff দেখে বাছাই করে প্রয়োগ; *Undo last bulk change* সবসময় আছে।
+- **Auto mode (ঐচ্ছিক):** Space-এ paste করলে ওই page background-এ নিজে ঠিক হয়।
+- **ছবি দেখে মেলানো:** page-এর ছবি (ছোট করে) সাথে যায় → বেশি নির্ভুল। Mobile data saver চালু থাকলে শুধু text।
+- **Math:** default LaTeX (`$\dfrac{a}{b}$`, আগের cleaned ফাইলের মতো); চাইলে dropdown থেকে Unicode (x², √, π, ≤)।
+- **Instruction:** আগে Claude যে নিয়মে বই ঠিক করেছে (বাংলা শব্দ/যুক্তাক্ষর, pseudo-math → LaTeX, `Sol:` → `সমাধান:`, watermark মোছা, `[চিত্র লাগবে]` / `[OCR-এ হারিয়ে গেছে]` / `[সম্পাদকীয় নোট: …]`), আসল OCR উদাহরণসহ। উত্তরমালা দেখে সংখ্যা অনুমান বা নিজে হিসাব করে বদলানো নিষেধ।
+- **নিরাপত্তা:** temperature 0; output ৫০–১৪০% (LaTeX-এ ১৯০%) size-এর বাইরে গেলে বাদ; AI-র লেখা আগে preview; OCR text-কে instruction নয়, data হিসেবে পাঠানো হয়।
+- **Privacy:** Free tier-এ EEA/UK/Switzerland-এর বাইরে Google এই data নিজেদের product উন্নয়নে ব্যবহার করতে পারে — গোপন কিছু হলে ব্যবহার করবেন না।
+- Internet লাগে (offline-এ আগের rule-based Cleanup চলে)। Free limit প্রতিটা user-এর নিজের project-এর, আপনার কোনো খরচ/server নেই।
+
 ---
 
 ## 📁 Files

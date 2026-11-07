@@ -10,7 +10,6 @@
 //  - simple in-memory rate limit (per IP, per serverless instance — best-effort only;
 //    for strict limits put this behind Vercel's Edge Config / a KV store instead)
 
-const IMAGE_TTL_SECONDS = 8 * 24 * 60 * 60; // 691200
 const MAX_BODY_BYTES = 12 * 1024 * 1024; // ~12MB base64 (client compresses before upload)
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 600; // per IP per window (একটানা parallel background upload)
@@ -41,10 +40,7 @@ function checkRateLimit(ip) {
 }
 
 export default async function handler(req, res) {
-  const _allowed = (process.env.ALLOWED_ORIGINS || '').split(',').map(x => x.trim()).filter(Boolean);
-  const _origin = req.headers.origin || '';
-  res.setHeader('Access-Control-Allow-Origin', _allowed.length ? (_allowed.find(o => _origin.startsWith(o)) || _allowed[0]) : '*');
-  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -77,11 +73,10 @@ export default async function handler(req, res) {
 
     const form = new FormData();
     form.append('image', image);
-    // Link auto-deletes after 8 days (client treats a link as fresh for 7 days and re-uploads after that),
-    // so page images never stay public on imgbb forever. imgbb allows 60 .. 15552000 seconds.
+    // expiration দেওয়া হয় না → link কখনো expire হয় না (client 7 দিন পর safety re-upload করে)
 
     const imgbbRes = await fetch(
-      `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}&expiration=${IMAGE_TTL_SECONDS}`,
+      `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_KEY}`,
       { method: 'POST', body: form }
     );
 

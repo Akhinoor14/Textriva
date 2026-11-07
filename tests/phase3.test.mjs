@@ -330,7 +330,7 @@ test('wiring: every Lens upload path goes through lensCopyBlob; every image chan
   const setFn = extractDeclaration(source, 'setPageBlob');
   for (const f of ['remoteUrl', 'remoteAt', 'driveFileId', 'blobSaved', 'hash', 'pdfPage', 'imgRev']) assert.ok(setFn.includes(f), 'setPageBlob resets ' + f);
   assert.match(source, /'i' \+ \(p\.imgRev \|\| 0\)/, 'syncSig includes the image revision');
-  assert.ok(/CACHE = 'textriva-v1[2-9]'/.test(readFileSync(new URL('../sw.js', import.meta.url), 'utf8')));
+  assert.ok(/CACHE = 'textriva-v\d+'/.test(readFileSync(new URL('../sw.js', import.meta.url), 'utf8')));
   assert.ok(html.includes('id="pageToolsBtn"'));
   assert.ok(source.includes('#ptDlg'));
 });

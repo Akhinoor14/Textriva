@@ -10,7 +10,7 @@ export function installFakeDrive(w) {
   const readBlob = blob => new Promise((res, rej) => { const r = new w.FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsArrayBuffer(blob); });
   const utf8 = u8 => new TextDecoder().decode(u8);
   const reply = (obj, status = 200) => ({ ok: status < 400, status, json: async () => obj, blob: async () => { throw new Error('not a blob'); } });
-  const pub = f => ({ id: f.id, name: f.name, mimeType: f.mimeType, modifiedTime: new Date(1.7e12 + f.mod * 1000).toISOString(), appProperties: f.appProperties || {}, trashed: !!f.trashed });
+  const pub = f => ({ id: f.id, name: f.name, mimeType: f.mimeType, modifiedTime: new Date(1.7e12 + f.mod * 1000).toISOString(), appProperties: f.appProperties || {}, trashed: !!f.trashed, size: String(f.bytes ? f.bytes.length : 0) });
   const touch = f => { f.mod = tick++; return f; };
 
   w.fetch = async (url, opts = {}) => {
