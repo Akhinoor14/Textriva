@@ -6674,7 +6674,7 @@ async function uploadImageWithRetry(blob, maxAttempts = 3) {
     } catch (e) {
       lastErr = e;
       if (e && e.network) { _bgNetFail(); break; }   // no response at all: retrying instantly just wastes CPU/data
-      if (e && e.status === 429) _bgPauseUntil = Math.max(_bgPauseUntil, Date.now() + 10000);   // too many requests → সবাই একটু থামুক
+      if (e && e.status === 429) { _bgPauseUntil = Math.max(_bgPauseUntil, Date.now() + 65000); break; }   // imgbb rate limit → ১ মিনিট থামো, retry করে আরও বাড়িও না
       if (attempt < maxAttempts) {
         // exponential backoff: 1s, 2s, 4s (429 হলে 8s+)
         const base = (e && e.status === 429) ? 8000 : 1000;
