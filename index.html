@@ -4696,7 +4696,11 @@ const aiKey = () => { const l = aiLoadKeys(); return l.length ? l[0].key : ''; }
 function aiAddKey(k, nickname, remember) {
   const rec = { id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: (nickname || '').trim() || L('নাম ছাড়া key', 'Unnamed key'), key: k };
   if (remember) {
-    const list = aiLoadKeys().filter(x => x.key !== k);
+    // Only touch the PERSISTED list here — aiLoadKeys() returns persisted+session merged, and saving
+    // that merged view would silently write session-only (unremembered) keys to localStorage too.
+    let list = []; try { list = JSON.parse(readSaved(LS_AI_KEYS) || '[]'); } catch {}
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(x => x && x.key !== k);
     list.push(rec); aiSaveKeys(list);
   } else {
     _aiSessionKeys = (_aiSessionKeys || []).filter(x => x.key !== k); _aiSessionKeys.push(rec);
