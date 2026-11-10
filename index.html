@@ -317,6 +317,21 @@ a { color:inherit; text-decoration:none }
 .pt-badge.ready     { background:var(--accent-gl); color:var(--accent) }
 .pt-badge.done      { background:var(--green-gl);  color:var(--green) }
 .pt-badge.error     { background:var(--red-gl);    color:var(--red) }
+.pt-badge.ai-fixed  { background:var(--accent); color:#fff; font-size:.6rem; padding:2px 5px; box-shadow:0 0 0 1px var(--accent) }
+/* Prominent corner ribbon on the thumbnail image itself — visible at a glance, not just in the status row */
+.pt-ai-ribbon {
+  position:absolute; top:5px; left:-26px; width:110px; z-index:3;
+  transform:rotate(-45deg); transform-origin:center;
+  background:var(--accent); color:#fff; font-size:.52rem; font-weight:800;
+  letter-spacing:.03em; text-align:center; padding:2px 0;
+  box-shadow:0 1px 4px rgba(0,0,0,.35); pointer-events:none;
+  text-transform:uppercase;
+}
+.ai-key-list { display:flex; flex-direction:column; gap:.4rem; margin:.4rem 0; }
+.ai-key-row { display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.45rem .6rem; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--card2); flex-wrap:wrap; }
+.ai-key-info { display:flex; flex-direction:column; gap:.1rem; min-width:0; flex:1; }
+.ai-key-name { font:inherit; font-weight:600; border:1px solid transparent; background:transparent; color:var(--text); padding:.1rem .3rem; border-radius:4px; min-width:0; }
+.ai-key-name:hover, .ai-key-name:focus { border-color:var(--line); background:var(--card); }
 .page-thumb .pt-remove {
   position:absolute; top:3px; right:3px;
   width:16px; height:16px; border-radius:50%;
@@ -1057,10 +1072,15 @@ a { color:inherit; text-decoration:none }
 @media (max-width:560px) { .step-bar { padding-left:1rem; padding-right:1rem } #flowBtn { padding:.6rem 1rem } }
 body.has-stepbar .wrap { padding-bottom:6rem }
 body.has-stepbar #pwa-install-bar { bottom:76px }
+body.has-stepbar .toasts { bottom:calc(1.25rem + 64px + env(safe-area-inset-bottom, 0px)) }
 
 /* ── work indicator + busy buttons ── */
-.work-bar { position:fixed; left:50%; bottom:88px; transform:translateX(-50%); z-index:9500; display:flex; align-items:center; gap:.7rem; min-width:240px; max-width:min(92vw,420px); padding:.7rem 1rem; background:var(--card); color:var(--text); border:1px solid var(--accent); border-radius:var(--r-sm); box-shadow:0 8px 24px rgba(0,0,0,.35) }
+/* Anchored to the LEFT of the toast corner (same bottom-right stack as toasts), not centered —
+   so it never sits over the middle of the screen where notifications also pop up. */
+.work-bar { position:fixed; right:1.25rem; bottom:1.25rem; z-index:9400; display:flex; align-items:center; gap:.7rem; min-width:240px; max-width:min(92vw,420px); padding:.7rem 1rem; background:var(--card); color:var(--text); border:1px solid var(--accent); border-radius:var(--r-sm); box-shadow:0 8px 24px rgba(0,0,0,.35) }
 .work-bar.hidden { display:none }
+/* When a toast is also showing, push the work-bar up above the toast stack instead of overlapping it. */
+body.has-toast .work-bar { bottom:calc(1.25rem + var(--toast-stack-h, 0px) + .5rem) }
 .work-spin { flex:none; width:18px; height:18px; border:2.5px solid var(--line2); border-top-color:var(--accent); border-radius:50%; animation:rot .8s linear infinite }
 .work-txt { flex:1; min-width:0 }
 .work-txt b { display:block; font-size:.82rem; font-weight:600; line-height:1.4 }
@@ -1070,7 +1090,7 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
 .btn.is-busy { opacity:.75; pointer-events:none }
 .btn.is-busy::before { content:''; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:rot .7s linear infinite }
 .lib-busy { pointer-events:none; opacity:.6 }
-@media (max-width:560px) { .work-bar { bottom:84px } }
+@media (max-width:560px) { .work-bar { right:.7rem; left:.7rem; bottom:calc(.7rem + env(safe-area-inset-bottom, 0px)) } body.has-toast .work-bar { bottom:calc(.7rem + var(--toast-stack-h, 0px) + .5rem + env(safe-area-inset-bottom, 0px)) } }
 
 /* ── project chip + switch cue ── */
 .proj-chip { display:flex; align-items:center; gap:.5rem; min-width:0; flex:1 1 auto; font-size:.85rem }
@@ -1246,6 +1266,7 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
     <button class="btn btn-warning hidden" id="reviewBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap"><span id="reviewBtnTxt">Review</span></button>
     <button class="btn btn-warning hidden" id="retryActionBtn" style="font-size:.75rem;padding:.35rem .8rem;white-space:nowrap">↺ <span id="retryActionBtnTxt">Retry</span></button>
     <span class="action-spacer"></span>
+    <button class="btn btn-primary" id="aiFixBtn"><span id="aiFixBtnTxt">✨ AI fix…</span></button>
     <button class="btn btn-secondary" id="driveSaveBtn"><svg class="ic" aria-hidden="true"><use href="#i-drive"/></svg> <span id="driveSaveBtnTxt">Drive-এ Save</span></button>
     <button class="btn btn-secondary" id="exportBtn"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> <span id="exportBtnTxt">Export…</span></button>
     <div class="more-wrap">
@@ -1258,7 +1279,6 @@ body.has-stepbar #pwa-install-bar { bottom:76px }
         <button class="btn btn-secondary" id="pageToolsBtn" role="menuitem"><span id="pageToolsBtnTxt">Page tools…</span></button>
         <button class="btn btn-secondary" id="cameraBtn" role="menuitem"><span id="cameraBtnTxt">Scan page</span></button>
         <button class="btn btn-secondary" id="ocrBtn" role="menuitem"><span id="ocrBtnTxt">Auto-OCR…</span></button>
-        <button class="btn btn-secondary" id="aiFixBtn" role="menuitem"><span id="aiFixBtnTxt">AI fix…</span></button>
         <div class="more-sep" role="separator"></div>
         <button class="btn btn-danger" id="allClearBtn" role="menuitem" title="সব মুছে একদম শুরুর অবস্থায় ফিরুন"><span id="allClearBtnTxt">All Clear</span></button>
       </div>
@@ -1694,7 +1714,7 @@ const i18n = {
     pageWord: 'পেজ', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
-    pageBlock: '=== পেজ {num} — {name} ===',
+    pageBlock: '=== পেজ {num} — {name}{ai} ===',
     statusPending: 'Pending', statusUploading: '⬆️ Upload',
     statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
     lpcDone: '✓ Done', lpcOpen: 'Lens', lpcRetry: '↺ Retry',
@@ -1776,7 +1796,7 @@ const i18n = {
     pageWord: 'page', doneWord: 'done',
     txtStats: '{chars} chars · {words} words',
     allMeta: '<b>{pages}</b> pages · {chars} chars · {words} words',
-    pageBlock: '=== Page {num} — {name} ===',
+    pageBlock: '=== Page {num} — {name}{ai} ===',
     statusPending: 'Pending', statusUploading: '⬆️ Uploading',
     statusReady: '✅ Ready', statusDone: '✓ Done', statusError: '❌ Error',
     lpcDone: '✓ Done', lpcOpen: 'Open Lens', lpcRetry: '↺ Retry upload',
@@ -1892,6 +1912,14 @@ window.addEventListener('unhandledrejection', ev => {
 // ══════════════════════════════════════════
 // TOAST
 // ══════════════════════════════════════════
+// Keeps the work-bar (floating progress pill) from ever sitting under the toast stack: whenever a
+// toast is visible we measure the stack's real height and push the work-bar up above it.
+function _syncToastStackHeight() {
+  const wrap = $('toasts');
+  const has = wrap && wrap.children.length > 0;
+  document.body.classList.toggle('has-toast', !!has);
+  if (has) document.documentElement.style.setProperty('--toast-stack-h', wrap.offsetHeight + 'px');
+}
 function toast(msg, type = '', dur = 3000, action = null) {
   msg = String(msg ?? '').replace(/^(?:\u2705|\u274C|\u26A0\uFE0F?|\u2139\uFE0F?)\s*/u, '');
   const el = document.createElement('div');
@@ -1899,7 +1927,7 @@ function toast(msg, type = '', dur = 3000, action = null) {
   const span = document.createElement('span');
   span.textContent = msg;
   el.appendChild(span);
-  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 400); };
+  const close = () => { el.classList.add('out'); setTimeout(() => { el.remove(); _syncToastStackHeight(); }, 400); };
   if (action && action.label && typeof action.fn === 'function') {
     const b = document.createElement('button');
     b.type = 'button';
@@ -1909,6 +1937,7 @@ function toast(msg, type = '', dur = 3000, action = null) {
     el.appendChild(b);
   }
   $('toasts').appendChild(el);
+  _syncToastStackHeight();
   setTimeout(close, dur);
 }
 
@@ -1952,6 +1981,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const fmtDate = ts => { try { return new Date(ts).toLocaleString(currentLang === 'en' ? 'en-GB' : 'bn-BD', { dateStyle: 'medium', timeStyle: 'short' }); } catch { return ''; } };
 const newId = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const hashStr = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return h; };
+// Marks a page's text-export header when it is the AI's current output, so anyone (or any other AI)
+// opening the exported text can see at a glance that this page was already corrected by Gemini.
+const aiTag = p => (p && p.aiFixedHash && p.aiFixedHash === hashStr(p.text || '')) ? L(' [Gemini AI দিয়ে ঠিক করা]', ' [Fixed by Gemini AI]') : '';
 
 const LS_LAST = 'textriva-last-project';
 // ── Account identity (device-level) ──────────────────────────────────────────
@@ -2021,6 +2053,7 @@ function saveNow() {
     status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, driveFileId: p.driveFileId || null,
     hash: p.hash || null, phash: p.phash || null, possibleDupOf: p.possibleDupOf || null,
     ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
+    aiFixedHash: p.aiFixedHash || null,
   }));
   // Phase 4: search index — rebuilt only when some page text changed (per-page word lists are cached on the page)
   const sSig = snap.map(x => x.text.length + ':' + hashStr(x.text)).join(',');
@@ -2149,6 +2182,7 @@ function pushRestoredPage(o) {
     hash: o.hash || null, phash: o.phash || null, possibleDupOf: o.possibleDupOf || null,
     ocr: sanitizeOcr(o.ocr), flags: Array.isArray(o.flags) ? o.flags : [], reviewed: !!o.reviewed,
     note: typeof o.note === 'string' ? o.note : '', bookmark: !!o.bookmark,
+    aiFixedHash: o.aiFixedHash || null,
   });
 }
 
@@ -2209,7 +2243,7 @@ async function deleteLocalProject(pid) {
 
 async function localTextOf(pid) {
   const { proj, recs } = await localLoad(pid);
-  const text = recs.filter(r => r.text).map(r => `${t('pageBlock', { num: r.order + 1, name: r.name })}\n${r.text}`).join('\n\n');
+  const text = recs.filter(r => r.text).map(r => `${t('pageBlock', { num: r.order + 1, name: r.name, ai: aiTag(r) })}\n${r.text}`).join('\n\n');
   return { name: proj.name, text };
 }
 async function downloadLocalText(pid) {
@@ -2303,7 +2337,14 @@ function gRequest(prompt) {
 async function driveToken() {
   if (!GOOGLE_CLIENT_ID) throw new Error(L('Google Client ID সেট করা নেই', 'Google Client ID not configured'));
   if (driveValid()) return gdrive.token;
-  return gRequest(readSaved('textriva-g-hint') ? '' : 'select_account');
+  // Known account on this device → try ONE silent (no-popup) refresh first. The browser's Google
+  // session is often still fine even though our in-memory token expired; only fall back to the
+  // account-chooser popup when the silent attempt actually fails.
+  if (readSaved('textriva-g-hint')) {
+    try { return await gRequest('none'); } catch {}
+    return gRequest('');
+  }
+  return gRequest('select_account');
 }
 // ওই account-এর কাজ আগে save হয়, তারপর screen থেকে সরে যায় — পরের user যেন আগের user-এর কিছু না দেখে।
 async function gSignOut() {
@@ -2713,8 +2754,21 @@ $('driveChip').onclick = async () => {
     else if (mode === 'reconnect') { await driveToken(); refreshDriveChip(); await syncToDrive({ silent: true }); refreshDriveChip(); }
   } catch (e) { toast('❌ ' + e.message, 'err', 4000); }
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDriveChip(); });
-window.addEventListener('focus', refreshDriveChip);
+// Coming back to the tab/app is exactly when a silent (no-popup) refresh is most likely to succeed —
+// the browser's own Google session has often become valid again by then. Retry quietly here instead
+// of only redrawing the "Reconnect" chip and waiting for a click, which is what forces the account-
+// chooser popup to reappear later. A short cooldown stops rapid focus/blur cycles from hammering Google.
+let _lastFocusRefreshAt = 0;
+function maybeSilentRefreshOnResume() {
+  refreshDriveChip();
+  if (!GOOGLE_CLIENT_ID || !storedUser() || driveValid() || gdrive.pending || !navigator.onLine) return;
+  const now = Date.now();
+  if (now - _lastFocusRefreshAt < 20000) return;
+  _lastFocusRefreshAt = now;
+  silentTokenRefresh();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) maybeSilentRefreshOnResume(); });
+window.addEventListener('focus', maybeSilentRefreshOnResume);
 
 // ── Conflict dialog ──
 async function fetchRemoteMeta() {
@@ -4324,6 +4378,9 @@ function applyTextChanges(changes, label) {
     if (!pg || (pg.text || '') !== c.before) { stale++; return; }
     histPush(pageHist(pg), snapOf(pg));
     pg.text = c.after;
+    // "AI fix" durably marks the page so it won't be re-run; any other tool clears the mark.
+    if (label === 'AI fix') pg.aiFixedHash = hashStr(c.after);
+    else pg.aiFixedHash = null;
     items.push({ id: pg.id, before: c.before, after: c.after });
   });
   if (items.length) {
@@ -4341,7 +4398,7 @@ function undoBulk() {
     const pg = state.pages.find(p => p.id === it.id);
     if (!pg || (pg.text || '') !== it.after) { skipped++; return; }
     histPush(pageHist(pg), snapOf(pg));
-    pg.text = it.before; ok++;
+    pg.text = it.before; pg.aiFixedHash = (b.label === 'AI fix') ? null : pg.aiFixedHash; ok++;
   });
   renderAll(); updateStats();
   toast(L(`↩ "${b.label}" undo হয়েছে — ${ok}টি page`, `↩ Undid "${b.label}" — ${ok} page(s)`) + (skipped ? L(` (${skipped}টি বাদ — পরে edit করা)`, ` (${skipped} skipped — edited since)`) : ''), 'ok', 3500);
@@ -4568,7 +4625,7 @@ function openTextTools(tab) {
         wrap.querySelectorAll('[data-pick]').forEach(i => { i.checked = a === 'all'; });
         updateTtApplyBtn();
       }
-      else if (a.startsWith('ai-')) aiTtAction(a);
+      else if (a.startsWith('ai-')) aiTtAction(a, b);
       else if (a === 'rule-add') { _bnFix.rules.push({ id: 'u' + Date.now().toString(36), name: '', find: '', replace: '', regex: false, enabled: true }); saveBnFix(); renderBnRules(); }
       else if (a === 'rule-reset') { _bnFix.rules = BN_DEFAULT_RULES.map(r => Object.assign({}, r)); _bnFix.digits = 'none'; saveBnFix(); renderBnRules(); }
       else if (a === 'rule-del') { const i = +b.closest('[data-r]').dataset.r; _bnFix.rules.splice(i, 1); saveBnFix(); renderBnRules(); }
@@ -4577,6 +4634,7 @@ function openTextTools(tab) {
   wrap.addEventListener('change', e => {
     const t = e.target;
     if (t.dataset.pick !== undefined) { const k = +t.dataset.pick; if (t.checked) tt.checked.add(k); else tt.checked.delete(k); updateTtApplyBtn(); return; }
+    if (t.classList && t.classList.contains('ai-key-name')) { const row = t.closest('[data-key-id]'); if (row) aiRenameKey(row.dataset.keyId, t.value); return; }
     if (t.id === 'ttDigits') { _bnFix.digits = t.value; saveBnFix(); invalidateTtPlan(); return; }
     const row = t.closest && t.closest('.bn-rule');
     if (row && t.dataset.f) { const r = _bnFix.rules[+row.dataset.r]; r[t.dataset.f] = t.type === 'checkbox' ? t.checked : t.value; saveBnFix(); invalidateTtPlan(); return; }
@@ -4608,26 +4666,81 @@ $('textToolsBtn').onclick = () => openTextTools();
 // ══════════════════════════════════════════
 const AI_HOST = 'https://generativelanguage.googleapis.com/v1beta';
 const LS_AI_KEY = 'textriva-ai-key', LS_AI_OPTS = 'textriva-ai-opts', LS_AI_MODELS = 'textriva-ai-models';
+const LS_AI_KEYS = 'textriva-ai-keys';     // multi-key: [{id, name, key}], first = tried first
 const AI_DEFAULTS = { remember: true, auto: false, useImage: true, redo: false, math: 'latex' };
 // AI Studio now issues "AQ." auth keys; older keys start with "AIza". Real validation = models.list.
 const AI_KEY_RE = /^(?:AIza[0-9A-Za-z_\-]{30,60}|AQ\.[0-9A-Za-z_.\-]{20,200})$/;
 const AI_LEN_MIN = 0.5, AI_LEN_MAX = 1.4, AI_LEN_MAX_LATEX = 1.9;   // output/input size guard (non-space chars)
 const AI_CHUNK = 7000, AI_GAP_MS = 1200;
-let _aiSessionKey = '', _aiModels = null;
-const _aiBad = new Set();                  // models that said "no access / limit 0" this session
-const _aiDone = new Map();                 // page id → hash of the text the AI already produced/checked
+let _aiSessionKeys = null;                 // non-remembered keys live only in memory this tab
+const _aiModelsByKey = new Map();          // key → ranked model list (per-key cache, session only)
+const _aiBad = new Set();                  // "key-suffix::model" combos that said "no access / limit 0" this session
+const _aiCoolingUntil = new Map();         // key → timestamp (ms) until which this key is skipped (rate-limited)
 const aiOpts = () => readJson(LS_AI_OPTS, AI_DEFAULTS);
-const aiKey = () => _aiSessionKey || (readSaved(LS_AI_KEY) || '');
 const aiMask = k => (k ? '…' + k.slice(-4) : '');
 const aiSleep = ms => new Promise(r => setTimeout(r, ms));
-function aiSetKey(k, remember) {
-  _aiSessionKey = remember ? '' : k;
-  if (remember) saveSetting(LS_AI_KEY, k); else { try { localStorage.removeItem(LS_AI_KEY); } catch {} }
+
+// ── Multi-key store: every saved key has a nickname; all of them are tried, in order, with automatic
+//    fallback to the next one the moment a key hits its free-tier rate limit. ──
+function aiLoadKeys() {
+  let list = [];
+  try { list = JSON.parse(readSaved(LS_AI_KEYS) || '[]'); } catch {}
+  if (!Array.isArray(list)) list = [];
+  if (_aiSessionKeys) list = list.concat(_aiSessionKeys.filter(sk => !list.some(k => k.key === sk.key)));
+  return list.filter(k => k && k.key);
+}
+function aiSaveKeys(list) { saveSetting(LS_AI_KEYS, JSON.stringify(list)); }
+function aiKeyList() { return aiLoadKeys(); }
+// Back-compat single-key accessor: first key in the list (used by old call sites / "quick add" flow).
+const aiKey = () => { const l = aiLoadKeys(); return l.length ? l[0].key : ''; };
+function aiAddKey(k, nickname, remember) {
+  const rec = { id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: (nickname || '').trim() || L('নাম ছাড়া key', 'Unnamed key'), key: k };
+  if (remember) {
+    const list = aiLoadKeys().filter(x => x.key !== k);
+    list.push(rec); aiSaveKeys(list);
+  } else {
+    _aiSessionKeys = (_aiSessionKeys || []).filter(x => x.key !== k); _aiSessionKeys.push(rec);
+  }
+  return rec;
+}
+function aiRemoveKey(id) {
+  let removed = null;
+  try {
+    const list = JSON.parse(readSaved(LS_AI_KEYS) || '[]');
+    removed = list.find(k => k.id === id);
+    aiSaveKeys(list.filter(k => k.id !== id));
+  } catch {}
+  if (_aiSessionKeys) { const sk = _aiSessionKeys.find(k => k.id === id); if (sk) removed = removed || sk; _aiSessionKeys = _aiSessionKeys.filter(k => k.id !== id); }
+  if (removed) {
+    _aiModelsByKey.delete(removed.key); _aiCoolingUntil.delete(removed.key);
+    try { localStorage.removeItem(LS_AI_MODELS + ':' + removed.key.slice(-8)); } catch {}
+  }
+}
+function aiRenameKey(id, nickname) {
+  const name = (nickname || '').trim() || L('নাম ছাড়া key', 'Unnamed key');
+  try {
+    const list = JSON.parse(readSaved(LS_AI_KEYS) || '[]');
+    const rec = list.find(k => k.id === id); if (rec) { rec.name = name; aiSaveKeys(list); }
+  } catch {}
+  if (_aiSessionKeys) { const rec = _aiSessionKeys.find(k => k.id === id); if (rec) rec.name = name; }
 }
 function aiClearKey() {
-  _aiSessionKey = ''; _aiModels = null; _aiBad.clear();
-  try { localStorage.removeItem(LS_AI_KEY); localStorage.removeItem(LS_AI_MODELS); } catch {}
+  _aiSessionKeys = null; _aiModelsByKey.clear(); _aiBad.clear(); _aiCoolingUntil.clear();
+  try {
+    localStorage.removeItem(LS_AI_KEY); localStorage.removeItem(LS_AI_KEYS);
+    Object.keys(localStorage).filter(k => k.indexOf(LS_AI_MODELS) === 0).forEach(k => localStorage.removeItem(k));
+  } catch {}
 }
+// One-time migration: older versions stored a single key under LS_AI_KEY — fold it into the new list.
+(function aiMigrateOldKey() {
+  try {
+    const old = readSaved(LS_AI_KEY);
+    if (!old) return;
+    const list = JSON.parse(readSaved(LS_AI_KEYS) || '[]');
+    if (!list.some(k => k.key === old)) { list.push({ id: 'k' + Date.now().toString(36), name: L('আগের key', 'Previous key'), key: old }); aiSaveKeys(list); }
+    localStorage.removeItem(LS_AI_KEY);
+  } catch {}
+})();
 
 const AI_MSG = {
   key: () => L('Key ঠিক নেই বা বন্ধ — AI Studio থেকে নতুন key নিন', 'Key is invalid or disabled — get a new key from AI Studio'),
@@ -4691,22 +4804,23 @@ function aiRankModels(list) {
   return out.filter(x => !x.lite).slice(0, 3).concat(out.filter(x => x.lite).slice(0, 2)).map(x => x.name);
 }
 async function aiModels(key, force) {
-  if (!force && _aiModels) return _aiModels;
-  if (!force) { try { const c = JSON.parse(readSaved(LS_AI_MODELS) || 'null'); if (c && c.list && c.list.length && Date.now() - c.at < 864e5) return (_aiModels = c.list); } catch {} }
+  if (!force && _aiModelsByKey.has(key)) return _aiModelsByKey.get(key);
+  const cacheKey = LS_AI_MODELS + ':' + key.slice(-8);
+  if (!force) { try { const c = JSON.parse(readSaved(cacheKey) || 'null'); if (c && c.list && c.list.length && Date.now() - c.at < 864e5) { _aiModelsByKey.set(key, c.list); return c.list; } } catch {} }
   const j = await aiFetch('/models?pageSize=200', null, key);
   const list = aiRankModels(j && j.models);
   if (!list.length) throw new AiError('model');
-  _aiModels = list; _aiBad.clear();
-  saveSetting(LS_AI_MODELS, JSON.stringify({ at: Date.now(), list }));
+  _aiModelsByKey.set(key, list);
+  saveSetting(cacheKey, JSON.stringify({ at: Date.now(), list }));
   return list;
 }
 
-// Generates with automatic fallback: next model on 429/403/404/empty; retry once on 5xx.
+// Generates on ONE key, with automatic fallback: next model on 429/403/404/empty; retry once on 5xx.
 async function aiGenerate(parts, system, key) {
   const models = await aiModels(key);
   let last = null, wait = 0;
   for (const model of models) {
-    if (_aiBad.has(model)) continue;
+    if (_aiBad.has(key.slice(-8) + '::' + model)) continue;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const j = await aiFetch('/models/' + model + ':generateContent', {
@@ -4724,7 +4838,7 @@ async function aiGenerate(parts, system, key) {
         last = e;
         if (e.code === 'key' || e.code === 'offline') throw e;
         if (e.code === 'server' && attempt === 0) { await aiSleep(2000); continue; }
-        if (e.code === 'model') _aiBad.add(model);
+        if (e.code === 'model') _aiBad.add(key.slice(-8) + '::' + model);
         if (e.code === 'rate') wait = Math.max(wait, e.wait);
         break;
       }
@@ -4732,6 +4846,36 @@ async function aiGenerate(parts, system, key) {
   }
   if (last && last.code === 'rate') last.wait = wait || 30;
   throw last || new AiError('model');
+}
+
+// Tries every saved key in order, skipping any still "cooling down" from a recent rate-limit,
+// and automatically moving to the next key the moment one hits its free-tier limit or turns out invalid.
+// If `preferId` is given (used by the parallel per-key workers below), that key is tried FIRST so each
+// worker mostly sticks to its own key; it only borrows another idle key if its own is cooling down.
+async function aiGenerateAnyKey(parts, system, preferId) {
+  const keys = aiKeyList();
+  if (!keys.length) throw new AiError('key');
+  const now = Date.now();
+  let ordered = keys;
+  if (preferId) { const mine = keys.find(k => k.id === preferId); if (mine) ordered = [mine, ...keys.filter(k => k.id !== preferId)]; }
+  const usable = ordered.filter(k => (_aiCoolingUntil.get(k.key) || 0) <= now);
+  const tryOrder = usable.length ? usable : ordered;    // if every key is cooling, try anyway (best effort)
+  let lastErr = null;
+  for (let i = 0; i < tryOrder.length; i++) {
+    const k = tryOrder[i];
+    try {
+      const r = await aiGenerate(parts, system, k.key);
+      _aiCoolingUntil.delete(k.key);
+      return Object.assign(r, { keyName: k.name, keyId: k.id });
+    } catch (e) {
+      lastErr = e;
+      if (!(e instanceof AiError)) throw e;
+      if (e.code === 'rate') { _aiCoolingUntil.set(k.key, Date.now() + Math.max(e.wait || 30, 30) * 1000); continue; }
+      if (e.code === 'key') { continue; }               // this key is bad — try the next one
+      throw e;                                           // offline / blocked / truncated / server etc. — don't burn through keys
+    }
+  }
+  throw lastErr || new AiError('key');
 }
 
 // ── The instructions the AI follows (distilled from how Claude cleaned the real book files) ──
@@ -4832,66 +4976,97 @@ async function aiImageB64(blob) {
   } catch { return null; }
 }
 
-// Fixes ONE page → { after, model, withImage }. Throws AiError (incl. 'guard').
-async function aiFixPage(pg, o, key) {
+// Fixes ONE page → { after, model, withImage, keyName }. Throws AiError (incl. 'guard').
+// preferId: when a parallel per-key worker calls this, it passes its own key id so this page
+// mostly stays on that worker's key (only borrowing another if that one is cooling down).
+async function aiFixPage(pg, o, preferId) {
   const before = pg.text || '';
   const chunks = aiSplit(before);
   let img = null, metered = false;
   try { metered = dataSaverOn() && isMetered(); } catch {}
   if (o.useImage && chunks.length === 1 && pg.blob && !pg.txtOnly && !metered) img = await aiImageB64(pg.blob);
   const sys = aiSystemPrompt(o, !!img);
-  const outs = []; let model = '';
+  const outs = []; let model = '', keyName = '';
   for (let k = 0; k < chunks.length; k++) {
     const parts = [];
     if (img) parts.push({ inlineData: img });
     parts.push({ text: (chunks.length > 1 ? `This is part ${k + 1} of ${chunks.length} of one page.\n` : '') + 'Correct this page.\n<ocr_text>\n' + chunks[k] + '\n</ocr_text>' });
-    const r = await aiGenerate(parts, sys, key);
-    outs.push(aiClean(r.text)); model = r.model;
+    const r = await aiGenerateAnyKey(parts, sys, preferId);
+    outs.push(aiClean(r.text)); model = r.model; keyName = r.keyName || keyName;
   }
   const after = outs.join('\n\n');
   if (!aiAccept(before, after, o.math === 'latex' ? AI_LEN_MAX_LATEX : AI_LEN_MAX)) throw new AiError('guard');
-  return { after, model, withImage: !!img };
+  return { after, model, withImage: !!img, keyName };
 }
 
 // Runs the AI over page ids, one at a time (free RPM is small). onItem gets every page that would change.
+// Rate-limited keys are skipped automatically (see aiGenerateAnyKey); we only wait-and-retry here if
+// EVERY saved key is currently cooling down.
+// PARALLEL ACROSS KEYS: one saved key = one worker, each sticking mostly to its own key, all pulling
+// pages off a shared cursor — so N keys fix up to N pages at the same time instead of one at a time.
+// Per key, how many pages are worked on at the same time. Free-tier RPM is small, so this stays
+// modest — fast enough to clear a big document quickly without tripping rate limits on every call.
+const AI_CONCURRENCY_PER_KEY = 3;
 async function aiRunPages(ids, o, run, onItem, onProgress) {
-  const key = aiKey();
   const res = { ok: 0, same: 0, failed: 0, guard: 0, cancelled: false, fatal: null, lastErr: null };
-  if (!key) { res.fatal = new AiError('key'); return res; }
-  for (let n = 0; n < ids.length; n++) {
-    if (run.cancel) { res.cancelled = true; break; }
-    const pg = state.pages.find(p => p.id === ids[n]);
-    if (!pg || !(pg.text || '').trim()) continue;
-    if (onProgress) onProgress(n + 1, ids.length);
-    const before = pg.text;
-    for (let tries = 0; ; ) {
-      try {
-        const r = await aiFixPage(pg, o, key);
-        if (pg.text !== before) break;                                   // edited meanwhile → drop
-        if (r.after === normNl(before)) { res.same++; _aiDone.set(pg.id, hashStr(before)); }
-        else { res.ok++; _aiDone.set(pg.id, hashStr(r.after)); onItem({ id: pg.id, i: state.pages.indexOf(pg), before, after: r.after }); }
-        break;
-      } catch (e) {
-        if (!(e instanceof AiError)) { res.failed++; res.lastErr = e; break; }
-        if (e.code === 'key' || e.code === 'offline') { res.fatal = e; return res; }
-        if (e.code === 'rate' && tries < 3 && !run.cancel) {
-          tries++;
-          for (let s = Math.min(e.wait || 30, 65); s > 0 && !run.cancel; s--) await aiSleep(1000);
-          continue;
+  const keys = aiKeyList();
+  if (!keys.length) { res.fatal = new AiError('key'); return res; }
+  let cursor = 0, doneCount = 0, active = 0;
+  const total = ids.length;
+  // Total simultaneous workers this run: each key gets up to AI_CONCURRENCY_PER_KEY workers of its
+  // own, capped so we never spin up more workers than there are pages left to fix.
+  const slotsPerKey = Math.max(1, Math.min(AI_CONCURRENCY_PER_KEY, total));
+  const parallelCount = Math.min(keys.length * slotsPerKey, total);
+  const nextId = () => (cursor < ids.length ? ids[cursor++] : null);
+
+  async function worker(preferId) {
+    for (;;) {
+      if (run.cancel) return;
+      const id = nextId();
+      if (id == null) return;
+      active++;
+      if (onProgress) onProgress(doneCount, total, active, parallelCount);
+      const pg = state.pages.find(p => p.id === id);
+      if (!pg || !(pg.text || '').trim()) { doneCount++; active--; continue; }
+      const before = pg.text;
+      for (let tries = 0; ; ) {
+        try {
+          const r = await aiFixPage(pg, o, preferId);
+          if (pg.text !== before) break;                                 // edited meanwhile → drop
+          if (r.after === normNl(before)) { res.same++; pg.aiFixedHash = hashStr(before); }
+          else { res.ok++; onItem({ id: pg.id, i: state.pages.indexOf(pg), before, after: r.after, keyName: r.keyName }); }
+          break;
+        } catch (e) {
+          if (!(e instanceof AiError)) { res.failed++; res.lastErr = e; break; }
+          if (e.code === 'offline') { res.fatal = e; run.cancel = true; active--; return; }
+          if (e.code === 'key' && !aiKeyList().length) { res.fatal = e; run.cancel = true; active--; return; }
+          if (e.code === 'rate' && tries < 3 && !run.cancel) {
+            tries++;
+            for (let s = Math.min(e.wait || 30, 65); s > 0 && !run.cancel; s--) await aiSleep(1000);
+            continue;
+          }
+          if (e.code === 'guard') res.guard++; else res.failed++;
+          res.lastErr = e; break;
         }
-        if (e.code === 'guard') res.guard++; else res.failed++;
-        res.lastErr = e; break;
       }
+      doneCount++; active--;
+      if (onProgress) onProgress(doneCount, total, active, parallelCount);
+      if (cursor < ids.length) await aiSleep(AI_GAP_MS);                  // gentle pacing per worker, not global
     }
-    if (n < ids.length - 1) await aiSleep(AI_GAP_MS);
   }
+
+  // Each key runs slotsPerKey workers side by side, all pulling from the same shared cursor — so one
+  // key can already be fixing several pages at once, not just one key = one page at a time.
+  const jobs = [];
+  for (const k of keys) for (let s = 0; s < slotsPerKey; s++) jobs.push(worker(k.id));
+  await Promise.all(jobs);
   return res;
 }
 
 // ── Auto-fix right after a Space-workflow paste (opt-in, background, one page at a time) ──
 const _aiQ = []; let _aiQBusy = false;
 function aiAutoAfterPaste(pg) {
-  if (!pg || !aiOpts().auto || !aiKey() || isOffline()) return;
+  if (!pg || !aiOpts().auto || !aiKeyList().length || isOffline()) return;
   _aiQ.push(pg.id);
   if (!_aiQBusy) aiDrainQueue();
 }
@@ -4903,7 +5078,7 @@ async function aiDrainQueue() {
       const res = await aiRunPages([id], aiOpts(), { cancel: false }, c => items.push(c));
       if (items.length) {
         const r = applyTextChanges(items.map(c => ({ id: c.id, before: c.before, after: c.after })), 'AI fix');
-        if (r.applied) toast(L(`✨ Page ${items[0].i + 1} AI দিয়ে ঠিক হয়েছে`, `✨ Page ${items[0].i + 1} fixed by AI`), 'ok', 1800);
+        if (r.applied) toast(L(`✨ Page ${items[0].i + 1} AI দিয়ে ঠিক হয়েছে (আবার হবে না)`, `✨ Page ${items[0].i + 1} fixed by AI (won't repeat)`), 'ok', 2200);
       }
       if (res.fatal) {
         toast('❌ ' + aiErrText(res.fatal), 'err', 5000);
@@ -4915,15 +5090,31 @@ async function aiDrainQueue() {
 }
 
 // ── UI: the "✨ AI fix" tab inside Text tools ──
+function aiKeyRowHtml(rec) {
+  const cooling = (_aiCoolingUntil.get(rec.key) || 0) > Date.now();
+  const models = _aiModelsByKey.get(rec.key);
+  const statusTxt = cooling
+    ? '⏳ ' + L('Rate limit — অপেক্ষা করছে', 'Rate limited — waiting')
+    : (models ? '✅ ' + esc(models[0]) : L('যাচাই করা হয়নি', 'Not tested yet'));
+  return `<div class="ai-key-row" data-key-id="${esc(rec.id)}">
+    <div class="ai-key-info">
+      <input class="ai-key-name" data-tt="ai-rename" value="${esc(rec.name)}" aria-label="${L('Key-এর নাম', 'Key nickname')}">
+      <span class="tt-hint" style="margin:0">${aiMask(rec.key)} · ${statusTxt}</span>
+    </div>
+    <div class="dc-actions">
+      <button class="btn btn-secondary" data-tt="ai-test-one">${L('যাচাই', 'Test')}</button>
+      <button class="btn btn-secondary" data-tt="ai-delkey">✕</button>
+    </div>
+  </div>`;
+}
 function aiOptsHtml() {
-  const o = aiOpts(), k = aiKey();
+  const o = aiOpts(), keys = aiKeyList();
   const chk = (key, bn, en) => `<label class="tt-chk"><input type="checkbox" data-o="${key}" ${o[key] ? 'checked' : ''}> ${L(bn, en)}</label>`;
-  const keyBox = k
-    ? `<div class="tt-hint">✅ ${L('Key আছে', 'Key saved')} (${aiMask(k)})${_aiModels ? ' · ' + esc(_aiModels[0]) : ''}</div>
-       <div class="dc-actions"><button class="btn btn-secondary" data-tt="ai-test">${L('যাচাই', 'Test')}</button><button class="btn btn-secondary" data-tt="ai-delkey">${L('Key মুছুন', 'Remove key')}</button></div>`
-    : `<div class="tt-hint"><b>${L('বিনামূল্যে — ৩ ধাপ:', 'Free — 3 steps:')}</b><br>① ${L('নিচের বাটনে AI Studio খুলবে → Google account দিয়ে ঢুকে “Create API key” চাপুন', 'The button opens AI Studio → sign in with Google → press “Create API key”')}<br>② ${L('Key-টা copy করুন', 'Copy the key')}<br>③ ${L('এখানে ফিরে “Clipboard থেকে বসান” চাপুন (বা নিচে paste করুন)', 'Come back and press “Paste from clipboard” (or paste below)')}</div>
+  const keyBox = `<div class="tt-hint"><b>${L('বিনামূল্যে — ৩ ধাপ:', 'Free — 3 steps:')}</b><br>① ${L('নিচের বাটনে AI Studio খুলবে → Google account দিয়ে ঢুকে “Create API key” চাপুন', 'The button opens AI Studio → sign in with Google → press “Create API key”')}<br>② ${L('Key-টা copy করুন', 'Copy the key')}<br>③ ${L('এখানে ফিরে “Clipboard থেকে বসান” চাপুন (বা নিচে paste করুন)', 'Come back and press “Paste from clipboard” (or paste below)')}</div>
+       ${keys.length ? `<div class="ai-key-list">${keys.map(aiKeyRowHtml).join('')}</div>
+       <div class="tt-hint">${L('যত খুশি key যোগ করতে পারবেন (কোনো সীমা নেই) — সব key একসাথে (parallel) কাজ করবে, তাই যত বেশি key তত দ্রুত কাজ হবে। একটায় free limit ছুঁলে app নিজে নিজে সেটা সাময়িক বাদ দিয়ে বাকিগুলো দিয়ে চালিয়ে যাবে।', 'Add as many keys as you like (no limit) — all of them work at the same time (in parallel), so more keys means faster work. If one hits its free limit the app temporarily skips it and keeps going with the rest.')}</div>` : ''}
        <div class="ex-row"><button class="btn btn-secondary" data-tt="ai-getkey">① ${L('Key নিন (AI Studio)', 'Get key (AI Studio)')}</button><button class="btn btn-primary" data-tt="ai-paste">③ 📋 ${L('Clipboard থেকে বসান', 'Paste from clipboard')}</button></div>
-       <div class="ex-row"><input id="aiKeyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… / AIza…" aria-label="Gemini API key"><button class="btn btn-secondary" data-tt="ai-savekey">${L('সংরক্ষণ ও যাচাই', 'Save & check')}</button></div>
+       <div class="ex-row"><input id="aiKeyNameIn" type="text" autocomplete="off" placeholder="${L('নাম (যেমন: আমার Gmail)', 'Nickname (e.g. My Gmail)')}" aria-label="${L('Key-এর নাম', 'Key nickname')}" style="max-width:160px"><input id="aiKeyIn" type="password" autocomplete="off" spellcheck="false" placeholder="AQ.… / AIza…" aria-label="Gemini API key"><button class="btn btn-secondary" data-tt="ai-savekey">${keys.length ? L('নতুন key যোগ করুন', 'Add another key') : L('সংরক্ষণ ও যাচাই', 'Save & check')}</button></div>
        ${chk('remember', 'এই device-এ key মনে রাখো (বন্ধ থাকলে tab বন্ধ করলেই মুছে যাবে)', 'Remember the key on this device (off = forgotten when the tab closes)')}`;
   return keyBox
     + `<div class="tt-hint">🔒 ${L('Key শুধু এই browser-এ থাকে — Drive, backup বা export-এ যায় না। Page-এর text (ও ছবি) সরাসরি Google Gemini-তে যায়। Free tier-এ EEA/UK/Switzerland-এর বাইরে Google এই data নিজেদের product উন্নয়নে ব্যবহার করতে পারে — গোপন কিছু হলে এটা ব্যবহার করবেন না।', 'The key stays in this browser only — never in Drive, backups or exports. Page text (and image) goes straight to Google Gemini. On the free tier, outside the EEA/UK/Switzerland, Google may use this data to improve its products — do not use it for confidential material.')}</div>`
@@ -4938,38 +5129,58 @@ function aiReadOpts() {
   const m = $('aiMath'); if (m) o.math = m.value;
   return o;
 }
-async function aiTtAction(a) {
+async function aiTtAction(a, target) {
   const sum = $('ttSum');
   try {
     if (a === 'ai-stop') { if (state.aiRun) state.aiRun.cancel = true; return; }
     if (a === 'ai-getkey') { window.open('https://aistudio.google.com/apikey', '_blank', 'noopener'); return; }
-    if (a === 'ai-delkey') { if (confirm(L('এই device থেকে key মুছবেন?', 'Remove the key from this device?'))) { aiClearKey(); await renderTtTab(); } return; }
+    const row = target ? target.closest('[data-key-id]') : null;
+    const keyId = row ? row.dataset.keyId : null;
+    if (a === 'ai-delkey') {
+      if (confirm(L('এই key-টা মুছবেন?', 'Remove this key?'))) { aiRemoveKey(keyId); await renderTtTab(); }
+      return;
+    }
+    if (a === 'ai-rename') {
+      const inp = row ? row.querySelector('.ai-key-name') : null;
+      if (inp) aiRenameKey(keyId, inp.value);
+      return;
+    }
+    if (a === 'ai-test-one') {
+      const rec = aiKeyList().find(k => k.id === keyId);
+      if (!rec) return;
+      sum.textContent = L('যাচাই হচ্ছে…', 'Checking…');
+      const list = await aiModels(rec.key, true);
+      await renderTtTab();
+      $('ttSum').textContent = '✅ ' + esc(rec.name) + ' — ' + L('Key ঠিক আছে · model: ', 'works · model: ') + list[0];
+      return;
+    }
     let k;
-    if (a === 'ai-test') k = aiKey();
-    else if (a === 'ai-paste') {
+    if (a === 'ai-paste') {
       try { k = ((await navigator.clipboard.readText()) || '').trim(); } catch { sum.textContent = '⚠️ ' + L('Clipboard পড়া যায়নি — key নিচের ঘরে paste করুন', 'Cannot read the clipboard — paste the key in the box below'); return; }
     } else { const inp = $('aiKeyIn'); k = inp ? inp.value.trim() : ''; }
     if (!AI_KEY_RE.test(k)) { sum.textContent = '⚠️ ' + L('এটা key-এর মতো দেখাচ্ছে না (AQ. বা AIza দিয়ে শুরু হয়)', 'That does not look like a key (it starts with AQ. or AIza)'); return; }
+    if (aiKeyList().some(x => x.key === k)) { sum.textContent = '⚠️ ' + L('এই key আগে থেকেই যোগ করা আছে', 'This key is already added'); return; }
     sum.textContent = L('যাচাই হচ্ছে…', 'Checking…');
     const list = await aiModels(k, true);
-    if (a !== 'ai-test') { const r = document.querySelector('#ttOpts [data-o="remember"]'); aiSetKey(k, r ? r.checked : true); }
+    const nameInp = $('aiKeyNameIn'); const r = document.querySelector('#ttOpts [data-o="remember"]');
+    const rec = aiAddKey(k, nameInp ? nameInp.value : '', r ? r.checked : true);
     await renderTtTab();
-    $('ttSum').textContent = '✅ ' + L('Key ঠিক আছে · model: ', 'Key works · model: ') + list[0];
+    $('ttSum').textContent = '✅ ' + esc(rec.name) + ' — ' + L('Key ঠিক আছে · model: ', 'works · model: ') + list[0];
   } catch (e) { sum.textContent = '❌ ' + aiErrText(e); }
 }
 async function runAiPreview() {
   const sum = $('ttSum'), prev = $('ttPrev');
   if (state.aiRun) return;
   const o = aiReadOpts(); saveSetting(LS_AI_OPTS, JSON.stringify(o));
-  if (!aiKey()) { sum.textContent = '⚠️ ' + L('আগে Gemini key বসান', 'Add your Gemini key first'); return; }
+  if (!aiKeyList().length) { sum.textContent = '⚠️ ' + L('আগে Gemini key বসান', 'Add your Gemini key first'); return; }
   if (isOffline()) { sum.textContent = '⚠️ ' + AI_MSG.offline(); return; }
   const scope = ttScopeIdx();
-  const ids = state.pages.filter((p, i) => (!scope || scope.has(i)) && (p.text || '').trim() && (o.redo || _aiDone.get(p.id) !== hashStr(p.text))).map(p => p.id);
+  const ids = state.pages.filter((p, i) => (!scope || scope.has(i)) && (p.text || '').trim() && (o.redo || p.aiFixedHash !== hashStr(p.text))).map(p => p.id);
   if (!ids.length) { sum.textContent = '✅ ' + L('AI-fix করার মতো page নেই', 'No pages left to fix'); return; }
   const run = state.aiRun = { cancel: false }, changes = [];
   prev.innerHTML = `<button class="btn btn-secondary" data-tt="ai-stop">■ ${L('থামান', 'Stop')}</button>`;
   let res;
-  try { res = await aiRunPages(ids, o, run, c => changes.push(c), (n, t) => { const s = $('ttSum'); if (s) s.textContent = L(`AI চলছে… ${n}/${t}`, `AI running… ${n}/${t}`); }); }
+  try { res = await aiRunPages(ids, o, run, c => changes.push(c), (n, t, active, parallel) => { const s = $('ttSum'); if (s) s.textContent = parallel > 1 ? L(`AI চলছে… ${n}/${t} · ⚡ ${active}/${parallel}টি key একসাথে কাজ করছে`, `AI running… ${n}/${t} · ⚡ ${active}/${parallel} keys working in parallel`) : L(`AI চলছে… ${n}/${t}`, `AI running… ${n}/${t}`); }); }
   finally { state.aiRun = null; }
   if (!$('ttDlg')) return;                                               // dialog was closed meanwhile
   prev.innerHTML = '';
@@ -5288,7 +5499,7 @@ function openOcrDlg() {
 }
 function renderPhase6UI() {
   const b = $('ocrBtnTxt'); if (b) b.textContent = L('Auto-OCR…', 'Auto-OCR…');
-  const ai = $('aiFixBtnTxt'); if (ai) ai.textContent = L('AI fix…', 'AI fix…');
+  const ai = $('aiFixBtnTxt'); if (ai) ai.textContent = '✨ ' + L('AI fix…', 'AI fix…');
 }
 $('ocrBtn').onclick = () => openOcrDlg();
 
@@ -5967,7 +6178,7 @@ function buildBackupZip(zip, projects) {
       return Object.assign({}, p, { image });
     });
     zip.file(dir + '/project.json', buildProjectJson(pr.meta, pages));
-    zip.file(dir + '/text.txt', pages.map((p, i) => (p.text ? '=== Page ' + (i + 1) + ' — ' + p.name + ' ===\n' + p.text : null)).filter(Boolean).join('\n\n'));
+    zip.file(dir + '/text.txt', pages.map((p, i) => (p.text ? '=== Page ' + (i + 1) + ' — ' + p.name + aiTag(p) + ' ===\n' + p.text : null)).filter(Boolean).join('\n\n'));
   });
   zip.file('manifest.json', JSON.stringify({ format: BACKUP_FORMAT, v: 1, exportedAt: Date.now(), projects: dirs }, null, 2));
   return zip;
@@ -6458,7 +6669,9 @@ function renderStrip(opts) {
     const thumbContent = pg.txtOnly
       ? `<div class="pt-img" style="display:flex;align-items:center;justify-content:center;background:var(--card2);aspect-ratio:.7;color:var(--accent);">${IC('file')}</div>`
       : `<img class="pt-img" src="${pg.url}" alt="page ${i+1}" draggable="false" loading="lazy" decoding="async"/>`;
+    const aiFixedNow = pg.aiFixedHash && pg.aiFixedHash === hashStr(pg.text || '');
     el.innerHTML = `
+      ${aiFixedNow ? `<div class="pt-ai-ribbon" title="${L('AI দিয়ে ঠিক হয়েছে — আবার করবে না', 'Fixed by AI — will not be re-run')}">✨ Gemini AI</div>` : ''}
       ${thumbContent}
       ${(pg.bookmark || pg.note) ? `<div class="pt-marks">${pg.bookmark ? `<span class="pt-badge bm" title="${L('Bookmark', 'Bookmark')}">${IC('bookmark')}</span>` : ''}${pg.note ? `<span class="pt-badge note" title="${esc(pg.note.slice(0, 80))}">${IC('note')}</span>` : ''}</div>` : ''}
       <div class="pt-foot">
@@ -6466,6 +6679,7 @@ function renderStrip(opts) {
         ${pg.possibleDupOf ? `<span class="pt-badge possible-dup" title="${L('সম্ভাব্য duplicate', 'Possible duplicate')}">⚠️ dup?</span>` : ''}
         ${isFlagged(pg) ? `<span class="pt-badge flagged" title="${esc(flagsText(pg))}">⚠️</span>` : ''}
         ${pg.reviewed && pg.status === 'done' && (pg.flags || []).length ? `<span class="pt-badge reviewed" title="${L('Review হয়েছে', 'Reviewed')}">✔</span>` : ''}
+        ${aiFixedNow ? `<span class="pt-badge ai-fixed" title="${L('AI দিয়ে ঠিক হয়েছে — আবার করবে না', 'Fixed by AI — will not be re-run')}">✨ AI</span>` : ''}
         <span class="pt-badge ${pg.status}">${statusLabel(pg.status)}</span>
       </div>
       ${pg.status === 'uploading' ? '<div class="pt-progress"></div>' : ''}
@@ -6577,7 +6791,7 @@ function updateStats() {
   const allDone = done === total && total > 0;
   chip.className = `chip chip-done${allDone ? ' all-done' : ''}`;
   chip.textContent = allDone ? `✓ ${done}/${total} Done` : `${done}/${total} Done`;
-  const texts = state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean);
+  const texts = state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name, ai: aiTag(p) })}\n${p.text}` : null).filter(Boolean);
   if (texts.length) {
     resultsSection.classList.remove('hidden');
     const full = texts.join('\n\n');
@@ -7055,7 +7269,7 @@ async function copyText(txt) {
   }
 }
 function buildAllText() {
-  return state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name })}\n${p.text}` : null).filter(Boolean).join('\n\n');
+  return state.pages.map((p, i) => p.text ? `${t('pageBlock', { num: i+1, name: p.name, ai: aiTag(p) })}\n${p.text}` : null).filter(Boolean).join('\n\n');
 }
 function buildMergedText() {
   return state.pages.map(p => (p.text || '').trim()).filter(Boolean).join('\n\n');
