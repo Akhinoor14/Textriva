@@ -492,3 +492,16 @@ imgbb stays the primary image host. Nothing for Phase 7 is in the code. Do not a
 **Manual test:** see README → "Performance test plan (300-page PDF)". Plus: share 3 photos from the gallery → pages appear; 📷 Scan page → new page appended; airplane mode → app still opens.
 
 **Resume point:** Phase 10 — Code health (split into ES modules, a11y, ARCHITECTURE.md, CONTRIBUTING.md). Run the full suite before and after; behaviour must stay identical.
+
+---
+
+## Phase 10b — AI multi-provider, live progress, key usage, encrypted key backup (done)
+
+- **Providers:** Gemini + Groq, OpenRouter, Mistral, Cerebras in one key pool (provider detected from the key; per-key 3 parallel pages; automatic fallback on limit).
+- **Live progress:** % / elapsed / remaining, per-key colour + letter, page cells coloured by key, background chip.
+- **Prompt:** arithmetic check, neighbour-page context, final audit call when the AI adds numbers (⚠️ in preview).
+- **Key usage (new):** per key, today's requests + tokens, 7-day mini chart, total, last used, approx. free-cap bar (Groq/OpenRouter/Cerebras), status (ready / rate-limited / daily limit used / invalid). Stored in `textriva-ai-usage` (this browser only).
+- **Encrypted key backup (new):** manual *Save to Drive* / *Restore from Drive*; AES-GCM, PBKDF2-SHA256 (250k); file `textriva-ai-keys.json` in the Drive `Textriva` folder; passphrase never leaves the device. No new OAuth scope.
+- **Not verified live:** the four non-Gemini providers from a real browser (CORS) and the prompt quality on real pages.
+- **Deliberately skipped:** Cloudflare Workers AI (needs an Account ID + unverified browser CORS → more to maintain).
+- **Known stale tests:** `tests/groups.test.mjs` (12 tests) belongs to a Library-groups UI removed in commit 94bba3c; they fail by design until deleted or the feature returns.
