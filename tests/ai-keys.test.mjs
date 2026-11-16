@@ -65,6 +65,10 @@ test('Drive backup: save, then restore on a fresh device merges without duplicat
   assert.equal(a.aiKeyList().map(k => k.provider).sort().join(), 'gemini,groq');
   assert.equal(JSON.stringify(await a.aiKeysFromDrive('my passphrase')), JSON.stringify({ added: 0, total: 2 }));   // nothing duplicated
 });
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
 
 test('pause: a paused key is never used, stays in the list, can be switched on again; "at once" limits the workers', async () => {
   const w = withCrypto(await bootApp()); const a = w.__app;
@@ -86,3 +90,8 @@ test('pause: a paused key is never used, stays in the list, can be switched on a
   await assert.rejects(() => a.aiGenerateAnyKey(mk, false), e => e.code === 'key');
   assert.equal(a.aiPar({ par: 2 }), 2); assert.equal(a.aiPar({ par: 9 }), 3); assert.equal(a.aiPar({}), 3);
 });
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2

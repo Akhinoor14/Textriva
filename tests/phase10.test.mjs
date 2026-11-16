@@ -329,7 +329,14 @@ test('auto mode is ON by default: a fresh paste/OCR page is fixed in the backgro
   const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE]);
   const calls = mock(w, () => reply(AFTER));
   a.aiAddKey(KEY, 'k1', true);
+<<<<<<< HEAD
   w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ auto: false, autoV2: true, useImage: false }));
+=======
+<<<<<<< HEAD
+  w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ auto: false, autoV2: true, useImage: false }));
+=======
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
   a.aiAutoAfterPaste(a.state.pages[0]); await tick(50);
   assert.equal(calls.length, 0, 'explicitly turned off → nothing runs');
   w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ useImage: false }));        // old saved options (no marker) → on
@@ -338,6 +345,10 @@ test('auto mode is ON by default: a fresh paste/OCR page is fixed in the backgro
   assert.equal(a.state.pages[0].text, AFTER);
 });
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
 test('auto mode: a ✨ AI page is never re-run (Save keeps human edits), but a fresh paste on it is fixed again; queue does not double up', async () => {
   const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE]);
   const calls = mock(w, () => reply(AFTER));
@@ -403,13 +414,26 @@ test('auto mode: single pages arriving one by one are spread round-robin over th
   assert.ok(used[0] >= 2 && used[1] >= 2, 'both keys used: ' + used);
 });
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
 test('wiring: menu button, CSP (all providers) and service-worker cache are updated', async () => {
   const { readFileSync } = await import('node:fs');
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /id="aiFixBtn"/);
   const csp = readFileSync(new URL('../vercel.json', import.meta.url), 'utf8');
   for (const h of ['generativelanguage.googleapis.com', 'api.groq.com', 'openrouter.ai', 'api.mistral.ai', 'api.cerebras.ai']) assert.match(csp, new RegExp('connect-src[^"]*https://' + h.replace(/\./g, '\\.')), h);
+<<<<<<< HEAD
   assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v28/);
+=======
+<<<<<<< HEAD
+  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v28/);
+=======
+  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v24/);
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
 });
 
 test('prompt carries the book-cleaning rules: markers, Sol→সমাধান, watermarks, no guessing, real examples, backslashes intact', async () => {

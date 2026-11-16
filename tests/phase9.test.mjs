@@ -111,5 +111,13 @@ test('wiring: manifest share_target, SW share + CDN caching, share cache survive
   assert.match(sw, /k !== 'textriva-share'/);
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /pdfPagesToLoad\(numPages\)/); assert.match(html, /page\.cleanup\(\)/);
+<<<<<<< HEAD
   assert.match(sw, /textriva-v28/);
+=======
+<<<<<<< HEAD
+  assert.match(sw, /textriva-v28/);
+=======
+  assert.match(sw, /textriva-v24/);
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
+>>>>>>> ac623b98f00479a83be99addbaba6c4b29681fb2
 });
