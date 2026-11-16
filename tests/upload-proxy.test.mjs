@@ -123,3 +123,24 @@ test('GET ?status reports key counts, never key values', withKeys(['SECRETKEY5',
   assert.equal(res.statusCode, 200); assert.equal(res.body.keysConfigured, 2);
   assert.ok(!JSON.stringify(res.body).includes('SECRET'));
 }));
+
+test('status: per-key name/state/counters, no key values; STATUS_TOKEN protects it', withKeys(['SECRETKEY7', 'BADKEY7'], async () => {
+  globalThis.fetch = async url => /key=BADKEY7/.test(url) ? imgbb(400, { error: { message: 'Invalid API v1 key.', code: 100 } }) : OK;
+  for (let i = 0; i < 3; i++) await post();
+  const res = mockRes();
+  await handler({ method: 'GET', url: '/api/upload?status', headers: {}, socket: {} }, res);
+  const names = res.body.keys.map(k => k.name);
+  assert.deepEqual(names.sort(), ['IMGBB_KEY', 'IMGBB_KEY_2']);
+  const bad = res.body.keys.find(k => k.name === 'IMGBB_KEY_2');
+  assert.equal(bad.state, 'invalid');
+  const good = res.body.keys.find(k => k.name === 'IMGBB_KEY');
+  assert.ok(good.uploaded >= 1);
+  assert.ok(!JSON.stringify(res.body).includes('SECRETKEY') && !JSON.stringify(res.body).includes('BADKEY'));
+  process.env.STATUS_TOKEN = 'tok123';
+  try {
+    const r1 = mockRes(); await handler({ method: 'GET', url: '/api/upload?status', headers: {}, socket: {} }, r1);
+    assert.equal(r1.statusCode, 401);
+    const r2 = mockRes(); await handler({ method: 'GET', url: '/api/upload?status&token=tok123', headers: {}, socket: {} }, r2);
+    assert.equal(r2.statusCode, 200);
+  } finally { delete process.env.STATUS_TOKEN; }
+}));

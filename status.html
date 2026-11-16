@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Textriva — Upload key status</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#16181d; --muted:#6b7280; --line:#e5e7eb; --ok:#15803d; --warn:#b45309; --bad:#b91c1c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#181b22; --text:#e8eaee; --muted:#9aa3b2; --line:#2a2f3a; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); padding:16px; }
+  main { max-width:760px; margin:0 auto; }
+  h1 { font-size:20px; margin:4px 0 2px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:14px; }
+  .sum { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+  .sum div { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center; }
+  .sum b { display:block; font-size:22px; }
+  .sum span { font-size:12px; color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .name { font-family:ui-monospace,Consolas,monospace; font-weight:600; }
+  .pill { font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; border:1px solid currentColor; }
+  .ready { color:var(--ok); } .cooling { color:var(--warn); } .invalid { color:var(--bad); }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px; font-size:13px; }
+  .grid div { color:var(--muted); } .grid b { display:block; color:var(--text); font-size:16px; }
+  .err { margin-top:8px; font-size:12px; color:var(--muted); word-break:break-word; }
+  .bar { display:flex; gap:8px; align-items:center; margin:12px 0; flex-wrap:wrap; }
+  button, input { font:inherit; padding:6px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); }
+  button { cursor:pointer; }
+  .msg { padding:12px; border-radius:10px; background:var(--card); border:1px solid var(--line); }
+  @media (max-width:520px) { .sum, .grid { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Upload key status</h1>
+  <div class="sub">imgbb key-র অবস্থা · ১০ সেকেন্ড পর পর নিজে আপডেট হয় · <span id="upd">—</span></div>
+  <div class="bar">
+    <input id="tok" type="password" placeholder="token (লাগলে)" size="14">
+    <button id="go">দেখাও</button>
+    <label><input id="auto" type="checkbox" checked> auto refresh</label>
+  </div>
+  <div id="out"><div class="msg">লোড হচ্ছে…</div></div>
+  <p class="sub" id="note"></p>
+</main>
+<script>
+(function () {
+  var out = document.getElementById('out'), upd = document.getElementById('upd'), note = document.getElementById('note');
+  var tok = document.getElementById('tok'), auto = document.getElementById('auto');
+  try { tok.value = sessionStorage.getItem('st_tok') || ''; } catch (e) {}
+  var STATE = { ready: 'ready — চালু', cooling: 'cooling — limit খেয়েছে', invalid: 'invalid — ভুল key' };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+  function ago(n) { if (n == null) return '—'; if (n < 90) return n + ' সেকেন্ড আগে'; if (n < 5400) return Math.round(n / 60) + ' মিনিট আগে'; return Math.round(n / 3600) + ' ঘণ্টা আগে'; }
+  function render(d) {
+    var h = '<div class="sum">' +
+      '<div><b>' + d.keysConfigured + '</b><span>মোট key</span></div>' +
+      '<div><b class="ready">' + d.ready + '</b><span>ready</span></div>' +
+      '<div><b class="cooling">' + d.coolingDown + '</b><span>cooling</span></div>' +
+      '<div><b class="invalid">' + d.invalid + '</b><span>invalid</span></div></div>';
+    (d.keys || []).forEach(function (k) {
+      h += '<div class="card"><div class="row"><span class="name">' + esc(k.name) + '</span>' +
+        '<span class="pill ' + esc(k.state) + '">' + esc(STATE[k.state] || k.state) +
+        (k.retryInSec ? ' · ' + k.retryInSec + 's' : '') + '</span></div>' +
+        '<div class="grid"><div><b>' + k.uploaded + '</b>upload সফল</div>' +
+        '<div><b>' + k.rateLimited + '</b>limit খেয়েছে</div>' +
+        '<div><b>' + k.invalidHits + '</b>invalid বার্তা</div>' +
+        '<div><b>' + k.otherErrors + '</b>অন্য error</div></div>' +
+        '<div class="err">শেষ সফল: ' + ago(k.lastOkAgoSec) +
+        (k.lastError ? ' · শেষ error: ' + esc(k.lastError) + ' (' + ago(k.lastErrorAgoSec) + ')' : '') + '</div></div>';
+    });
+    if (!d.keys || !d.keys.length) h += '<div class="msg">কোনো imgbb key সেট করা নেই।</div>';
+    out.innerHTML = h;
+    note.textContent = 'হিসাব শুধু বর্তমান server instance-এর; instance বদলালে বা restart হলে শূন্য থেকে শুরু হয়।';
+  }
+  function load() {
+    var t = tok.value.trim(), url = '/api/upload?status' + (t ? '&token=' + encodeURIComponent(t) : '');
+    fetch(url, { cache: 'no-store' }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+      .then(function (x) {
+        if (x.s === 401) { out.innerHTML = '<div class="msg">Token লাগবে — উপরের ঘরে বসাও।</div>'; return; }
+        if (!x.j || !x.j.success) { out.innerHTML = '<div class="msg">উত্তর বোঝা যায়নি: ' + esc(x.j && x.j.error) + '</div>'; return; }
+        render(x.j); upd.textContent = new Date().toLocaleTimeString();
+      })
+      .catch(function () { out.innerHTML = '<div class="msg">সার্ভারে পৌঁছানো যাচ্ছে না।</div>'; });
+  }
+  document.getElementById('go').onclick = function () { try { sessionStorage.setItem('st_tok', tok.value); } catch (e) {} load(); };
+  setInterval(function () { if (auto.checked && !document.hidden) load(); }, 10000);
+  load();
+})();
+</script>
+</body>
+</html>

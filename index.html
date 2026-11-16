@@ -1029,6 +1029,24 @@ textarea.ai-wait { opacity:.65; }
   background: var(--accent-gl); border:1px solid var(--accent);
 }
 .lib-banner-txt { flex:1; min-width:200px; font-size:.82rem; color:var(--text); line-height:1.6 }
+#keyModal .modal { max-width:560px; max-height:88vh; display:flex; flex-direction:column }
+#keyModal .modal-body { overflow:auto; flex:1; padding:1rem }
+#keyBadge { display:inline-block !important; }
+#keyBadge.k-ok { color:var(--green); border-color:var(--green); }
+#keyBadge.k-warn { color:var(--yellow); border-color:var(--yellow); }
+#keyBadge.k-bad { color:var(--red); border-color:var(--red); }
+.k-sum { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; margin-bottom:.8rem; text-align:center }
+.k-sum div { background:var(--card2); border:1px solid var(--line); border-radius:var(--r-sm); padding:.5rem .3rem; font-size:.7rem; color:var(--mid) }
+.k-sum b { display:block; font-size:1.2rem; color:var(--text) }
+.k-card { background:var(--card2); border:1px solid var(--line); border-radius:var(--r-sm); padding:.65rem .85rem; margin-bottom:.55rem }
+.k-row { display:flex; justify-content:space-between; align-items:center; gap:.5rem; flex-wrap:wrap }
+.k-name { font-family:var(--font-mono); font-weight:700; font-size:.8rem }
+.k-pill { font-size:.66rem; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid currentColor }
+.k-pill.ready { color:var(--green) } .k-pill.cooling { color:var(--yellow) } .k-pill.invalid { color:var(--red) }
+.k-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.4rem; margin-top:.55rem; font-size:.68rem; color:var(--mid) }
+.k-grid b { display:block; font-size:.95rem; color:var(--text) }
+.k-err { margin-top:.45rem; font-size:.68rem; color:var(--mid); word-break:break-word }
+@media (max-width:520px){ .k-sum, .k-grid { grid-template-columns:repeat(2,1fr) } }
 #libModal .modal { max-width:720px; max-height:88vh; display:flex; flex-direction:column }
 #flowBtn.waiting-copy { opacity:.7; animation: tx-pulse 1.1s ease-in-out infinite; }
 @keyframes tx-pulse { 0%,100%{opacity:.7} 50%{opacity:1} }
@@ -1232,6 +1250,11 @@ body.has-toast .work-bar { bottom:calc(1.25rem + var(--toast-stack-h, 0px) + .5r
         <button class="hdr-ctl" id="libBtn" title="Library" aria-label="Library">
           <span class="hdr-ctl-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
           <span class="hdr-ctl-label" id="libBtnLabel">Library</span>
+        </button>
+        <button class="hdr-ctl" id="keyBtn" title="Upload keys" aria-label="Upload key status">
+          <span class="hdr-ctl-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9"/><path d="M16 7l3 3"/></svg></span>
+          <span class="hdr-ctl-label">Keys</span>
+          <span class="hdr-ctl-badge" id="keyBadge">–</span>
         </button>
         <button class="hdr-ctl" id="acctBtn" title="Google sign in" aria-label="Google sign in">
           <span class="hdr-ctl-ico" id="acctIco"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span>
@@ -1587,6 +1610,23 @@ body.has-toast .work-bar { bottom:calc(1.25rem + var(--toast-stack-h, 0px) + .5r
         <button class="btn btn-secondary lib-tab" id="tabDrive">Google Drive</button>
       </div>
       <div id="libContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD KEY STATUS MODAL -->
+<div class="modal-bg" id="keyModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <span class="modal-title-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9"/><path d="M16 7l3 3"/></svg></span>
+        <span id="keyTitle">Upload key status</span>
+      </div>
+      <button class="modal-close" id="keyClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="keyContent"></div>
+      <div class="lib-note" id="keyNote" style="margin-top:.7rem"></div>
     </div>
   </div>
 </div>
@@ -3207,6 +3247,55 @@ $('libContent').addEventListener('click', async e => {
 });
 $('tabLocal').onclick = () => { libTab = 'local'; renderLib(); };
 $('tabDrive').onclick = () => { libTab = 'drive'; renderLib(); };
+// ── Upload key status (imgbb) — মেইন পেজেই দেখা যায়; নতুন key বসালে নিজে থেকেই তালিকায় আসে ──
+let _keyData = null, _keyTimer = null;
+const _kEsc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function _kAgo(n) { if (n == null) return '—'; if (n < 90) return n + L(' সেকেন্ড আগে', 's ago'); if (n < 5400) return Math.round(n / 60) + L(' মিনিট আগে', ' min ago'); return Math.round(n / 3600) + L(' ঘণ্টা আগে', ' h ago'); }
+function renderKeyBadge() {
+  const b = $('keyBadge'); if (!b) return;
+  b.classList.remove('k-ok', 'k-warn', 'k-bad');
+  if (!_keyData || !_keyData.success) { b.textContent = '–'; return; }
+  b.textContent = _keyData.ready + '/' + _keyData.keysConfigured;
+  b.classList.add(_keyData.keysConfigured === 0 || _keyData.ready === 0 ? 'k-bad' : (_keyData.invalid > 0 || _keyData.coolingDown > 0 ? 'k-warn' : 'k-ok'));
+  $('keyBtn').title = L('Upload key — ' + _keyData.ready + ' ready / ' + _keyData.keysConfigured, 'Upload keys — ' + _keyData.ready + ' ready of ' + _keyData.keysConfigured);
+}
+function renderKeyModal() {
+  const box = $('keyContent'), d = _keyData;
+  $('keyTitle').textContent = L('Upload key-র অবস্থা', 'Upload key status');
+  if (!d) { box.innerHTML = '<div class="lib-note">' + L('লোড হচ্ছে…', 'Loading…') + '</div>'; return; }
+  if (d.error) { box.innerHTML = '<div class="lib-note">' + _kEsc(d.error) + '</div>'; $('keyNote').textContent = ''; return; }
+  const STATE = { ready: L('চালু', 'ready'), cooling: L('limit খেয়েছে', 'cooling'), invalid: L('ভুল key', 'invalid') };
+  let h = '<div class="k-sum"><div><b>' + d.keysConfigured + '</b>' + L('মোট key', 'keys') + '</div><div><b style="color:var(--green)">' + d.ready + '</b>ready</div><div><b style="color:var(--yellow)">' + d.coolingDown + '</b>cooling</div><div><b style="color:var(--red)">' + d.invalid + '</b>invalid</div></div>';
+  (d.keys || []).forEach(k => {
+    h += '<div class="k-card"><div class="k-row"><span class="k-name">' + _kEsc(k.name) + '</span><span class="k-pill ' + _kEsc(k.state) + '">' + _kEsc(STATE[k.state] || k.state) + (k.retryInSec ? ' · ' + k.retryInSec + 's' : '') + '</span></div>' +
+      '<div class="k-grid"><div><b>' + k.uploaded + '</b>' + L('সফল upload', 'uploaded') + '</div><div><b>' + k.rateLimited + '</b>' + L('limit খেয়েছে', 'rate-limited') + '</div><div><b>' + k.invalidHits + '</b>' + L('invalid বার্তা', 'invalid hits') + '</div><div><b>' + k.otherErrors + '</b>' + L('অন্য error', 'other errors') + '</div></div>' +
+      '<div class="k-err">' + L('শেষ সফল: ', 'Last OK: ') + _kAgo(k.lastOkAgoSec) + (k.lastError ? ' · ' + L('শেষ error: ', 'Last error: ') + _kEsc(k.lastError) + ' (' + _kAgo(k.lastErrorAgoSec) + ')' : '') + '</div></div>';
+  });
+  if (!(d.keys || []).length) h += '<div class="lib-note">' + L('কোনো imgbb key সেট করা নেই। Vercel-এ IMGBB_KEY বসাও।', 'No imgbb key is configured. Set IMGBB_KEY in Vercel.') + '</div>';
+  box.innerHTML = h;
+  $('keyNote').textContent = L('নতুন key (IMGBB_KEY_4, _5 … _20) Vercel-এ বসিয়ে Redeploy করলে এখানে নিজে থেকেই আসবে। হিসাব বর্তমান server instance-এর, restart হলে শূন্য থেকে শুরু।', 'New keys (IMGBB_KEY_4, _5 … _20) appear here automatically after you add them in Vercel and redeploy. Counts are per server instance and reset on restart.');
+}
+async function pollKeyStatus() {
+  if (!navigator.onLine) return;
+  try {
+    const r = await fetch('/api/upload?status', { cache: 'no-store' });
+    if (r.status === 401) _keyData = { error: L('Status বন্ধ করা আছে (STATUS_TOKEN সেট)। এখানে দেখতে চাইলে Vercel থেকে STATUS_TOKEN মুছো।', 'Status is locked (STATUS_TOKEN is set). Remove it in Vercel to see it here.') };
+    else { const j = await r.json(); _keyData = (j && j.success) ? j : null; }
+  } catch (e) { _keyData = null; }
+  try {   // page may be torn down (tests / navigation) while the request was in flight
+    renderKeyBadge();
+    if ($('keyModal').classList.contains('open')) renderKeyModal();
+  } catch (e) { /* ignore */ }
+}
+function openKeyModal() { $('keyModal').classList.add('open'); renderKeyModal(); pollKeyStatus(); clearInterval(_keyTimer); _keyTimer = setInterval(() => { if (!document.hidden) pollKeyStatus(); }, 10000); }
+function closeKeyModal() { $('keyModal').classList.remove('open'); clearInterval(_keyTimer); _keyTimer = null; }
+$('keyBtn').onclick = openKeyModal;
+$('keyClose').onclick = closeKeyModal;
+$('keyModal').onclick = e => { if (e.target === $('keyModal')) closeKeyModal(); };
+pollKeyStatus();
+setInterval(() => { try { if (!document.hidden && !$('keyModal').classList.contains('open')) pollKeyStatus(); } catch (e) {} }, 30000);
+window.addEventListener('online', pollKeyStatus);
+
 $('libBtn').onclick = () => openLib('local');
 $('libClose').onclick = closeLib;
 $('libModal').onclick = e => { if (e.target === $('libModal')) closeLib(); };

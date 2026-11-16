@@ -38,7 +38,7 @@ function getKeys() {
   const list = [];
   if (process.env.IMGBB_KEYS) list.push(...process.env.IMGBB_KEYS.split(','));
   list.push(process.env.IMGBB_KEY);
-  for (let i = 2; i <= 10; i++) list.push(process.env['IMGBB_KEY_' + i]);
+  for (let i = 2; i <= 20; i++) list.push(process.env['IMGBB_KEY_' + i]);
   return [...new Set(list.map(k => (k || '').trim()).filter(Boolean))];
 }
 
@@ -52,6 +52,20 @@ function classify(status, msg) {
   if (status === 429 || /rate.?limit|too many|limit reached/i.test(msg)) return 'rate';
   if (status === 401 || status === 403 || /invalid.*key|key.*invalid|api key/i.test(msg)) return 'badkey';
   return 'other';
+}
+
+// ── প্রতি key-র হিসাব (শুধু এই serverless instance-এর মেমরিতে; key-র মান কখনো রাখা/দেখানো হয় না) ──
+const keyStats = globalThis.__textrivaKeyStats || (globalThis.__textrivaKeyStats = new Map());
+function statOf(key) {
+  let st = keyStats.get(key);
+  if (!st) keyStats.set(key, st = { ok: 0, rate: 0, bad: 0, other: 0, lastOkAt: 0, lastErrAt: 0, lastErr: '' });
+  return st;
+}
+function keyLabel(key) {
+  const names = ['IMGBB_KEY', ...Array.from({ length: 19 }, (_, i) => 'IMGBB_KEY_' + (i + 2))];
+  for (const n of names) if ((process.env[n] || '').trim() === key) return n;
+  const i = getKeys().indexOf(key);
+  return 'IMGBB_KEYS #' + (i + 1);
 }
 
 function orderedKeys(keys) {
@@ -86,14 +100,36 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method === 'GET' && /(^|[?&])status(=|&|$)/.test(String(req.url || ''))) {
-    // নিরাপদ নির্ণয়: কয়টা key সেট, কয়টা ready — key-র মান কখনো দেখানো হয় না
+    // নিরাপদ নির্ণয়: key-র মান কখনো দেখানো হয় না, শুধু নাম (IMGBB_KEY_2) ও অবস্থা।
+    // STATUS_TOKEN সেট থাকলে ?status&token=... ছাড়া দেখা যাবে না।
+    const need = (process.env.STATUS_TOKEN || '').trim();
+    if (need) {
+      const m = /[?&]token=([^&]*)/.exec(String(req.url || ''));
+      if (!m || decodeURIComponent(m[1]) !== need) return res.status(401).json({ success: false, error: 'Token required' });
+    }
+    res.setHeader('Cache-Control', 'no-store');
     const ks = getKeys(), now = Date.now();
+    const rows = ks.map(k => {
+      const st = statOf(k);
+      const bad = (keyBad.get(k) || 0) > now, cool = (keyCooldown.get(k) || 0) > now;
+      return {
+        name: keyLabel(k),
+        state: bad ? 'invalid' : cool ? 'cooling' : 'ready',
+        retryInSec: bad ? Math.ceil((keyBad.get(k) - now) / 1000) : cool ? Math.ceil((keyCooldown.get(k) - now) / 1000) : 0,
+        uploaded: st.ok, rateLimited: st.rate, invalidHits: st.bad, otherErrors: st.other,
+        lastOkAgoSec: st.lastOkAt ? Math.round((now - st.lastOkAt) / 1000) : null,
+        lastError: st.lastErr || null,
+        lastErrorAgoSec: st.lastErrAt ? Math.round((now - st.lastErrAt) / 1000) : null,
+      };
+    });
     return res.status(200).json({
       success: true,
       keysConfigured: ks.length,
-      ready: ks.filter(k => (keyCooldown.get(k) || 0) <= now && (keyBad.get(k) || 0) <= now).length,
-      coolingDown: ks.filter(k => (keyCooldown.get(k) || 0) > now).length,
-      invalid: ks.filter(k => (keyBad.get(k) || 0) > now).length,
+      ready: rows.filter(r => r.state === 'ready').length,
+      coolingDown: rows.filter(r => r.state === 'cooling').length,
+      invalid: rows.filter(r => r.state === 'invalid').length,
+      keys: rows,
+      note: 'Counts are per serverless instance and reset when it recycles.',
     });
   }
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
@@ -146,6 +182,7 @@ export default async function handler(req, res) {
         raw = await imgbbRes.text();
       } catch (e) {
         sawOther = true;
+        { const st = statOf(key); st.other++; st.lastErrAt = Date.now(); st.lastErr = 'network/timeout'; }
         lastMsg = 'network/timeout';
         console.error('imgbb fetch failed (key #' + (keys.indexOf(key) + 1) + '):', e.message || e);
         continue;   // পরের key-তে চেষ্টা
@@ -155,6 +192,7 @@ export default async function handler(req, res) {
       try { data = JSON.parse(raw); } catch (_) { /* non-JSON */ }
 
       if (data && data.success) {
+        { const st = statOf(key); st.ok++; st.lastOkAt = Date.now(); }
         return res.status(200).json({ success: true, url: data.data.url });
       }
 
@@ -163,6 +201,7 @@ export default async function handler(req, res) {
       lastMsg = msg;
       console.error('imgbb failure (key #' + (keys.indexOf(key) + 1) + '/' + keys.length + '):',
         imgbbRes.status, msg, String(raw).slice(0, 200).replace(/key=[^&\s]+/g, 'key=***'));
+      { const st = statOf(key); st[kind === 'rate' ? 'rate' : kind === 'badkey' ? 'bad' : 'other']++; st.lastErrAt = Date.now(); st.lastErr = String(msg).slice(0, 80); }
       if (kind === 'rate') { sawRate = true; keyCooldown.set(key, Date.now() + KEY_COOLDOWN_MS); }
       else if (kind === 'badkey') { sawBad = true; keyBad.set(key, Date.now() + KEY_BAD_MS); }
       else sawOther = true;
