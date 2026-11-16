@@ -1,7 +1,0 @@
-name = "textriva"
-compatibility_date = "2024-01-01"
-pages_build_output_dir = "."
-
-# IMGBB_KEY secret set করতে হবে Dashboard থেকে:
-# Pages → textriva → Settings → Environment Variables
-# Name: IMGBB_KEY | Value: তোমার key | Encrypt: ✅ ON
