@@ -79,13 +79,25 @@ Scope শুধু `drive.file` — অ্যাপ কেবল নিজের
 
 `GOOGLE_CLIENT_ID` ফাঁকা থাকলে Drive অংশ বন্ধ থাকে, কিন্তু local Library পুরোপুরি চলে।
 
-## ✨ AI fix (Phase 10) — Gemini, প্রত্যেকে নিজের free key
+## ✨ AI fix (Phase 10) — Gemini + Groq/OpenRouter/Mistral/Cerebras, প্রত্যেকে নিজের free key
 
-OCR-এর ভাঙা অক্ষর/শব্দ, line wrap, formatting ও math sign ঠিক করে। **Provider একটাই: Gemini**; model ভেতরে নিজে বাছাই হয় (নতুন Flash → ছোট Flash → Flash-Lite, limit পেলে পরেরটায়)।
+OCR-এর ভাঙা অক্ষর/শব্দ, line wrap, formatting ও math sign ঠিক করে। **Gemini** আগের মতোই প্রধান (model নিজে বাছাই হয়: নতুন Flash → ছোট Flash → Flash-Lite)। এর সাথে **Groq, OpenRouter, Mistral, Cerebras**-এর free key-ও একই পুলে যোগ করা যায়; provider key দেখে নিজে চেনে, এক key-র limit শেষ হলে পরেরটায় যায়। Cerebras শুধু text, বাকিদের কিছু model ছবিও বোঝে। সব key এক পুলে: প্রতি key-তে ৩টা page একসাথে চলে।
+
+**Live progress:** AI চলার সময় % , কত সময় গেছে/বাকি, প্রতিটা key-র আলাদা রঙ ও অক্ষর (A, B…), কোন page কোন key করছে সব দেখা যায়। Background auto-fix-এ নিচে ছোট “AI কাজ করছে” chip আসে।
+
+**Auto AI-fix (ডিফল্টে চালু):** key থাকলে প্রতিটা page-এ নতুন OCR text আসামাত্র (Space paste, Auto-OCR, বা Save) background-এ AI-fix চলে, একসাথে (key × “একসাথে প্রতি key”) টা page, যেমন ৪ key × ৩ = ১২টা; বেশি এলে সারিতে অপেক্ষা করে, জায়গা খালি হলেই শুরু। ফিক্স হলে page-এ ✨ AI চিহ্ন বসে (certified): ওই page-এ Save চাপলে বা আবার চালালে AI আর হাত দেয় না, আপনার হাতের edit নিরাপদ। শুধু ওই page-এ নতুন OCR/paste text এলে আবার ঠিক হয়। আগের ও পরের page-এর অংশ context হিসেবে যায় (যে পাশের page-এ তখনও text নেই, সেটা বাদ যায়)। বন্ধ করতে AI fix… dialog-এ টিক তুলে দিন।
+
+**Dialog-এর গঠন:** উপরে Auto AI-fix সুইচ → Key তালিকা (প্রতি key এক সারি; *বন্ধ* চাপলে key মোছে না, শুধু কাজে লাগে না; usage-র ▸ চাপলে ৭ দিনের চার্ট) → ＋ নতুন key যোগ (ভাঁজ করা) → অপশন (*একসাথে প্রতি key* ১–৩ page, Math ধরন) → 🔒 সুরক্ষা ও Drive (ভাঁজ করা)।
+
+**Key-র usage:** প্রতিটা key-র নিচে দেখায় আজ কত request/token গেল (সফল/মোট), শেষ ৭ দিনের চার্ট, মোট, শেষ কখন ব্যবহার হয়েছে, আর (Groq/OpenRouter/Cerebras-এ) free দৈনিক সীমার কত % (আনুমানিক)। উপরে সব key মিলিয়ে একটা সারাংশ। Key-র অবস্থা: ✅ চালু, ⏳ rate limit, 🚫 আজকের limit শেষ, ❌ key ঠিক নেই। Usage শুধু এই browser-এ থাকে।
+
+**সব device-এ key:** *☁ Key-গুলো সব device-এ* অংশে passphrase দিয়ে *Drive-এ save* চাপলে key-গুলো AES-GCM দিয়ে encrypt হয়ে আপনার নিজের Drive-এর Textriva ফোল্ডারে `textriva-ai-keys.json` হিসেবে যায় (passphrase কোথাও যায় না)। নতুন device-এ sign in করে একই passphrase দিয়ে *Drive থেকে আনুন*। এটা নিজে নিজে হয় না, শুধু বাটন চাপলে। Passphrase ভুলে গেলে backup পড়া যায় না, তখন key আবার যোগ করুন।
+
+**শেষ যাচাই:** AI এমন সংখ্যা ঢোকালে যা OCR-এ ছিল না, অতিরিক্ত audit call যায় ও preview-তে ⚠️ দেখায়। হিসাব ভুল হলে AI চুপচাপ অঙ্ক বদলায় না; শুধু যেখানে হিসাবই OCR-ভুল প্রমাণ করে (যেমন 1S0 → 150) সেখানে ঠিক করে, নইলে সংখ্যা রেখে [সম্পাদকীয় নোট] দেয়।
 
 **Key নেওয়া (একবার, ৩ ধাপ):** Export… → *Text tools…* → **✨ AI fix** tab → ① *Key নিন* (AI Studio খুলবে, Google account দিয়ে *Create API key*) → ② copy → ③ *Clipboard থেকে বসান*।
 
-- Key শুধু ওই browser-এর `localStorage`-এ (বা "মনে রাখো" বন্ধ থাকলে শুধু memory-তে)। Drive sync, backup ZIP, `.json/.docx` export — কোথাও যায় না। শুধু Google-এ যায়। *Key মুছুন* চাপলে সব মোছে।
+- Key শুধু ওই browser-এর `localStorage`-এ (বা "মনে রাখো" বন্ধ থাকলে শুধু memory-তে)। backup ZIP, `.json/.docx` export — কোথাও যায় না (Drive-এ শুধু উপরের encrypted backup বাটনে)। যে provider-এর key দিয়ে কাজ হচ্ছে শুধু তার কাছে যায় (Free tier-এ provider data নিজেদের উন্নয়নে ব্যবহার করতে পারে)। *Key মুছুন* চাপলে সব মোছে।
 - **Preview → Apply:** প্রতিটা page-এর diff দেখে বাছাই করে প্রয়োগ; *Undo last bulk change* সবসময় আছে।
 - **Auto mode (ঐচ্ছিক):** Space-এ paste করলে ওই page background-এ নিজে ঠিক হয়।
 - **ছবি দেখে মেলানো:** page-এর ছবি (ছোট করে) সাথে যায় → বেশি নির্ভুল। Mobile data saver চালু থাকলে শুধু text।
