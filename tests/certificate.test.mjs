@@ -107,3 +107,12 @@ test('auto mode: once every page is AI-fixed and the queue is empty, the whole-d
   assert.ok(a.certValid());
   w.close();
 });
+
+test('background safety: PDF split renders with intent "print" (no requestAnimationFrame) and the certificate step holds a keep-alive', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const loadPdf = src.slice(src.indexOf('async function loadPdf'), src.indexOf('PHASE 9 — PWA'));
+  assert.match(loadPdf, /render\(\{[^}]*intent: 'print'/, 'rAF is paused in hidden tabs');
+  const cert = src.slice(src.indexOf('async function aiCertifyDocument'), src.indexOf("document.getElementById('certBtn')"));
+  assert.match(cert, /bgKeep\.start\(\)/); assert.match(cert, /finally \{ stopKeep\(\); \}/);
+});

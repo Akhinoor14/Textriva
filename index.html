@@ -2230,13 +2230,14 @@ function saveNow() {
     status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, driveFileId: p.driveFileId || null,
     hash: p.hash || null, phash: p.phash || null, possibleDupOf: p.possibleDupOf || null,
     ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark,
-    aiFixedHash: p.aiFixedHash || null,
+    aiFixedHash: p.aiFixedHash || null, pdfRef: p.pdfRef || null,
   }));
   // Phase 4: search index — rebuilt only when some page text changed (per-page word lists are cached on the page)
   const sSig = snap.map(x => x.text.length + ':' + hashStr(x.text)).join(',');
   const searchRec = (state._idxSig && state._idxSig.pid === pid && state._idxSig.sig === sSig) ? null
     : { id: pid, words: buildSearchIndex(state.pages.map(pageWords)), sig: sSig, updatedAt: Date.now() };
   const newBlobs = state.pages.filter(p => !p.txtOnly && !p.blobSaved && p.blob).map(p => ({ id: p.id, blob: p.blob, pg: p }));
+  const srcNew = (state.srcPdf && !state.srcPdf.saved && state.pages.some(p => p.pdfRef)) ? state.srcPdf : null;
   let unsynced = false; try { unsynced = !!pr.driveFolderId && pr.lastSig !== syncSig(); } catch {}
   const proj = {
     id: pid, name: projectName(), sourceFileName: state.sourceFileName || '',
@@ -2244,7 +2245,8 @@ function saveNow() {
     createdAt: pr.createdAt || Date.now(), updatedAt: Date.now(),
     pageCount: snap.length, doneCount: snap.filter(s => s.status === 'done').length, current: state.current,
     driveFolderId: pr.driveFolderId || null, driveMetaId: pr.driveMetaId || null, driveTextId: pr.driveTextId || null,
-    driveRev: pr.driveRev || '', blobsFreed: false,   // Phase 8: last Drive revision seen; images present locally
+    driveRev: pr.driveRev || '', blobsFreed: false, drivePdf: pr.drivePdf || null,
+    srcMeta: state.srcPdf ? { name: state.srcPdf.name, scale: state.srcPdf.scale || 2 } : (pr.srcMeta || null),   // Phase 8: last Drive revision seen; images present locally
     firstPageHash: snap[0]?.hash || null, // for Library-level duplicate-project detection
   };
   const write = async () => {
@@ -2261,8 +2263,10 @@ function saveNow() {
       };
       snap.forEach(s => pStore.put(s));
       newBlobs.forEach(b => bStore.put({ id: b.id, blob: b.blob }));
+      if (srcNew) bStore.put({ id: SRC_KEY(pid), blob: srcNew.blob });
     });
     newBlobs.forEach(b => { b.pg.blobSaved = true; });
+    if (srcNew) srcNew.saved = true;
     state._saveFailed = false;
     if (searchRec) state._idxSig = { pid, sig: sSig };
     saveSetting(LS_LAST, pid);
@@ -2299,6 +2303,7 @@ async function dbDeleteProject(pid) {
     tx.objectStore('search').delete(pid);
     const pStore = tx.objectStore('pages'), bStore = tx.objectStore('blobs');
     pStore.index('byProject').getAllKeys(pid).onsuccess = e => (e.target.result || []).forEach(k => { pStore.delete(k); bStore.delete(k); });
+    bStore.delete(SRC_KEY(pid));
   });
 }
 
@@ -2359,7 +2364,7 @@ function pushRestoredPage(o) {
     hash: o.hash || null, phash: o.phash || null, possibleDupOf: o.possibleDupOf || null,
     ocr: sanitizeOcr(o.ocr), flags: Array.isArray(o.flags) ? o.flags : [], reviewed: !!o.reviewed,
     note: typeof o.note === 'string' ? o.note : '', bookmark: !!o.bookmark,
-    aiFixedHash: o.aiFixedHash || null,
+    aiFixedHash: o.aiFixedHash || null, pdfRef: o.pdfRef || null,
   });
 }
 
@@ -2399,8 +2404,9 @@ async function openLocalProject(pid, pageIdx) {   // eslint-disable-line complex
   }
   resetWorkspaceState();
   state.projectId = pid;
-  state.proj = { createdAt: proj.createdAt, owner: proj.owner || '', driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, driveRev: proj.driveRev || '', lastSig: '' };
+  state.proj = { createdAt: proj.createdAt, owner: proj.owner || '', driveFolderId: proj.driveFolderId || null, driveMetaId: proj.driveMetaId || null, driveTextId: proj.driveTextId || null, driveRev: proj.driveRev || '', lastSig: '', drivePdf: proj.drivePdf || null, srcMeta: proj.srcMeta || null };
   state.sourceFileName = proj.sourceFileName || proj.name;
+  if (recs.some(r => r.pdfRef)) { const sb = await readSrcBlob(pid); if (sb) state.srcPdf = { blob: sb, name: (proj.srcMeta && proj.srcMeta.name) || 'source.pdf', scale: (proj.srcMeta && proj.srcMeta.scale) || 2, saved: true }; }
   recs.forEach((r, i) => {
     if (!r.txtOnly && !blobs[i]?.blob) return;
     pushRestoredPage({ ...r, blob: blobs[i]?.blob, blobSaved: true });
@@ -2644,7 +2650,84 @@ async function dUpload({ name, parentId, mime, blob, fileId }) {
   }
 }
 
-// ── Sync current project → Drive/Textriva/<project name>/ (page images + project.json + text.txt)
+// ── Original PDF kept whole ─────────────────────────────────────────────────────────────────────────────────
+// A project that came from ONE pdf stores that pdf once on Drive (source.pdf) instead of a JPEG per page. Opening the
+// project on another device downloads the pdf (with a visible progress) and splits it again. Pages that were edited
+// (crop / rotate / enhance / cut …) no longer match the pdf, so they still travel as images (page.pdfRef is cleared).
+state.srcPdf = null;          // { blob, name, scale, saved } – the pdf of the open project (device copy lives in IndexedDB as "src:<projectId>")
+const SRC_KEY = pid => 'src:' + pid;
+async function readSrcBlob(pid) {
+  try { const db = await idb(); const r = await idbReq(db.transaction('blobs').objectStore('blobs').get(SRC_KEY(pid))); return r && r.blob ? r.blob : null; } catch (e) { return null; }
+}
+const pdfBacked = p => !!(p && p.pdfRef && state.proj && state.proj.drivePdf);
+
+// multipart upload with a real byte progress (fetch cannot report upload progress) → falls back to dUpload where XHR is missing
+async function dUploadProgress({ name, parentId, mime, blob, fileId, onProgress }) {
+  if (typeof XMLHttpRequest !== 'function') { const id = await dUpload({ name, parentId, mime, blob, fileId }); if (onProgress) onProgress(blob.size, blob.size); return id; }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const tok = await driveToken();
+    const meta = fileId ? { name } : { name, parents: [parentId] };
+    const boundary = 'tx' + Math.random().toString(36).slice(2);
+    const body = new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`, JSON.stringify(meta), `\r\n--${boundary}\r\nContent-Type: ${mime}\r\n\r\n`, blob, `\r\n--${boundary}--`]);
+    const url = fileId ? `${DRIVE_UP}/files/${fileId}?uploadType=multipart&fields=id` : `${DRIVE_UP}/files?uploadType=multipart&fields=id`;
+    const res = await new Promise((resolve, reject) => {
+      const x = new XMLHttpRequest();
+      x.open(fileId ? 'PATCH' : 'POST', url);
+      x.setRequestHeader('Authorization', 'Bearer ' + tok);
+      x.setRequestHeader('Content-Type', `multipart/related; boundary=${boundary}`);
+      x.upload.onprogress = e => { if (onProgress && e.lengthComputable) onProgress(Math.min(e.loaded, blob.size), blob.size); };
+      x.onload = () => resolve({ status: x.status, text: x.responseText });
+      x.onerror = () => reject(new Error(L('Drive-এ পৌঁছানো যাচ্ছে না — internet চেক করুন', 'Could not reach Drive — check your internet connection')));
+      x.ontimeout = x.onabort = x.onerror;
+      x.send(body);
+    });
+    if (res.status === 401 && attempt === 0) { gdrive.exp = 0; continue; }
+    if (res.status < 200 || res.status >= 300) throw new Error('Drive ' + res.status);
+    if (onProgress) onProgress(blob.size, blob.size);
+    return JSON.parse(res.text).id;
+  }
+  throw new Error('Drive 401');
+}
+// download with a real byte progress
+async function dDownloadProgress(fileId, size, onProgress) {
+  const r = await dfetch(`${DRIVE}/files/${fileId}?alt=media`, { timeoutMs: 600000 });
+  const total = size || Number(r.headers && r.headers.get && r.headers.get('content-length')) || 0;
+  if (!r.body || !r.body.getReader) { const b = await r.blob(); if (onProgress) onProgress(b.size, b.size); return b; }
+  const rd = r.body.getReader(), parts = []; let got = 0;
+  for (;;) {
+    const { done, value } = await rd.read(); if (done) break;
+    parts.push(value); got += value.length; if (onProgress) onProgress(got, total || got);
+  }
+  return new Blob(parts, { type: 'application/pdf' });
+}
+// Renders the wanted 1-based pdf pages to JPEG blobs → Map(pageNumber → blob). intent:'print' keeps pdf.js off requestAnimationFrame (paused in hidden tabs).
+async function pdfRenderPages(pdfBlob, nums, scale, onStep) {
+  const stopKeep = bgKeep.start(), out = new Map();
+  try {
+    const pdf = await pdfjs.getDocument({ data: await pdfBlob.arrayBuffer() }).promise;
+    for (let k = 0; k < nums.length; k++) {
+      const page = await pdf.getPage(nums[k]);
+      const vp = page.getViewport({ scale: scale || 2 });
+      const canvas = document.createElement('canvas'); canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp, intent: 'print' }).promise;
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+      canvas.width = canvas.height = 0; try { page.cleanup(); } catch (e) { /* ignore */ }
+      if (!blob) throw new Error(L('PDF-এর page ' + nums[k] + ' তৈরি করা যায়নি', 'Could not render PDF page ' + nums[k]));
+      out.set(nums[k], blob);
+      if (onStep) onStep(k + 1, nums.length);
+      if ((k + 1) % PDF_YIELD_EVERY === 0) await bgYield();
+    }
+    try { pdf.cleanup(); } catch (e) { /* ignore */ }
+    return out;
+  } finally { stopKeep(); }
+}
+const pdfBar = (msg, a, b) => {   // one place that paints the visible PDF upload/download progress
+  const pct = b > 0 ? Math.min(100, Math.round(a / b * 100)) : 0;
+  work.update(msg, pct);
+  try { showProgress(); $('uploadBar').style.width = pct + '%'; $('uploadPct').textContent = pct + '%'; $('uploadDetail').textContent = msg; $('splitPhase').classList.add('dim-phase'); $('uploadPhase').classList.remove('dim-phase'); } catch (e) { /* ignore */ }
+};
+
+// ── Sync current project → Drive/Textriva/<project name>/ (original pdf OR page images + project.json + text.txt)
 let _syncing = false, _dtimer = null;
 const syncSig = () => state.pages.map(p => p.id + (p.status === 'done' ? 'd' : 'p') + (p.reviewed ? 'r' : '') + (p.bookmark ? 'b' : '') + 'i' + (p.imgRev || 0) + hashStr(p.text || '') + hashStr(p.note || '')).join(',');
 
@@ -2663,6 +2746,7 @@ async function syncToDrive({ silent = false, force = false } = {}) {
   if (_syncing) return;
   _syncing = true; refreshDriveBtn();
   const label0 = $('uploadPhaseLabel').textContent;
+  const stopKeep = bgKeep.start();   // upload keeps going while the tab is in the background
   try {
     await saveNow();
     await driveToken();
@@ -2678,7 +2762,7 @@ async function syncToDrive({ silent = false, force = false } = {}) {
       } catch (e) {
         // Only a trashed / missing folder means "start a new one" — a network or auth hiccup must NOT create a duplicate folder.
         if (!(e.message === 'trashed' || /Drive 404/.test(e.message))) throw e;
-        pr.driveFolderId = pr.driveMetaId = pr.driveTextId = null; pr.driveRev = ''; state.pages.forEach(p => { p.driveFileId = null; });
+        pr.driveFolderId = pr.driveMetaId = pr.driveTextId = null; pr.drivePdf = null; pr.driveRev = ''; state.pages.forEach(p => { p.driveFileId = null; });
       }
     }
     // Phase 8: someone else (another device/tab) wrote to Drive since we last synced → never overwrite silently
@@ -2690,15 +2774,25 @@ async function syncToDrive({ silent = false, force = false } = {}) {
       return;
     }
     if (!silent) {
-      const est = state.pages.filter(p => !p.txtOnly && p.blob && (!pr.driveFolderId || !p.driveFileId)).reduce((a, p) => a + p.blob.size, 0);
+      const needPdf = !!(state.srcPdf && state.pages.some(p => p.pdfRef) && !pr.drivePdf);
+      const est = (needPdf ? state.srcPdf.blob.size : 0) + state.pages.filter(p => !p.txtOnly && p.blob && !(p.pdfRef && (pr.drivePdf || needPdf)) && (!pr.driveFolderId || !p.driveFileId)).reduce((a, p) => a + p.blob.size, 0);
       if (!confirmTransfer(est, L('Drive-এ upload-এ', 'Uploading to Drive'))) { toast(L('Upload বাতিল করা হয়েছে', 'Upload cancelled'), '', 2500); return; }
     }
     if (!pr.driveFolderId) {
       pr.driveFolderId = (await dMkdir(folderName, root, { textriva: 'project', pid: state.projectId })).id;
-      pr.driveMetaId = pr.driveTextId = null; state.pages.forEach(p => { p.driveFileId = null; });
+      pr.driveMetaId = pr.driveTextId = null; pr.drivePdf = null; state.pages.forEach(p => { p.driveFileId = null; });
     }
     const folder = pr.driveFolderId;
-    const todo = state.pages.filter(p => !p.txtOnly && !p.driveFileId && p.blob);
+    // the original pdf goes up ONCE (instead of one JPEG per page); its progress is always visible, also for the automatic background sync
+    if (!pr.drivePdf && state.srcPdf && state.pages.some(p => p.pdfRef)) {
+      const sb = state.srcPdf.blob, nm = state.srcPdf.name || 'source.pdf';
+      $('uploadPhaseLabel').textContent = L('Google Drive · মূল PDF', 'Google Drive · original PDF');
+      pdfBar(L(`মূল PDF upload হচ্ছে · ${fmtMB(0)} / ${fmtMB(sb.size)}`, `Uploading original PDF · ${fmtMB(0)} / ${fmtMB(sb.size)}`), 0, sb.size);
+      const pid2 = await dUploadProgress({ name: 'source.pdf', parentId: folder, mime: 'application/pdf', blob: sb,
+        onProgress: (a, b) => pdfBar(L(`মূল PDF upload হচ্ছে · ${fmtMB(a)} / ${fmtMB(b)}`, `Uploading original PDF · ${fmtMB(a)} / ${fmtMB(b)}`), a, b) });
+      pr.drivePdf = { id: pid2, size: sb.size, name: nm, scale: state.srcPdf.scale || 2 };
+    }
+    const todo = state.pages.filter(p => !p.txtOnly && !p.driveFileId && p.blob && !pdfBacked(p));
     if (todo.length && !silent) { showProgress(); $('uploadPhaseLabel').textContent = 'Google Drive'; }
     let n = 0, sent = 0;
     for (const p of todo) {
@@ -2712,12 +2806,13 @@ async function syncToDrive({ silent = false, force = false } = {}) {
     const sig = syncSig();
     const meta = {
       v: 1, app: 'textriva', name: projectName(), sourceFileName: state.sourceFileName || '', createdAt: pr.createdAt, updatedAt: Date.now(),
-      pages: state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, fileId: p.driveFileId || null, hash: p.hash || null, phash: p.phash || null, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark })),
+      pdf: pr.drivePdf ? { fileId: pr.drivePdf.id, size: pr.drivePdf.size, name: pr.drivePdf.name, scale: pr.drivePdf.scale || 2 } : null,
+      pages: state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status === 'done' ? 'done' : 'pending', txtOnly: !!p.txtOnly, fileId: p.driveFileId || null, pdfPage: (!p.driveFileId && pdfBacked(p)) ? p.pdfRef : null, hash: p.hash || null, phash: p.phash || null, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, note: p.note || '', bookmark: !!p.bookmark })),
     };
     pr.driveMetaId = await dUpload({ name: 'project.json', parentId: folder, mime: 'application/json', blob: new Blob([JSON.stringify(meta)], { type: 'application/json' }), fileId: pr.driveMetaId });
     pr.driveTextId = await dUpload({ name: 'text.txt', parentId: folder, mime: 'text/plain', blob: new Blob([buildAllText()], { type: 'text/plain;charset=utf-8' }), fileId: pr.driveTextId });
     if (!silent) {
-      const keep = new Set([pr.driveMetaId, pr.driveTextId, ...state.pages.map(p => p.driveFileId).filter(Boolean)]);
+      const keep = new Set([pr.driveMetaId, pr.driveTextId, pr.drivePdf && pr.drivePdf.id, ...state.pages.map(p => p.driveFileId).filter(Boolean)]);
       for (const k of await dList(`'${folder}' in parents and trashed=false`, 'files(id)')) if (!keep.has(k.id)) await dPatch(k.id, { trashed: true }).catch(() => {});
     }
     const done = state.pages.filter(p => p.status === 'done').length;
@@ -2732,7 +2827,7 @@ async function syncToDrive({ silent = false, force = false } = {}) {
     console.warn('[drive sync]', e);
     toast(L('❌ Drive sync হয়নি: ', '❌ Drive sync failed: ') + e.message, 'err', 5000);
   } finally {
-    _syncing = false; hideProgress(); $('uploadPhaseLabel').textContent = label0; refreshDriveBtn();
+    _syncing = false; stopKeep(); hideProgress(); $('uploadPhaseLabel').textContent = label0; refreshDriveBtn();
   }
 }
 
@@ -2754,15 +2849,22 @@ async function openDriveProject(folderId, pageIdx) {
     const existing = (await localList().catch(() => [])).find(p => p.driveFolderId === folderId);
     // Mobile-data saver: pages already stored on this device (same Drive file) are reused, never downloaded again.
     const local = new Map();
+    const pdfInfo = meta.pdf && meta.pdf.fileId ? meta.pdf : null;      // the project's original pdf (pages with m.pdfPage are rebuilt from it)
+    const sameLocalPdf = !!(existing && pdfInfo && existing.drivePdf && existing.drivePdf.id === pdfInfo.fileId);
+    const localPdfPages = new Map();
     if (existing) {
       try {
         const { recs, blobs } = await localLoad(existing.id);
-        recs.forEach((r, i) => { const b = blobs[i] && blobs[i].blob; if (r.driveFileId && b) local.set(r.driveFileId, { blob: b, hash: r.hash || null }); });
+        recs.forEach((r, i) => { const b = blobs[i] && blobs[i].blob; if (r.driveFileId && b) local.set(r.driveFileId, { blob: b, hash: r.hash || null }); if (sameLocalPdf && r.pdfRef && b) localPdfPages.set(r.pdfRef, b); });
       } catch {}
     }
+    let srcBlob = (sameLocalPdf && existing) ? await readSrcBlob(existing.id) : null;
+    if (!srcBlob && pdfInfo) srcBlob = _dlCache.get(pdfInfo.fileId) || null;
     const reusable = m => { const l = m.fileId && local.get(m.fileId); return l && (!m.hash || !l.hash || m.hash === l.hash) ? l.blob : null; };
     const sizeOf = new Map(kids.map(k => [k.id, Number(k.size || 0)]));
-    const needBytes = meta.pages.reduce((a, m) => a + (!m.txtOnly && m.fileId && !reusable(m) ? (sizeOf.get(m.fileId) || 0) : 0), 0);
+    const pdfPending = m => !m.txtOnly && !m.fileId && m.pdfPage && pdfInfo && !localPdfPages.get(m.pdfPage);
+    const pdfDownload = !srcBlob && meta.pages.some(pdfPending);
+    const needBytes = meta.pages.reduce((a, m) => a + (!m.txtOnly && m.fileId && !reusable(m) ? (sizeOf.get(m.fileId) || 0) : 0), 0) + (pdfDownload ? Number(pdfInfo.size || sizeOf.get(pdfInfo.fileId) || 0) : 0);
     if (!confirmTransfer(needBytes, L('এই project নামাতে', 'Downloading this project'))) { toast(L('Download বাতিল করা হয়েছে', 'Download cancelled'), '', 2500); return; }
     const prev = (state.projectId && state.pages.length && state.projectId !== existing?.id) ? { id: state.projectId, name: projectName() } : null;
     let gotBytes = 0, reusedBytes = 0;
@@ -2777,6 +2879,11 @@ async function openDriveProject(folderId, pageIdx) {
         ? L(`Page ${i + 1} / ${total} — এই device-এই আছে (data লাগেনি)`, `Page ${i + 1} of ${total} — already on this device (no data used)`)
         : L(`Page ${i + 1} / ${total} নামানো হচ্ছে${needBytes ? ` · ${fmtMB(gotBytes)} / ${fmtMB(needBytes)}` : ''}`, `Downloading page ${i + 1} of ${total}${needBytes ? ` · ${fmtMB(gotBytes)} / ${fmtMB(needBytes)}` : ''}`), (i / Math.max(1, total)) * 100);
       if (m.txtOnly) { got.push({ m, blob: null }); continue; }
+      if (!m.fileId && m.pdfPage && pdfInfo) {                       // rebuilt from the pdf after this loop (or reused from this device)
+        const lp = localPdfPages.get(m.pdfPage);
+        if (lp) reusedBytes += lp.size;
+        got.push({ m, blob: lp || null, fromPdf: !lp }); continue;
+      }
       if (!m.fileId) continue;
       if (have) { reusedBytes += have.size; got.push({ m, blob: have }); continue; }
       let blob = _dlCache.get(m.fileId);
@@ -2786,15 +2893,39 @@ async function openDriveProject(folderId, pageIdx) {
       }
       gotBytes += blob.size; got.push({ m, blob });
     }
+    const fromPdf = got.filter(g => g.fromPdf);
+    if (fromPdf.length) {
+      // 1) the original pdf (one download, visible MB progress, kept on this device afterwards)
+      if (!srcBlob) {
+        $('uploadPhaseLabel').textContent = L('Google Drive · মূল PDF', 'Google Drive · original PDF');
+        pdfBar(L('মূল PDF নামানো হচ্ছে…', 'Downloading the original PDF…'), 0, 1);
+        srcBlob = await dDownloadProgress(pdfInfo.fileId, Number(pdfInfo.size || sizeOf.get(pdfInfo.fileId) || 0),
+          (a, b) => pdfBar(L(`মূল PDF নামানো হচ্ছে · ${fmtMB(a)} / ${fmtMB(b)}`, `Downloading the original PDF · ${fmtMB(a)} / ${fmtMB(b)}`), a, b));
+        gotBytes += srcBlob.size;
+        if (_dlCacheBytes + srcBlob.size < 150 * 1048576) { _dlCache.set(pdfInfo.fileId, srcBlob); _dlCacheBytes += srcBlob.size; }
+      }
+      // 2) split it back into page images (runs in the background-safe renderer)
+      $('uploadPhaseLabel').textContent = label0;
+      const nums = fromPdf.map(g => g.m.pdfPage);
+      const rendered = await pdfRenderPages(srcBlob, nums, pdfInfo.scale || 2, (k, tot) => {
+        work.update(L(`PDF থেকে page ${k} / ${tot} তৈরি হচ্ছে`, `Splitting the PDF: page ${k} of ${tot}`), (k / tot) * 100);
+        $('splitDetail').textContent = L(`PDF split: page ${k} / ${tot}`, `PDF split: page ${k} / ${tot}`);
+        setSplitProgress(k, tot);
+      });
+      fromPdf.forEach(g => { g.blob = rendered.get(g.m.pdfPage) || null; });
+    }
     work.update(L('Workspace সাজানো হচ্ছে…', 'Preparing your workspace…'), 100);
     resetWorkspaceState();
     state.projectId = existing?.id || newId();
-    state.proj = { createdAt: meta.createdAt || Date.now(), owner: currentOwner(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, driveRev: (finfo.appProperties && finfo.appProperties.rev) || '', lastSig: '' };
+    state.proj = { createdAt: meta.createdAt || Date.now(), owner: currentOwner(), driveFolderId: folderId, driveMetaId: metaFile.id, driveTextId: textFile?.id || null, driveRev: (finfo.appProperties && finfo.appProperties.rev) || '', lastSig: '',
+      drivePdf: pdfInfo ? { id: pdfInfo.fileId, size: Number(pdfInfo.size || 0), name: pdfInfo.name || 'source.pdf', scale: pdfInfo.scale || 2 } : null, srcMeta: pdfInfo ? { name: pdfInfo.name || 'source.pdf', scale: pdfInfo.scale || 2 } : null };
+    if (srcBlob) state.srcPdf = { blob: srcBlob, name: (pdfInfo && pdfInfo.name) || 'source.pdf', scale: (pdfInfo && pdfInfo.scale) || 2, saved: !!(sameLocalPdf && existing && (await readSrcBlob(existing.id))) };
     state.sourceFileName = meta.sourceFileName || meta.name || 'Untitled';
     state.syncConflict = null;
-    for (const { m, blob } of got) {
+    for (const { m, blob, fromPdf: fp } of got) {
+      if (!m.txtOnly && !blob) continue;                              // a page that could not be restored is never added blank
       if (m.txtOnly) pushRestoredPage({ name: m.name, text: m.text, txtOnly: true, ocr: m.ocr, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
-      else pushRestoredPage({ name: m.name, text: m.text, status: m.status, blob, driveFileId: m.fileId, blobSaved: false, hash: m.hash || null, phash: m.phash || null, ocr: m.ocr, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
+      else pushRestoredPage({ name: m.name, text: m.text, status: m.status, blob, driveFileId: m.fileId || null, pdfRef: (!m.fileId && m.pdfPage) ? m.pdfPage : null, blobSaved: false, hash: m.hash || null, phash: m.phash || null, ocr: m.ocr, flags: m.flags, reviewed: m.reviewed, note: m.note, bookmark: m.bookmark });
     }
     setUploadProgress(total, total, false, total);
     state.proj.lastSig = syncSig();
@@ -2838,14 +2969,14 @@ async function openFromDriveTab(folderId, remoteRev) {
 async function trashDriveProject(folderId) {
   await dPatch(folderId, { trashed: true });
   // এই device-এর copy থেকে Drive link সরিয়ে দাও, যাতে আবার save করলে নতুন করে upload হয়
-  if (state.proj?.driveFolderId === folderId) { state.proj.driveFolderId = state.proj.driveMetaId = state.proj.driveTextId = null; state.pages.forEach(p => { p.driveFileId = null; }); }
+  if (state.proj?.driveFolderId === folderId) { state.proj.driveFolderId = state.proj.driveMetaId = state.proj.driveTextId = null; state.proj.drivePdf = null; state.pages.forEach(p => { p.driveFileId = null; }); }
   try {
     const db = await idb();
     for (const p of (await localList()).filter(p => p.driveFolderId === folderId)) {
       await new Promise((resolve, reject) => {
         const tx = db.transaction(['projects', 'pages'], 'readwrite');
         tx.oncomplete = resolve; tx.onerror = tx.onabort = () => reject(tx.error);
-        tx.objectStore('projects').put({ ...p, driveFolderId: null, driveMetaId: null, driveTextId: null });
+        tx.objectStore('projects').put({ ...p, driveFolderId: null, driveMetaId: null, driveTextId: null, drivePdf: null });
         const ps = tx.objectStore('pages');
         ps.index('byProject').getAll(p.id).onsuccess = e => (e.target.result || []).forEach(r => ps.put({ ...r, driveFileId: null }));
       });
@@ -2870,7 +3001,12 @@ const newRev = () => Date.now().toString(36) + '-' + deviceId();   // written to
 function matchPagesForMerge(localPages, remotePages) {
   const usedL = new Set(), usedR = new Set(), pairs = [];
   remotePages.forEach((rp, ri) => {
-    if (!rp.fileId) return;
+    if (!rp.fileId) {                                   // page rebuilt from the project's pdf: same pdf page number = same page
+      if (!rp.pdfPage) return;
+      const lj = localPages.findIndex((lp, i) => !usedL.has(i) && lp.pdfRef && lp.pdfRef === rp.pdfPage);
+      if (lj >= 0) { usedL.add(lj); usedR.add(ri); pairs.push({ li: lj, ri }); }
+      return;
+    }
     const li = localPages.findIndex((lp, i) => !usedL.has(i) && lp.driveFileId && lp.driveFileId === rp.fileId);
     if (li >= 0) { usedL.add(li); usedR.add(ri); pairs.push({ li, ri }); }
   });
@@ -2970,6 +3106,7 @@ async function openSyncConflict() {
   try { meta = await fetchRemoteMeta(); }
   catch (e) { body.textContent = '❌ ' + e.message; wrap.querySelector('[data-sc="close"]').onclick = closeSyncDlg; return; }
   const remote = Array.isArray(meta.pages) ? meta.pages : [];
+  remote.pdfInfo = meta.pdf || null;
   const plan = planMerge(state.pages, remote);
   const conflicts = plan.rows.filter(r => r.kind === 'conflict');
   const auto = plan.rows.filter(r => r.kind === 'local' || r.kind === 'remote').length;
@@ -3041,17 +3178,27 @@ async function applyMerge(plan, remote, choices) {
     if (pairByRi.has(ri)) { anchor = pairByRi.get(ri); return; }
     if (plan.remoteOnly.includes(ri)) inserts.push({ ri, anchor });
   });
-  const created = [];
+  const created = []; let _mergePdf = null;
   for (const ins of inserts) {
     const rp = remote[ins.ri];
     let blob = null;
     if (!rp.txtOnly) {
-      if (!rp.fileId) continue;
-      blob = await (await dfetch(`${DRIVE}/files/${rp.fileId}?alt=media`)).blob();
+      if (!rp.fileId && rp.pdfPage && remote.pdfInfo) {
+        if (!_mergePdf) {
+          _mergePdf = (state.srcPdf && state.srcPdf.blob) || await dDownloadProgress(remote.pdfInfo.fileId, Number(remote.pdfInfo.size || 0),
+            (a, b) => pdfBar(L(`মূল PDF নামানো হচ্ছে · ${fmtMB(a)} / ${fmtMB(b)}`, `Downloading the original PDF · ${fmtMB(a)} / ${fmtMB(b)}`), a, b));
+          hideProgress();
+        }
+        blob = (await pdfRenderPages(_mergePdf, [rp.pdfPage], remote.pdfInfo.scale || 2)).get(rp.pdfPage) || null;
+        if (!blob) continue;
+      } else {
+        if (!rp.fileId) continue;
+        blob = await (await dfetch(`${DRIVE}/files/${rp.fileId}?alt=media`)).blob();
+      }
     }
     const before = state.pages.length;
     pushRestoredPage({ name: rp.name, text: rp.text, status: rp.status, txtOnly: !!rp.txtOnly, blob, driveFileId: rp.fileId || null, blobSaved: false,
-      hash: rp.hash || null, phash: rp.phash || null, ocr: rp.ocr, flags: rp.flags, reviewed: rp.reviewed, note: rp.note, bookmark: rp.bookmark });
+      hash: rp.hash || null, phash: rp.phash || null, ocr: rp.ocr, flags: rp.flags, reviewed: rp.reviewed, note: rp.note, bookmark: rp.bookmark, pdfRef: (blob && !rp.fileId && rp.pdfPage && state.proj.drivePdf && state.proj.drivePdf.id === remote.pdfInfo.fileId) ? rp.pdfPage : null });
     created.push({ pg: state.pages[before], anchor: ins.anchor });
   }
   const bucket = new Map();
@@ -3095,7 +3242,7 @@ async function freeUpSpace() {
   let freed = 0, projects = 0;
   for (const p of list) {
     const { recs, blobs } = await localLoad(p.id);
-    if (!recs.every(r => r.txtOnly || r.driveFileId)) continue;                // some image is not on Drive yet → keep it
+    if (!recs.every(r => r.txtOnly || r.driveFileId || (r.pdfRef && p.drivePdf))) continue;                // some image is not on Drive yet → keep it
     const size = blobs.reduce((s, b) => s + ((b && b.blob && b.blob.size) || 0), 0);
     const db = await idb();
     await new Promise((resolve, reject) => {
@@ -3890,18 +4037,22 @@ async function loadPdf(file) {
     const picked = await pdfPagesToLoad(numPages);
     if (!picked) { hideProgress(); return; }
     const total = picked.length;
+    const keepSrc = !state.pages.length;     // only a fresh project can be rebuilt from its one pdf
+    if (keepSrc) { ensureProject(); state.srcPdf = { blob: file, name: file.name, scale: parseFloat($('qualitySel').value) || 2.0, saved: false }; state.proj.drivePdf = null; }
     for (let n = 0; n < total; n++) {
       const i = picked[n] + 1;
       setSplitProgress(n, total);
       $('splitDetail').textContent = t('splitRendering', { cur: n + 1, total });
       const page = await pdf.getPage(i);
-      const scale = parseFloat($('qualitySel').value) || 2.0;
+      const scale = keepSrc ? state.srcPdf.scale : (parseFloat($('qualitySel').value) || 2.0);
       const vp = page.getViewport({ scale });
       const canvas = document.createElement('canvas');
       canvas.width = vp.width; canvas.height = vp.height;
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      // intent:'print' → pdf.js continues with promises instead of requestAnimationFrame (rAF is paused in a hidden tab, which froze the split)
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp, intent: 'print' }).promise;
       const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
       addPage(`${file.name} — ${t('pageWord')} ${i}`, blob, URL.createObjectURL(blob), page);
+      if (keepSrc) state.pages[state.pages.length - 1].pdfRef = i;
       canvas.width = canvas.height = 0;            // give the bitmap memory back right away
       try { page.cleanup(); } catch (e) { /* ignore */ }
       setSplitProgress(n + 1, total);
@@ -6099,7 +6250,7 @@ async function runAiPreview() {
   if ($('ttDlg') && tt.tab === 'ai') { $('ttSum').textContent = txt; $('ttPrev').innerHTML = html; refreshTtUndo(); }
   else tt.aiHold = { sum: txt, html };
   // whole document fixed → one last pass over the entire document at once, then the certificate goes on top
-  if (!scope && !res.cancelled && !res.fatal && o.certify !== false && (done.length || res.same)) setTimeout(() => aiCertifyDocument({ auto: true }), 400);                                  // dialog closed / other tab — show it when they come back
+  if (!scope && !res.cancelled && !res.fatal && o.certify !== false && (done.length || res.same)) bgTimer.set(() => aiCertifyDocument({ auto: true }), 400);                                  // dialog closed / other tab — show it when they come back
 }
 $('aiFixBtn').onclick = () => openTextTools('ai');
 
@@ -6556,7 +6707,7 @@ async function rehashEdited(pg) {
 function setPageBlob(pg, blob, url) {
   pg.blob = blob; pg.url = url || URL.createObjectURL(blob);
   pg.remoteUrl = ''; pg.remoteAt = 0; pg.driveFileId = null; pg.blobSaved = false;
-  pg.hash = null; pg.phash = null; pg.possibleDupOf = null; pg.dupOf = null; pg.pdfPage = null;
+  pg.hash = null; pg.phash = null; pg.possibleDupOf = null; pg.dupOf = null; pg.pdfPage = null; pg.pdfRef = null;
   pg.imgRev = (pg.imgRev || 0) + 1;
   if (pg.status !== 'done') pg.status = 'pending';
   delete lensRetryCount[pg.id];
@@ -6730,7 +6881,7 @@ async function mergeProjectIntoCurrent(pid) {
   let n = 0;
   recs.forEach((r, i) => {
     if (!r.txtOnly && !(blobs[i] && blobs[i].blob)) return;
-    pushRestoredPage(Object.assign({}, r, { id: null, blob: blobs[i] && blobs[i].blob, blobSaved: false, driveFileId: null, possibleDupOf: null }));
+    pushRestoredPage(Object.assign({}, r, { id: null, blob: blobs[i] && blobs[i].blob, blobSaved: false, driveFileId: null, possibleDupOf: null, pdfRef: null }));
     n++;
   });
   clearImgUndo();
@@ -7532,7 +7683,7 @@ $('allClearBtn').onclick = allClear;
 function resetWorkspaceState() {
   state.pages.forEach(p => { try { URL.revokeObjectURL(p.url); } catch {} });
   state.pages = []; state.current = 0;
-  state.projectId = null; state.proj = {}; state.lastClip = '';
+  state.projectId = null; state.proj = {}; state.srcPdf = null; state.lastClip = '';
   state.kWorkflowStarted = false;
   state.kWorkflowComplete = false;
   state.undoLog = []; state.redoLog = []; state.review = false;
@@ -7691,8 +7842,8 @@ function certPaint() {
 // Auto mode (pages fixed one by one as they arrive): once the queue is empty and EVERY page with text is AI-fixed, do the whole-document check once.
 let _certT = null;
 function aiMaybeCertify() {
-  clearTimeout(_certT);
-  _certT = setTimeout(() => {
+  bgTimer.clear(_certT);
+  _certT = bgTimer.set(() => {
     if (_aiQ.length || _aiInflight || state.certRun || state.aiRun || aiOpts().certify === false) return;
     const pgs = state.pages.filter(p => (p.text || '').trim());
     if (!pgs.length || !pgs.every(p => p.aiFixedHash && p.aiFixedHash === hashStr(p.text))) return;
@@ -7708,6 +7859,7 @@ async function aiCertifyDocument(opts) {
   if (!aiActiveKeys().length) { if (!opts.auto) toast('⚠️ ' + L('আগে একটি AI key বসান', 'Add an AI key first'), 'warn', 3500); return null; }
   if (isOffline()) { if (!opts.auto) toast('⚠️ ' + AI_MSG.offline(), 'warn', 3000); return null; }
   const run = state.certRun = { cancel: false, msg: '' };
+  const stopKeep = bgKeep.start();   // keep working while the tab is in the background
   const sig = docSig();
   certPaint();
   const local = { checked: 0, bad: [] };
@@ -7750,7 +7902,7 @@ async function aiCertifyDocument(opts) {
     if (e instanceof AiError) { if (e.code !== 'cancel') toast('⚠️ ' + L('পুরো document যাচাই হয়নি: ', 'Whole-document check failed: ') + aiErrText(e), 'warn', 6000); }
     else console.warn('[certify]', e);
     return null;
-  }
+  } finally { stopKeep(); }
 }
 document.getElementById('certBtn').onclick = () => aiCertifyDocument({});
 document.getElementById('certPanel').addEventListener('click', e => {
