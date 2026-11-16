@@ -42,15 +42,28 @@ function getKeys() {
   return [...new Set(list.map(k => (k || '').trim()).filter(Boolean))];
 }
 
+// ভুল/বাতিল key: rate-limit নয় — ১০ মিনিট বাদ রাখা হয়
+const keyBad = globalThis.__textrivaKeyBad || (globalThis.__textrivaKeyBad = new Map());
+const KEY_BAD_MS = 10 * 60 * 1000;
+
+// imgbb-র উত্তর থেকে বোঝা: rate-limit, ভুল key, নাকি অন্য কিছু
+// (আগে error code 100 = "Invalid API key"-কেও rate-limit ধরা হতো, তাই আসল কারণ লুকিয়ে যেত)
+function classify(status, msg) {
+  if (status === 429 || /rate.?limit|too many|limit reached/i.test(msg)) return 'rate';
+  if (status === 401 || status === 403 || /invalid.*key|key.*invalid|api key/i.test(msg)) return 'badkey';
+  return 'other';
+}
+
 function orderedKeys(keys) {
   // round-robin শুরু, তারপর cooldown-এ থাকা key সবার শেষে
   const now = Date.now();
   const start = rrIndex++ % keys.length;
   globalThis.__textrivaRR = rrIndex;
   const rotated = keys.map((_, i) => keys[(start + i) % keys.length]);
-  const ready = rotated.filter(k => (keyCooldown.get(k) || 0) <= now);
-  const cooling = rotated.filter(k => (keyCooldown.get(k) || 0) > now);
-  return [...ready, ...cooling];
+  const usable = rotated.filter(k => (keyBad.get(k) || 0) <= now);
+  const ready = usable.filter(k => (keyCooldown.get(k) || 0) <= now);
+  const cooling = usable.filter(k => (keyCooldown.get(k) || 0) > now);
+  return { ready, cooling, all: [...ready, ...cooling] };
 }
 
 function checkRateLimit(ip) {
@@ -67,11 +80,22 @@ function checkRateLimit(ip) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET' && /(^|[?&])status(=|&|$)/.test(String(req.url || ''))) {
+    // নিরাপদ নির্ণয়: কয়টা key সেট, কয়টা ready — key-র মান কখনো দেখানো হয় না
+    const ks = getKeys(), now = Date.now();
+    return res.status(200).json({
+      success: true,
+      keysConfigured: ks.length,
+      ready: ks.filter(k => (keyCooldown.get(k) || 0) <= now && (keyBad.get(k) || 0) <= now).length,
+      coolingDown: ks.filter(k => (keyCooldown.get(k) || 0) > now).length,
+      invalid: ks.filter(k => (keyBad.get(k) || 0) > now).length,
+    });
+  }
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
 
   if (!isAllowedOrigin(req)) {
@@ -99,9 +123,19 @@ export default async function handler(req, res) {
     }
 
     // expiration দেওয়া হয় না → link কখনো expire হয় না (client 7 দিন পর safety re-upload করে)
-    let lastMsg = '', allRateLimited = true;
+    let lastMsg = '', sawRate = false, sawBad = false, sawOther = false, soonest = 0;
 
-    for (const key of orderedKeys(keys)) {
+    const ord = orderedKeys(keys);
+    // সব key এখন ঠান্ডা/বাতিল হলে imgbb-কে আর বিরক্ত না করে সরাসরি উত্তর
+    if (ord.ready.length === 0 && ord.cooling.length > 0) {
+      const wait = Math.max(1, Math.ceil((Math.min(...ord.cooling.map(k => keyCooldown.get(k))) - Date.now()) / 1000));
+      res.setHeader('Retry-After', String(wait));
+      return res.status(429).json({ success: false, error: 'Image host rate limit — all keys cooling down, retry in ' + wait + 's' });
+    }
+    if (ord.all.length === 0) {
+      return res.status(502).json({ success: false, error: 'Image host error: all configured imgbb API keys are invalid' });
+    }
+    for (const key of ord.ready) {
       const form = new FormData();
       form.append('image', image);
 
@@ -111,7 +145,7 @@ export default async function handler(req, res) {
           { method: 'POST', body: form, signal: AbortSignal.timeout(20000) });
         raw = await imgbbRes.text();
       } catch (e) {
-        allRateLimited = false;
+        sawOther = true;
         lastMsg = 'network/timeout';
         console.error('imgbb fetch failed (key #' + (keys.indexOf(key) + 1) + '):', e.message || e);
         continue;   // পরের key-তে চেষ্টা
@@ -125,17 +159,20 @@ export default async function handler(req, res) {
       }
 
       const msg = data?.error?.message || data?.status_txt || `HTTP ${imgbbRes.status}`;
-      const rl = imgbbRes.status === 429 || data?.error?.code === 100 || /rate limit/i.test(msg);
+      const kind = classify(imgbbRes.status, msg);
       lastMsg = msg;
       console.error('imgbb failure (key #' + (keys.indexOf(key) + 1) + '/' + keys.length + '):',
         imgbbRes.status, msg, String(raw).slice(0, 200).replace(/key=[^&\s]+/g, 'key=***'));
-      if (rl) keyCooldown.set(key, Date.now() + KEY_COOLDOWN_MS);
-      else allRateLimited = false;
+      if (kind === 'rate') { sawRate = true; keyCooldown.set(key, Date.now() + KEY_COOLDOWN_MS); }
+      else if (kind === 'badkey') { sawBad = true; keyBad.set(key, Date.now() + KEY_BAD_MS); }
+      else sawOther = true;
     }
 
     // সব key ফেল
-    return res.status(allRateLimited ? 429 : 502)
-      .json({ success: false, error: 'Image host error: ' + lastMsg });
+    const onlyRate = sawRate && !sawBad && !sawOther;
+    if (onlyRate) res.setHeader('Retry-After', String(KEY_COOLDOWN_MS / 1000));
+    return res.status(onlyRate ? 429 : 502)
+      .json({ success: false, error: (sawBad && !sawRate && !sawOther ? 'Image host error: imgbb API key invalid — ' : 'Image host error: ') + lastMsg });
 
   } catch (err) {
     console.error('Upload error:', err.message || err);
