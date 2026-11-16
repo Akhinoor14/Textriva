@@ -492,3 +492,20 @@ imgbb stays the primary image host. Nothing for Phase 7 is in the code. Do not a
 **Manual test:** see README → "Performance test plan (300-page PDF)". Plus: share 3 photos from the gallery → pages appear; 📷 Scan page → new page appended; airplane mode → app still opens.
 
 **Resume point:** Phase 10 — Code health (split into ES modules, a11y, ARCHITECTURE.md, CONTRIBUTING.md). Run the full suite before and after; behaviour must stay identical.
+
+---
+
+## Phase 10b — AI multi-provider, live progress, key usage, encrypted key backup (done)
+
+- **Providers:** Gemini + Groq, OpenRouter, Mistral, Cerebras in one key pool (provider detected from the key; per-key 3 parallel pages; automatic fallback on limit).
+- **Live progress:** % / elapsed / remaining, per-key colour + letter, page cells coloured by key, background chip.
+- **Prompt:** arithmetic check, neighbour-page context, final audit call when the AI adds numbers (⚠️ in preview).
+- **Key usage (new):** per key, today's requests + tokens, 7-day mini chart, total, last used, approx. free-cap bar (Groq/OpenRouter/Cerebras), status (ready / rate-limited / daily limit used / invalid). Stored in `textriva-ai-usage` (this browser only).
+- **Encrypted key backup (new):** manual *Save to Drive* / *Restore from Drive*; AES-GCM, PBKDF2-SHA256 (250k); file `textriva-ai-keys.json` in the Drive `Textriva` folder; passphrase never leaves the device. No new OAuth scope.
+- **Not verified live:** the four non-Gemini providers from a real browser (CORS) and the prompt quality on real pages.
+- **Deliberately skipped:** Cloudflare Workers AI (needs an Account ID + unverified browser CORS → more to maintain).
+- **Known stale tests:** `tests/groups.test.mjs` (12 tests) belongs to a Library-groups UI removed in commit 94bba3c; they fail by design until deleted or the feature returns.
+- **Auto AI-fix default ON (10c):** triggers on Space paste, Auto-OCR (Tesseract) and the Save button; a ✨ AI (certified) page is never re-run, Save never overwrites a human edit on it, fresh OCR/paste text makes the page eligible again; queue de-duplicated; options saved before the default existed (no `autoV2` marker) count as ON once. Known limit: when pages are OCR'd in order the NEXT page has no text yet, so only the previous page is used as context for that fix.
+- **Clearer AI-working signal (10d):** busy thumbnail gets a dark veil + moving sweep + a solid label `AI <key letter>`; the page you are on shows a solid banner above the text box (“AI is fixing this page · Key A”) and the text box dims; all clear when the run ends. Reduced-motion users keep the veil and label (no animation).
+- **AI fix dialog tidy-up (10e):** one top switch (Auto AI-fix); compact one-row-per-key list (usage collapsed behind ▸, 7-day chart on expand); per-key *Pause/On* (keeps the key, stops using it — `off` flag, all pool code uses `aiActiveKeys()`); *At once (per key)* 1–3 pages (`par` option, matters for Groq's small per-minute token limit); *Add a key* is a collapsed block (open only when there are no keys); options reduced to 4 short checkboxes with explanations in tooltips; privacy + Drive backup folded into one collapsed block.
+- **Auto mode in parallel (10f):** the auto queue used to run ONE page at a time (so 4 keys = 1 page). Now `aiPumpQueue` keeps up to (active keys × “at once per key”) pages in flight (4 × 3 = 12), starts queued pages the moment a slot frees, applies each page as soon as it finishes, spreads single pages over the keys round-robin (`run.rot`), and shows one summary toast per burst. Tests: 14 pages at once → ≥10 concurrent, ≤12, all four keys used; `par:1` respected.
