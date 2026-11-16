@@ -85,10 +85,13 @@ OCR-এর ভাঙা অক্ষর/শব্দ, line wrap, formatting ও 
 
 **Live progress:** AI চলার সময় % , কত সময় গেছে/বাকি, প্রতিটা key-র আলাদা রঙ ও অক্ষর (A, B…), কোন page কোন key করছে সব দেখা যায়। Background auto-fix-এ নিচে ছোট “AI কাজ করছে” chip আসে।
 
+<<<<<<< HEAD
 **Auto AI-fix (ডিফল্টে চালু):** key থাকলে প্রতিটা page-এ নতুন OCR text আসামাত্র (Space paste, Auto-OCR, বা Save) background-এ AI-fix চলে, একসাথে (key × “একসাথে প্রতি key”) টা page, যেমন ৪ key × ৩ = ১২টা; বেশি এলে সারিতে অপেক্ষা করে, জায়গা খালি হলেই শুরু। ফিক্স হলে page-এ ✨ AI চিহ্ন বসে (certified): ওই page-এ Save চাপলে বা আবার চালালে AI আর হাত দেয় না, আপনার হাতের edit নিরাপদ। শুধু ওই page-এ নতুন OCR/paste text এলে আবার ঠিক হয়। আগের ও পরের page-এর অংশ context হিসেবে যায় (যে পাশের page-এ তখনও text নেই, সেটা বাদ যায়)। বন্ধ করতে AI fix… dialog-এ টিক তুলে দিন।
 
 **Dialog-এর গঠন:** উপরে Auto AI-fix সুইচ → Key তালিকা (প্রতি key এক সারি; *বন্ধ* চাপলে key মোছে না, শুধু কাজে লাগে না; usage-র ▸ চাপলে ৭ দিনের চার্ট) → ＋ নতুন key যোগ (ভাঁজ করা) → অপশন (*একসাথে প্রতি key* ১–৩ page, Math ধরন) → 🔒 সুরক্ষা ও Drive (ভাঁজ করা)।
 
+=======
+>>>>>>> fe3f85c1d6a5546699d04c7806e629ada4ae3510
 **Key-র usage:** প্রতিটা key-র নিচে দেখায় আজ কত request/token গেল (সফল/মোট), শেষ ৭ দিনের চার্ট, মোট, শেষ কখন ব্যবহার হয়েছে, আর (Groq/OpenRouter/Cerebras-এ) free দৈনিক সীমার কত % (আনুমানিক)। উপরে সব key মিলিয়ে একটা সারাংশ। Key-র অবস্থা: ✅ চালু, ⏳ rate limit, 🚫 আজকের limit শেষ, ❌ key ঠিক নেই। Usage শুধু এই browser-এ থাকে।
 
 **সব device-এ key:** *☁ Key-গুলো সব device-এ* অংশে passphrase দিয়ে *Drive-এ save* চাপলে key-গুলো AES-GCM দিয়ে encrypt হয়ে আপনার নিজের Drive-এর Textriva ফোল্ডারে `textriva-ai-keys.json` হিসেবে যায় (passphrase কোথাও যায় না)। নতুন device-এ sign in করে একই passphrase দিয়ে *Drive থেকে আনুন*। এটা নিজে নিজে হয় না, শুধু বাটন চাপলে। Passphrase ভুলে গেলে backup পড়া যায় না, তখন key আবার যোগ করুন।
