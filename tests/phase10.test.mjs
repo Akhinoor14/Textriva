@@ -245,7 +245,8 @@ test('daily quota gone (Retry-After in hours): model is skipped for the session 
   const t0 = Date.now();
   const res = await a.aiRunPages([a.state.pages[0].id], { useImage: false }, { cancel: false }, () => {});
   assert.ok(Date.now() - t0 < 5000, 'must not sit through retry sleeps');
-  assert.equal(res.failed, 1); assert.equal(res.lastErr.code, 'rate'); assert.equal(res.lastErr.wait, 3600);
+  assert.equal(res.failed, 0); assert.equal(res.fatal.code, 'rate'); assert.equal(res.fatal.wait, 3600);   // every key's daily quota is gone → stop cleanly, page left untouched
+  assert.equal(a.state.pages[0].aiFixedHash || null, null);
   assert.ok(a._aiBad.has(GROQ.slice(-8) + '::llama-4-scout-17b-16e-instruct'));
 });
 
@@ -279,24 +280,123 @@ test('parallel + live board: 2 keys × 3 slots = 6 pages at once; every page sho
   assert.ok(items.every(c => c.note && /Gmail|Groq key/.test(c.note)), 'each preview item names its key');
 });
 
-test('Text tools → ✨ AI fix: live board while running, preview shows diff + key name, Apply changes the page, bulk undo restores it', async () => {
+test('Text tools → ✨ AI fix: live board while running, page is written in DIRECTLY (no Apply), one bulk undo restores it', async () => {
   const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE, '']);
   mock(w, () => ({ ...reply(AFTER), delay: 700 }));
   a.aiAddKey(KEY, 'k1', true);
   a.openTextTools('ai'); await tick(20);
   assert.ok(w.document.querySelector('#ttDlg [data-tab="ai"]'));
   assert.ok(w.document.getElementById('aiProv'), 'provider picker');
+  assert.ok(w.document.querySelector('#ttDlg [data-tt="apply"]').classList.contains('hidden'), 'no Apply step on the AI tab');
+  assert.match(w.document.querySelector('#ttDlg [data-tt="preview"]').textContent, /AI চালান|Run AI/);
   w.document.querySelector('#ttDlg [data-tt="preview"]').click();
   await tick(300);
   const board = w.document.getElementById('aiBoard');
   assert.ok(board && /ai-lane/.test(board.innerHTML) && /✨/.test(board.innerHTML), 'board visible while AI works');
-  for (let i = 0; i < 60 && !a.tt.plan; i++) await tick(50);
-  assert.equal(a.tt.plan.changes.length, 1); assert.match(a.tt.plan.changes[0].note, /k1/);
-  assert.match(w.document.querySelector('#ttDlg .ai-flag').textContent, /k1/);
-  w.document.querySelector('#ttDlg [data-tt="apply"]').click();
-  assert.equal(a.state.pages[0].text, AFTER);
+  for (let i = 0; i < 60 && a.state.pages[0].text === BEFORE; i++) await tick(50);
+  assert.equal(a.state.pages[0].text, AFTER, 'applied by itself');
+  assert.ok(a.state.pages[0].aiFixedHash);
+  await tick(50);
+  assert.match(w.document.getElementById('ttSum').textContent, /1.*(ঠিক|fixed)/);
   a.undoBulk();
   assert.equal(a.state.pages[0].text, BEFORE);
+});
+
+test('manual run: many pages → each applied the moment it finishes, ONE undo step for the whole run, already-fixed pages skipped', async () => {
+  const w = await bootApp(); const a = w.__app;
+  const texts = Array.from({ length: 7 }, (_, i) => BEFORE + ' ' + (i + 1));
+  addPages(w, texts);
+  a.state.pages[0].aiFixedHash = a.hashStr(a.state.pages[0].text);          // fixed earlier → must be skipped
+  const calls = mock(w, () => reply(AFTER));
+  a.aiAddKey(KEY, 'k1', true);
+  a.openTextTools('ai'); await tick(20);
+  const before = a.state.bulkUndo.length;
+  w.document.querySelector('#ttDlg [data-tt="preview"]').click();
+  for (let i = 0; i < 100 && a.state.pages.slice(1).some(p => p.text !== AFTER); i++) await tick(50);
+  assert.equal(calls.filter(isGen).length, 6, 'page 1 (already fixed) is not sent');
+  assert.equal(a.state.pages[0].text, texts[0]);
+  assert.ok(a.state.pages.slice(1).every(p => p.text === AFTER));
+  await tick(100);
+  assert.equal(a.state.bulkUndo.length, before + 1, 'one undo step for the run');
+  a.undoBulk();
+  assert.ok(a.state.pages.slice(1).every((p, i) => p.text === texts[i + 1]));
+});
+
+test('closing the dialog does NOT stop a manual AI run; the page is still fixed and a summary waits for the next open', async () => {
+  const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE]);
+  mock(w, () => ({ ...reply(AFTER), delay: 400 }));
+  a.aiAddKey(KEY, 'k1', true);
+  a.openTextTools('ai'); await tick(20);
+  w.document.querySelector('#ttDlg [data-tt="preview"]').click(); await tick(100);
+  w.document.querySelector('#ttDlg [data-tt="close"]').click();
+  for (let i = 0; i < 60 && a.state.pages[0].text === BEFORE; i++) await tick(50);
+  assert.equal(a.state.pages[0].text, AFTER);
+  await tick(100);
+  assert.ok(a.tt.aiHold && /1/.test(a.tt.aiHold.sum));
+});
+
+test('rate limit in the middle of a big run: pages WAIT and retry, none are dropped or marked failed', async () => {
+  const w = await bootApp(); const a = w.__app;
+  addPages(w, Array.from({ length: 6 }, (_, i) => BEFORE + ' ' + (i + 1)));
+  let n = 0;
+  mock(w, () => (++n <= 2 ? { status: 429, headers: { 'retry-after': '1' }, body: { error: { message: 'quota' } } } : reply(AFTER)));
+  a.aiAddKey(KEY, 'k1', true);
+  const res = await a.aiRunPages(a.state.pages.map(p => p.id), { useImage: false }, { cancel: false }, c => a.applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix'));
+  assert.equal(res.failed, 0); assert.equal(res.fatal, null); assert.equal(res.ok, 6);
+  assert.ok(a.state.pages.every(p => p.text === AFTER));
+});
+
+test('temporary network errors are retried later (page goes back in the queue), not reported as failed', async () => {
+  const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE, BEFORE + ' 2']);
+  const seen = new Set(); let gen = 0;
+  w.fetch = async (url, init) => {
+    if (/\/models\?/.test(url)) return { ok: true, status: 200, headers: { get: () => null }, json: async () => MODELS };
+    gen++;
+    if (gen <= 2) throw new Error('network gone (phone was in the background)');
+    return { ok: true, status: 200, headers: { get: () => null }, json: async () => reply(AFTER).body };
+  };
+  a.aiAddKey(KEY, 'k1', true);
+  const res = await a.aiRunPages(a.state.pages.map(p => p.id), { useImage: false }, { cancel: false }, c => a.applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix'));
+  assert.equal(res.failed, 0); assert.equal(res.ok, 2);
+  assert.ok(a.state.pages.every(p => p.text === AFTER));
+});
+
+test('Stop cancels a run that is waiting on a cooldown (no hang)', async () => {
+  const w = await bootApp(); const a = w.__app; addPages(w, [BEFORE]);
+  mock(w, () => reply(AFTER));
+  const k = a.aiAddKey(KEY, 'k1', true);
+  a._aiCoolingUntil.set(k.key, Date.now() + 60000);                    // 60 s cooldown on the only key
+  const run = { cancel: false };
+  const p = a.aiRunPages([a.state.pages[0].id], { useImage: false }, run, () => {});
+  await tick(150); run.cancel = true;
+  const t0 = Date.now(); await p;
+  assert.ok(Date.now() - t0 < 2500, 'stops promptly');
+  assert.equal(a.state.pages[0].text, BEFORE);
+});
+
+test('background-proof timers: bgSleep works, bgKeep holds/releases a Web Lock only while work runs, per-key gate widens after a rate limit', async () => {
+  const w = await bootApp(); const a = w.__app;
+  const t0 = Date.now(); await a.bgSleep(30); assert.ok(Date.now() - t0 >= 25);
+  await a.bgYield();
+  let held = 0, released = 0;
+  Object.defineProperty(w.navigator, 'locks', { configurable: true, value: { request: (name, cb) => { held++; return Promise.resolve(cb()).then(() => { released++; }); } } });
+  const stop1 = a.bgKeep.start(), stop2 = a.bgKeep.start(); await tick(10);
+  assert.equal(held, 1, 'one lock for any number of jobs'); assert.equal(a.bgKeep.active, true);
+  stop1(); stop1(); assert.equal(a.bgKeep.active, true, 'still one job running');
+  stop2(); await tick(10);
+  assert.equal(a.bgKeep.active, false); assert.equal(released, 1);
+  w.__textrivaNoGate = false;
+  await a.aiGate('K1', 'gemini'); const g0 = a._aiGate.get('K1').gap; a.aiGateSlow('K1');
+  assert.ok(a._aiGate.get('K1').gap > g0);
+});
+
+test('source: no plain setTimeout is left in the AI worker / PDF split / upload retry paths (they would crawl in a hidden tab)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(src, /const aiSleep = bgSleep/);
+  assert.match(src, /await bgYield\(\);\s*\/\/ let the UI breathe/);
+  assert.ok(!/AI_GAP_MS\)/.test(src.slice(src.indexOf('async function aiRunPages'), src.indexOf('function aiNote'))), 'no fixed per-page sleep');
+  assert.match(src, /bgTimer\.set\(pumpUploads, delay\)/);
 });
 
 test('floating "AI is working" chip appears for a background (auto) run and disappears afterwards; no timer is left running', async () => {
@@ -318,10 +418,10 @@ test('already-fixed pages are skipped on the next preview (unless "redo")', asyn
   a.aiAddKey(KEY, 'k1', true);
   a.openTextTools('ai'); await tick(20);
   w.document.querySelector('#ttDlg [data-tt="preview"]').click();
-  for (let i = 0; i < 60 && !a.tt.plan; i++) await tick(50);
-  w.document.querySelector('#ttDlg [data-tt="apply"]').click();
+  for (let i = 0; i < 60 && a.state.pages[0].text === BEFORE; i++) await tick(50);
+  await tick(100);
   const n = calls.filter(isGen).length;
-  a.tt.plan = null; w.document.querySelector('#ttDlg [data-tt="preview"]').click(); await tick(100);
+  w.document.querySelector('#ttDlg [data-tt="preview"]').click(); await tick(100);
   assert.equal(calls.filter(isGen).length, n, 'no second AI call for an unchanged, already-fixed page');
 });
 
@@ -409,7 +509,7 @@ test('wiring: menu button, CSP (all providers) and service-worker cache are upda
   assert.match(html, /id="aiFixBtn"/);
   const csp = readFileSync(new URL('../vercel.json', import.meta.url), 'utf8');
   for (const h of ['generativelanguage.googleapis.com', 'api.groq.com', 'openrouter.ai', 'api.mistral.ai', 'api.cerebras.ai']) assert.match(csp, new RegExp('connect-src[^"]*https://' + h.replace(/\./g, '\\.')), h);
-  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v28/);
+  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v29/);
 });
 
 test('prompt carries the book-cleaning rules: markers, Sol→সমাধান, watermarks, no guessing, real examples, backslashes intact', async () => {

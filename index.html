@@ -2481,7 +2481,7 @@ async function dfetch(url, opts = {}, retry = true) {
       netErr = (e && e.name === 'AbortError')
         ? new Error(L('Drive সাড়া দিচ্ছে না (সময় শেষ) — internet ধীর হলে আবার চেষ্টা করুন', 'Drive is not responding (timed out) — if your connection is slow, try again'))
         : new Error(L('Drive-এ পৌঁছানো যাচ্ছে না — internet/ISP চেক করুন', 'Could not reach Drive — check your internet connection'));
-      if (attempt < (isGet ? 2 : 0)) await new Promise(res => setTimeout(res, 800 * (attempt + 1)));
+      if (attempt < (isGet ? 2 : 0)) await bgSleep(800 * (attempt + 1));
     }
   }
   if (netErr) throw netErr;
@@ -2545,8 +2545,8 @@ function queueDriveSync() {
   if (!GOOGLE_CLIENT_ID || _syncing || !state.proj?.driveFolderId || !driveValid() || state.syncConflict || isOffline()) return;
   if (dataSaverOn() && isMetered()) return;   // Data saver: no background uploads on mobile data (the Save button still works)
   if (state.proj.lastSig === syncSig()) return;
-  clearTimeout(_dtimer);
-  _dtimer = setTimeout(() => syncToDrive({ silent: true }), 8000);
+  bgTimer.clear(_dtimer);
+  _dtimer = bgTimer.set(() => syncToDrive({ silent: true }), 8000);
 }
 
 async function syncToDrive({ silent = false, force = false } = {}) {
@@ -3422,6 +3422,84 @@ window.addEventListener('pagehide', () => { saveNow(); });
 const REMOTE_TTL = 7 * 24 * 60 * 60 * 1000;
 const isFresh = pg => !!pg.remoteUrl && (Date.now() - (pg.remoteAt || 0)) < REMOTE_TTL;
 
+// ── Background-proof timers + keep-alive ─────────────────────────────────────
+// Browsers throttle ordinary setTimeout in hidden tabs (about 1/s, then 1/min after ~5 minutes), so every tiny
+// "sleep" between two pages / retries turns into minutes once the app is in the background. Timers that live in a
+// Web Worker are not throttled like that. bgKeep() also holds a Web Lock (Chrome does not freeze a tab that holds one)
+// and a screen wake lock (while the screen is on) as long as any long job — split, OCR, upload, AI — is running.
+const bgTimer = (() => {
+  let w = null, seq = 0; const cbs = new Map();
+  const fire = id => { const o = cbs.get(id); if (o) { cbs.delete(id); try { o.fn(); } catch (e) { console.error(e); } } };
+  const fallbackAll = () => { w = null; cbs.forEach((o, id) => { o.h = setTimeout(() => fire(id), Math.max(0, o.at - Date.now())); }); };
+  try {
+    if (typeof Worker === 'function' && typeof Blob === 'function' && window.URL && URL.createObjectURL) {
+      w = new Worker(URL.createObjectURL(new Blob(['onmessage=function(e){var d=e.data;setTimeout(function(){postMessage(d.id)},d.ms)}'], { type: 'text/javascript' })));
+      w.onmessage = e => fire(e.data);
+      w.onerror = fallbackAll;
+    }
+  } catch (e) { w = null; }
+  return {
+    set(fn, ms) {
+      ms = Math.max(0, +ms || 0);
+      if (!w) return setTimeout(fn, ms);
+      const id = ++seq; cbs.set(id, { fn, at: Date.now() + ms, h: null });
+      try { w.postMessage({ id, ms }); } catch (e) { fallbackAll(); }
+      return -id;
+    },
+    clear(h) { if (h < 0) { const o = cbs.get(-h); if (o && o.h) clearTimeout(o.h); cbs.delete(-h); } else clearTimeout(h); },
+  };
+})();
+const bgSleep = ms => new Promise(r => bgTimer.set(r, ms));
+// Yield to the event loop without a timer at all (MessageChannel is never throttled in a hidden tab).
+const bgYield = (() => {
+  let ch = null; try { if (typeof MessageChannel === 'function') ch = new MessageChannel(); } catch (e) { ch = null; }
+  if (!ch) return () => bgSleep(0);
+  const q = []; ch.port1.onmessage = () => { const f = q.shift(); if (f) f(); };
+  return () => new Promise(r => { q.push(r); ch.port2.postMessage(0); });
+})();
+// Waits until a wall-clock deadline (so it stays correct after the device slept), in short slices so a Stop is noticed.
+async function bgWaitUntil(ts, run) {
+  for (;;) {
+    const left = ts - Date.now();
+    if (left <= 0 || (run && run.cancel)) return;
+    await bgSleep(Math.min(left, 700));
+  }
+}
+const bgKeep = (() => {
+  let n = 0, release = null, locking = false, wake = null;
+  const wakeOn = async () => {
+    try {
+      if (n > 0 && !wake && !document.hidden && navigator.wakeLock) {
+        const s = await navigator.wakeLock.request('screen');
+        if (n <= 0) { s.release().catch(() => {}); return; }
+        wake = s; s.addEventListener('release', () => { if (wake === s) wake = null; });
+      }
+    } catch (e) { /* not allowed (battery saver etc.) — fine */ }
+  };
+  const lockOn = () => {
+    try {
+      if (!navigator.locks || locking) return;
+      locking = true;
+      navigator.locks.request('textriva-busy', () => (n <= 0 ? undefined : new Promise(res => { release = res; }))).catch(() => {}).then(() => { locking = false; release = null; });
+    } catch (e) { locking = false; }
+  };
+  document.addEventListener('visibilitychange', () => { if (n > 0 && !document.hidden) wakeOn(); });
+  return {
+    start() {
+      n++; if (n === 1) { lockOn(); wakeOn(); }
+      let done = false;
+      return () => {
+        if (done) return; done = true;
+        if (--n > 0) return;
+        n = 0;
+        if (release) { const r = release; release = null; r(); }
+        if (wake) { const s = wake; wake = null; s.release().catch(() => {}); }
+      };
+    },
+    get active() { return n > 0; },
+  };
+})();
+
 // ── Background auto-upload ───────────────────────────────────────────────────
 // সব page নিজে থেকে, একসাথে কয়েকটা করে (parallel) upload হয়; থামে না।
 //  • যে page-এ আছি সেখান থেকে শুরু, তারপর সামনে, শেষে পিছনের page
@@ -3482,12 +3560,13 @@ function bgUploadProgress() {
 }
 
 function scheduleUploadKeeper(delay = UPLOAD_KEEPER_MS) {
-  clearTimeout(_bgTimer);
-  _bgTimer = setTimeout(pumpUploads, delay);
+  bgTimer.clear(_bgTimer);
+  _bgTimer = bgTimer.set(pumpUploads, delay);
 }
 
 async function _uploadWorker() {
   _bgActive++;
+  const stopKeep = bgKeep.start();
   try {
     while (navigator.onLine && Date.now() >= _bgPauseUntil) {
       const i = pickNextUpload();
@@ -3509,6 +3588,7 @@ async function _uploadWorker() {
       bgUploadProgress();
     }
   } finally {
+    stopKeep();
     _bgActive--;
     if (_bgActive === 0) { bgUploadProgress(); scheduleUploadKeeper(); }
   }
@@ -3516,7 +3596,7 @@ async function _uploadWorker() {
 
 function pumpUploads() {
   if (window.__textrivaNoBgUpload) return;   // শুধু test harness-এর জন্য switch
-  clearTimeout(_bgTimer);
+  bgTimer.clear(_bgTimer);
   if (!state.pages.length) { scheduleUploadKeeper(); return; }
   const wait = _bgPauseUntil - Date.now();
   if (wait > 0) { scheduleUploadKeeper(wait + 50); return; }
@@ -3531,6 +3611,8 @@ function prefetchAhead() { pumpUploads(); }
 
 window.addEventListener('online', () => { _bgPauseUntil = 0; pumpUploads(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pumpUploads(); });
+window.addEventListener('pageshow', () => pumpUploads());
+document.addEventListener('resume', () => { _bgPauseUntil = 0; pumpUploads(); });   // tab un-frozen after being in the background
 scheduleUploadKeeper(2000);
 
 // ══════════════════════════════════════════
@@ -3643,6 +3725,7 @@ async function loadPdf(file) {
   toast(t('pdfLoading', { name: file.name }), '', 2000);
   showProgress();
   setSplitProgress(0, 1); // show activity immediately
+  const stopKeep = bgKeep.start();
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjs.getDocument({ data: buf }).promise;
@@ -3665,7 +3748,7 @@ async function loadPdf(file) {
       canvas.width = canvas.height = 0;            // give the bitmap memory back right away
       try { page.cleanup(); } catch (e) { /* ignore */ }
       setSplitProgress(n + 1, total);
-      if ((n + 1) % PDF_YIELD_EVERY === 0) await new Promise(r => setTimeout(r, 0));   // let the UI breathe on big files
+      if ((n + 1) % PDF_YIELD_EVERY === 0) await bgYield();   // let the UI breathe on big files (a plain setTimeout would crawl in a hidden tab)
     }
     try { pdf.cleanup(); } catch (e) { /* ignore */ }
     setSplitProgress(total, total);
@@ -3673,7 +3756,7 @@ async function loadPdf(file) {
   } catch (e) {
     toast(t('pdfError', { error: e.message }), 'err');
     hideProgress();
-  }
+  } finally { stopKeep(); }
 }
 
 // ══════════════════════════════════════════
@@ -4439,7 +4522,7 @@ function saveBnFix() {
 // ── Glue: bulk change + undo ──
 state.bulkUndo = [];
 // changes: [{ id, before, after }]. Per-page undo history is filled too, so ↶ on a page also works.
-function applyTextChanges(changes, label) {
+function applyTextChanges(changes, label, group) {
   const items = [];
   let stale = 0;
   changes.forEach(c => {
@@ -4453,8 +4536,13 @@ function applyTextChanges(changes, label) {
     items.push({ id: pg.id, before: c.before, after: c.after });
   });
   if (items.length) {
-    state.bulkUndo.push({ label, items });
-    while (state.bulkUndo.length > BULK_UNDO_LIMIT) state.bulkUndo.shift();
+    // group: every page of one AI run lands in ONE bulk-undo step instead of one step per page
+    if (group && group.entry && state.bulkUndo.includes(group.entry)) group.entry.items.push(...items);
+    else {
+      const entry = { label, items };
+      state.bulkUndo.push(entry); if (group) group.entry = entry;
+      while (state.bulkUndo.length > BULK_UNDO_LIMIT) state.bulkUndo.shift();
+    }
     renderAll(); updateStats();
   }
   return { applied: items.length, stale };
@@ -4479,7 +4567,7 @@ function undoBulk() {
 const tt = { tab: 'clean', plan: null, checked: new Set(), frTimer: null };
 const LS_CLEAN = 'textriva-clean-opts', LS_FR = 'textriva-fr-opts';
 const readJson = (k, d) => { try { return Object.assign({}, d, JSON.parse(readSaved(k) || '{}')); } catch { return Object.assign({}, d); } };
-function closeTextTools() { if (state.aiRun) state.aiRun.cancel = true; const d = document.getElementById('ttDlg'); if (d) d.remove(); tt.plan = null; }
+function closeTextTools() { const d = document.getElementById('ttDlg'); if (d) d.remove(); tt.plan = null; }
 // Any option/rule/scope change makes a shown preview stale — drop it so Apply never uses an outdated plan.
 function invalidateTtPlan() {
   if (!tt.plan) return;
@@ -4544,12 +4632,14 @@ async function renderTtTab() {
   document.getElementById('ttPrev').innerHTML = '';
   document.getElementById('ttSum').textContent = '';
   document.querySelector('#ttDlg [data-tt="apply"]').disabled = true;
+  document.querySelector('#ttDlg [data-tt="apply"]').classList.toggle('hidden', tt.tab === 'ai');           // AI pages are written in directly — nothing to "apply"
+  { const pb = document.querySelector('#ttDlg [data-tt="preview"]'); if (pb) pb.textContent = tt.tab === 'ai' ? '▶ ' + L('AI চালান', 'Run AI') : L('Preview', 'Preview'); }
   if (tt.tab === 'bn') { await loadBnFix(); renderBnRules(); }
   if (tt.tab === 'fr') updateFrCount();
   if (tt.tab === 'ai') { const m = document.getElementById('aiMath'); if (m) m.value = aiOpts().math; const pr = document.getElementById('aiPar'); if (pr) pr.value = String(aiPar()); }
   if (tt.tab === 'ai') {
     if (state.aiRun) { document.getElementById('ttPrev').innerHTML = `<div class="ai-stoprow"><button class="btn btn-secondary" data-tt="ai-stop">■ ${L('থামান', 'Stop')}</button></div><div id="aiBoard" class="ai-board"></div>`; aiPaintAll(); }
-    else if (tt.aiHold) { const h = tt.aiHold; tt.aiHold = null; renderTtPlan(h); }
+    else if (tt.aiHold) { const h = tt.aiHold; tt.aiHold = null; document.getElementById('ttSum').textContent = h.sum; document.getElementById('ttPrev').innerHTML = h.html || ''; }
   }
   refreshTtUndo();
 }
@@ -4693,6 +4783,7 @@ function openTextTools(tab) {
       else if (a === 'undo') { undoBulk(); refreshTtUndo(); }
       else if (a === 'toggle') showTtDiff(+b.dataset.k);
       else if (a === 'goto') { const c = tt.plan.changes[+b.dataset.k]; if (c) { state.current = c.i; renderAll(); } }
+      else if (a === 'goto-id') { const i = state.pages.findIndex(p => p.id === b.dataset.id); if (i >= 0) { state.current = i; renderAll(); } }
       else if (a === 'all' || a === 'none') {
         tt.checked = a === 'all' ? new Set(tt.plan.changes.map((_, k) => k)) : new Set();
         wrap.querySelectorAll('[data-pick]').forEach(i => { i.checked = a === 'all'; });
@@ -4769,7 +4860,8 @@ const _aiCoolingUntil = new Map();         // key → timestamp (ms) until which
 // after the person saves the dialog, their own choice sticks.
 const aiOpts = () => { const o = readJson(LS_AI_OPTS, AI_DEFAULTS); if (!o.autoV2) o.auto = true; return o; };
 const aiMask = k => (k ? '…' + k.slice(-4) : '');
-const aiSleep = ms => new Promise(r => setTimeout(r, ms));
+const aiSleep = bgSleep;                    // worker-based timer: not throttled while the app is in the background
+const aiWaitUntil = bgWaitUntil;
 
 // ── Multi-key store: every saved key has a nickname + provider; all of them are tried, in order, with automatic
 //    fallback to the next one the moment a key hits its free-tier rate limit. ──
@@ -4950,6 +5042,7 @@ const AI_MSG = {
   blocked: () => L('AI উত্তর দেয়নি (খালি/block)', 'AI returned nothing (empty/blocked)'),
   truncated: () => L('Page বড় — উত্তর মাঝপথে কেটে গেছে', 'Page too long — the answer was cut off'),
   guard: () => L('AI অনেক বেশি বদলেছে — নিরাপত্তার জন্য বাদ', 'AI changed too much — skipped for safety'),
+  cancel: () => L('থামানো হয়েছে', 'Stopped'),
   server: () => L('AI server সমস্যা', 'AI server problem'),
   bad: () => L('Request গ্রহণ হয়নি', 'Request was rejected'),
 };
@@ -5099,6 +5192,21 @@ async function aiCallOA(prov, model, rq, key) {
   return { text: txt, truncated: !!c && c.finish_reason === 'length', tok: (j && j.usage && j.usage.total_tokens) || 0 };
 }
 
+// ── Per-key pacing. All workers that use one key share one "next request may start at" clock, so a burst of
+//    pages never hammers a free-tier key. The gap widens after a rate-limit and slowly shrinks again after successes. ──
+const AI_GATE_BASE = { gemini: 1500, groq: 2200, openrouter: 3000, mistral: 1200, cerebras: 2200 };
+const _aiGate = new Map();
+async function aiGate(key, prov) {
+  if (window.__textrivaNoGate) return;
+  let g = _aiGate.get(key);
+  if (!g) { const b = AI_GATE_BASE[prov] || 2000; g = { next: 0, gap: b, base: b }; _aiGate.set(key, g); }
+  const at = Math.max(Date.now(), g.next); g.next = at + g.gap;          // reserve the slot synchronously
+  const w = at - Date.now();
+  if (w > 0) await bgSleep(w);
+}
+const aiGateOk = key => { const g = _aiGate.get(key); if (g) g.gap = Math.max(g.base, Math.round(g.gap * 0.92)); };
+const aiGateSlow = key => { const g = _aiGate.get(key); if (g) { g.gap = Math.min(15000, Math.round(g.gap * 1.7)); g.next = Math.max(g.next, Date.now() + g.gap); } };
+
 // Generates on ONE key, with automatic fallback: next model on 429/403/404/413/empty; retry once on 5xx.
 // mk(withImage) → { system, text, img } is called per model, because a text-only model must get a text-only prompt.
 async function aiGenerate(mk, hasImg, rec) {
@@ -5111,13 +5219,16 @@ async function aiGenerate(mk, hasImg, rec) {
     const rq = mk(withImage);
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
+        await aiGate(key, prov);
         const out = prov === 'gemini' ? await aiCallGemini(m.name, rq, key) : await aiCallOA(prov, m.name, rq, key);
         if (out.truncated) throw new AiError('truncated');
         if (!out.text.trim()) throw new AiError('blocked');
+        aiGateOk(key);
         return { text: out.text, model: m.name, withImage: !!rq.img, tok: out.tok || 0 };
       } catch (e) {
         if (!(e instanceof AiError)) throw e;
         last = e;
+        if (e.code === 'rate') aiGateSlow(key);
         if (e.code === 'key' || e.code === 'offline') throw e;
         if (e.code === 'server' && attempt === 0) { await aiSleep(2000); continue; }
         if (e.code === 'model' || (e.code === 'rate' && e.wait > AI_MAX_WAIT)) _aiBad.add(key.slice(-8) + '::' + m.name);   // no access / daily quota gone → skip this model for the session
@@ -5134,18 +5245,21 @@ async function aiGenerate(mk, hasImg, rec) {
 // and automatically moving to the next key the moment one hits its free-tier limit or turns out invalid.
 // If `preferId` is given (used by the parallel per-key workers below), that key is tried FIRST so each
 // worker mostly sticks to its own key; it only borrows another idle key if its own is cooling down.
-async function aiGenerateAnyKey(mk, hasImg, preferId) {
+async function aiGenerateAnyKey(mk, hasImg, preferId, run) {
   const keys = aiActiveKeys();
   if (!keys.length) throw new AiError('key');
-  const now = Date.now();
   let ordered = keys;
   if (preferId) { const mine = keys.find(k => k.id === preferId); if (mine) ordered = [mine, ...keys.filter(k => k.id !== preferId)]; }
-  const usable = ordered.filter(k => (_aiCoolingUntil.get(k.key) || 0) <= now);
-  if (!usable.length) {   // everything is cooling: if the shortest wait is hours (daily quota) don't sit there — fail fast
-    const w = Math.ceil((Math.min(...ordered.map(k => _aiCoolingUntil.get(k.key) || 0)) - now) / 1000);
+  let usable = ordered.filter(k => (_aiCoolingUntil.get(k.key) || 0) <= Date.now());
+  while (!usable.length) {   // every key is cooling: hours = daily quota → fail fast; otherwise WAIT it out (deadline based, so it stays right in the background)
+    const soon = Math.min(...ordered.map(k => _aiCoolingUntil.get(k.key) || 0));
+    const w = Math.ceil((soon - Date.now()) / 1000);
     if (w > AI_MAX_WAIT) throw new AiError('rate', w);
+    await aiWaitUntil(soon, run);
+    if (run && run.cancel) throw new AiError('cancel');
+    usable = ordered.filter(k => (_aiCoolingUntil.get(k.key) || 0) <= Date.now());
   }
-  const tryOrder = usable.length ? usable : ordered;    // short cooldowns: try anyway (best effort)
+  const tryOrder = usable;
   let lastErr = null;
   for (let i = 0; i < tryOrder.length; i++) {
     const k = tryOrder[i];
@@ -5158,7 +5272,7 @@ async function aiGenerateAnyKey(mk, hasImg, preferId) {
       lastErr = e;
       if (!(e instanceof AiError)) throw e;
       aiUsageNote(k.id, { ok: false, code: e.code });
-      if (e.code === 'rate') { _aiCoolingUntil.set(k.key, Date.now() + Math.max(e.wait || 30, 30) * 1000); continue; }
+      if (e.code === 'rate') { _aiCoolingUntil.set(k.key, Date.now() + Math.max(e.wait || 30, 3) * 1000); continue; }
       if (e.code === 'key') { continue; }               // this key is bad — try the next one
       if (e.code === 'model' && tryOrder.length > 1) continue;   // this key has no usable model — another key may
       throw e;                                           // offline / blocked / truncated / server etc. — don't burn through keys
@@ -5346,7 +5460,7 @@ function aiUserText(chunk, k, n, prev, next) {
 //    introduced: one extra "auditor" call that puts the author's digits back unless the image / the chain proves the repair.
 // preferId: when a parallel per-key worker calls this, it passes its own key id so this page
 // mostly stays on that worker's key (only borrowing another if that one is cooling down).
-async function aiFixPage(pg, o, preferId) {
+async function aiFixPage(pg, o, preferId, run) {
   const before = pg.text || '';
   const chunks = aiSplit(before);
   const idx = state.pages.indexOf(pg);
@@ -5360,7 +5474,7 @@ async function aiFixPage(pg, o, preferId) {
   for (let k = 0; k < chunks.length; k++) {
     const prev = k === 0 ? pPrev : aiTail(chunks[k - 1]), next = k === chunks.length - 1 ? pNext : aiHead(chunks[k + 1]);
     const mk = withImg => ({ system: aiSystemPrompt(o, withImg, !!(prev || next)), img: withImg ? img : null, text: aiUserText(chunks[k], k, chunks.length, prev, next) });
-    const r = await aiGenerateAnyKey(mk, !!img, preferId);
+    const r = await aiGenerateAnyKey(mk, !!img, preferId, run);
     outs.push(aiClean(r.text)); model = r.model; keyName = r.keyName || keyName; keyId = r.keyId || keyId; usedImg = r.withImage;
   }
   const max = o.math === 'latex' ? AI_LEN_MAX_LATEX : AI_LEN_MAX;
@@ -5374,14 +5488,14 @@ async function aiFixPage(pg, o, preferId) {
         text: '<original_ocr>\n' + normNl(before) + '\n</original_ocr>\n<proposed_fix>\n' + after + '\n</proposed_fix>\n<flagged_numbers>\nadded: '
           + flags.added.join(', ') + '\nmissing: ' + (flags.lost.join(', ') || '-') + '\n</flagged_numbers>\nReturn the final page.',
       });
-      const r2 = await aiGenerateAnyKey(mkR, !!img, preferId);
+      const r2 = await aiGenerateAnyKey(mkR, !!img, preferId, run);
       const a2 = aiClean(r2.text);
       reviewed = true;
       if (aiAccept(before, a2, max)) {
         const f2 = aiVerify(before, a2);
         if (f2.added.length <= flags.added.length) { after = a2; flags = f2; }   // never let the auditor make it worse
       }
-    } catch (e) { if (e instanceof AiError && (e.code === 'offline' || e.code === 'key')) throw e; /* auditor is best-effort: keep the first result, flagged */ }
+    } catch (e) { if (e instanceof AiError && (e.code === 'offline' || e.code === 'key' || e.code === 'cancel')) throw e; /* auditor is best-effort: keep the first result, flagged */ }
   }
   return { after, model, withImage: usedImg, keyName, keyId, flags, reviewed };
 }
@@ -5486,31 +5600,42 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
   const keys = aiActiveKeys();
   if (!keys.length) { res.fatal = new AiError('key'); return res; }
   const total = ids.length, stat = run.stat = aiNewStat(keys, ids);
-  let cursor = 0, active = 0;
+  const queue = ids.slice(), later = [], rounds = new Map();      // later: pages that hit a temporary problem — tried again after a pause
+  let active = 0;
   // Never spin up more workers than there are pages to fix.
   const slotsPerKey = Math.max(1, Math.min(aiPar(o), total)); stat.par = aiPar(o);
   const parallelCount = Math.min(keys.length * slotsPerKey, total);
-  const nextId = () => (cursor < ids.length ? ids[cursor++] : null);
+  const nextId = () => {
+    if (queue.length) return queue.shift();
+    const now = Date.now(), k = later.findIndex(x => x.at <= now);
+    return k >= 0 ? later.splice(k, 1)[0].id : null;
+  };
   const kstat = id => stat.keys.find(k => k.id === id);
   const progress = () => { if (onProgress) onProgress(stat.done, total, active, parallelCount, stat); };
+  const allDaily = () => aiActiveKeys().every(k => (_aiCoolingUntil.get(k.key) || 0) - Date.now() > AI_MAX_WAIT * 1000);
+  const stopKeep = bgKeep.start();                                   // keeps working while the app is in the background
   aiLiveStart(run);
 
   async function worker(preferId, slot) {
-    if (slot) await aiSleep(slot * 350);                                  // stagger the first calls (providers like Mistral allow ~1 req/s)
+    if (slot) await aiSleep(slot * 350);                              // stagger the first calls (providers like Mistral allow ~1 req/s)
     for (;;) {
       if (run.cancel) return;
       const id = nextId();
-      if (id == null) return;
+      if (id == null) {
+        if (!later.length && active === 0) return;                    // nothing left anywhere
+        await aiSleep(400); continue;                                 // others are still busy / a retry is not due yet — stay alive, never quit early
+      }
       const ps = stat.pages.get(id), ks = kstat(preferId);
       const pg = state.pages.find(p => p.id === id);
       if (!pg || !(pg.text || '').trim()) { ps.st = 'same'; stat.same++; stat.done++; progress(); continue; }
-      active++; ps.st = 'run'; ps.key = preferId; ps.t = Date.now(); if (ks) ks.busy.add(id);
+      active++; ps.st = 'run'; ps.key = preferId; ps.t = Date.now(); ps.err = ''; if (ks) ks.busy.add(id);
       progress();
       const before = pg.text;
-      for (let tries = 0; ; ) {
+      let requeued = false;
+      for (let rateTries = 0; ; ) {
         try {
-          const r = await aiFixPage(pg, o, preferId);
-          if (r.keyId && r.keyId !== ps.key) { if (ks) ks.busy.delete(id); const k2 = kstat(r.keyId); if (k2) k2.busy.add(id); ps.key = r.keyId; }
+          const r = await aiFixPage(pg, o, preferId, run);
+          if (r.keyId && r.keyId !== ps.key) { const k1 = kstat(ps.key); if (k1) k1.busy.delete(id); const k2 = kstat(r.keyId); if (k2) k2.busy.add(id); ps.key = r.keyId; }
           ps.model = r.model; const kk = kstat(ps.key); if (kk) kk.model = r.model;
           if (pg.text !== before) { ps.st = 'same'; stat.same++; break; }   // edited meanwhile → drop
           if (r.after === normNl(before)) { res.same++; stat.same++; ps.st = 'same'; pg.aiFixedHash = hashStr(before); }
@@ -5523,12 +5648,23 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
           break;
         } catch (e) {
           if (!(e instanceof AiError)) { res.failed++; stat.failed++; ps.st = 'fail'; ps.err = aiErrText(e); res.lastErr = e; break; }
-          if (e.code === 'offline') { res.fatal = e; run.cancel = true; ps.st = 'wait'; break; }
+          if (run.cancel || e.code === 'cancel') { ps.st = 'wait'; break; }
+          if (e.code === 'offline') {                                 // connection dropped (typical when the phone sleeps): pause, don't give up
+            ps.st = 'wait'; ps.err = aiErrText(e);
+            const until = Date.now() + 10 * 60 * 1000;
+            while (isOffline() && !run.cancel && Date.now() < until) await aiSleep(1000);
+            if (run.cancel) break;
+            if (isOffline()) { res.fatal = e; run.cancel = true; break; }
+            ps.st = 'run'; ps.err = ''; continue;
+          }
           if (e.code === 'key' && !aiActiveKeys().length) { res.fatal = e; run.cancel = true; ps.st = 'wait'; break; }
-          if (e.code === 'rate' && tries < 3 && !run.cancel && (e.wait || 30) <= AI_MAX_WAIT) {
-            tries++;
-            for (let s = Math.min(e.wait || 30, 65); s > 0 && !run.cancel; s--) await aiSleep(1000);
-            continue;
+          if (e.code === 'rate' && (e.wait || 30) <= AI_MAX_WAIT && ++rateTries <= 12) { continue; }   // aiGenerateAnyKey waits the cooldown out itself, then we retry the same page
+          if (e.code === 'rate' && (e.wait || 30) > AI_MAX_WAIT && allDaily()) { res.fatal = e; run.cancel = true; ps.st = 'wait'; break; }   // free quota of every key is gone → stop cleanly, the rest stays untouched
+          const again = e.code === 'rate' || e.code === 'net' || e.code === 'server' || e.code === 'blocked';
+          const n = rounds.get(id) || 0;
+          if (again && n < 3) {                                       // temporary problem → put the page back and try again a little later (not "failed")
+            rounds.set(id, n + 1); later.push({ id, at: Date.now() + 3000 * (n + 1) });
+            requeued = true; ps.st = 'wait'; ps.err = aiErrText(e); res.lastErr = e; break;
           }
           if (e.code === 'guard') { res.guard++; stat.guard++; ps.st = 'guard'; } else { res.failed++; stat.failed++; ps.st = 'fail'; }
           ps.err = aiErrText(e);
@@ -5537,18 +5673,17 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
       }
       active--; ps.ms = Date.now() - ps.t;
       stat.keys.forEach(k => k.busy.delete(id));
-      const kf = kstat(ps.key); if (kf && ps.st !== 'wait') kf.done++;
-      if (ps.st !== 'wait') stat.done++;
+      if (!requeued && ps.st !== 'wait') { const kf = kstat(ps.key); if (kf) kf.done++; stat.done++; }
       progress();
       if (res.fatal) return;
-      if (cursor < ids.length) await aiSleep(AI_GAP_MS);                  // gentle pacing per worker, not global
     }
   }
 
   const jobs = [];
   const rot = keys.length ? (run.rot || 0) % keys.length : 0;                  // start from a different key each run → single pages spread over all keys
   for (const k of keys.slice(rot).concat(keys.slice(0, rot))) for (let s = 0; s < slotsPerKey; s++) jobs.push(worker(k.id, s));
-  try { await Promise.all(jobs); } finally { aiLiveEnd(run); }
+  try { await Promise.all(jobs); } finally { aiLiveEnd(run); stopKeep(); }
+  res.cancelled = !!run.cancel && !res.fatal;
   return res;
 }
 function aiNote(r) {
@@ -5590,11 +5725,17 @@ function aiAutoToast(i, flagged) {
     _aiDone = { n: 0, flags: 0, first: 0, t: null };
   }, 700);
 }
+const _aiBusyIds = new Set();      // pages an auto batch is working on right now (a manual run must not double up on them)
 async function aiRunBatch(ids, rot) {
-  const res = await aiRunPages(ids, aiOpts(), { cancel: false, rot }, c => {        // each page is applied the moment it finishes
-    const r = applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix');
-    if (r.applied) aiAutoToast(c.i, !!(c.flags && c.flags.added.length));
-  });
+  const group = {};
+  ids.forEach(id => _aiBusyIds.add(id));
+  let res;
+  try {
+    res = await aiRunPages(ids, aiOpts(), { cancel: false, rot }, c => {        // each page is applied the moment it finishes
+      const r = applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix', group);
+      if (r.applied) aiAutoToast(c.i, !!(c.flags && c.flags.added.length));
+    });
+  } finally { ids.forEach(id => _aiBusyIds.delete(id)); }
   if (res.fatal) {
     toast('❌ ' + aiErrText(res.fatal), 'err', 5000);
     if (res.fatal.code === 'key') saveSetting(LS_AI_OPTS, JSON.stringify(Object.assign(aiOpts(), { auto: false, autoV2: true })));
@@ -5672,7 +5813,7 @@ function aiOptsHtml() {
     + chk('redo', 'ঠিক হওয়া page-ও আবার', 'Re-run fixed pages', 'আগে AI-fix হওয়া page-ও আবার করা (Preview/Run-এ)', 'Also re-run pages the AI already fixed (Preview/Run)')
     + `</div><div class="ex-row ai-sel-row"><label for="aiPar">${L('একসাথে (প্রতি key)', 'At once (per key)')}</label><select id="aiPar"><option value="1">1 page</option><option value="2">2 page</option><option value="3">3 page</option></select>`
     + `<label for="aiMath">${L('Math', 'Math')}</label><select id="aiMath"><option value="unicode">Unicode (x², √, π, ≤)</option><option value="latex">LaTeX ($x^2$)</option></select></div>`
-    + `<div class="tt-hint">${L('Groq-এর মতো মিনিটে token-সীমা ছোট হলে “একসাথে” কমিয়ে দিন। Preview-তে diff দেখে Apply করুন; “bulk undo” সব সময় আছে।', 'If a provider has a small per-minute token limit (e.g. Groq) lower “At once”. Review the diff in Preview, then Apply; “bulk undo” is always available.')}</div>`;
+    + `<div class="tt-hint">${L('Groq-এর মতো মিনিটে token-সীমা ছোট হলে “একসাথে” কমিয়ে দিন। “▶ AI চালান” চাপলে প্রতিটা page শেষ হওয়ামাত্র নিজে বসে যায় — আলাদা Apply লাগে না; আগে ঠিক করা page বাদ যায়। শেষে ↩ Undo একবারে সব ফেরায়; dialog বন্ধ করলে বা app background-এ গেলেও চলে।', 'If a provider has a small per-minute token limit (e.g. Groq) lower “At once”. “▶ Run AI” writes every page in the moment it is done — no separate Apply; already-fixed pages are skipped. One ↩ Undo reverts the whole run; it keeps going if you close this or leave the app.')}</div>`;
   // 4) rarely needed
   const safe = `<details class="ai-more"><summary>🔒 ${L('সুরক্ষা ও Drive', 'Privacy & Drive')}</summary>
     <div class="tt-hint">${L('Key শুধু এই browser-এ থাকে — backup বা export-এ যায় না (Drive-এ শুধু আপনি “Drive-এ save” চাপলে, encrypt হয়ে)। Page-এর text (ও ছবি) সরাসরি যে provider-এর key দিয়ে কাজ হচ্ছে তার কাছে যায়। Free tier-এ provider এই data নিজেদের product উন্নয়নে ব্যবহার করতে পারে — গোপন কিছু হলে এটা ব্যবহার করবেন না।', 'The key stays in this browser only — never in backups or exports (it reaches Drive only if you press “Save to Drive”, encrypted). The page text (and image) goes straight to the provider whose key is used. On free tiers a provider may use this data to improve its products — do not use it for anything confidential.')}</div>
@@ -5746,6 +5887,9 @@ async function aiTtAction(a, target) {
 const aiCorsHint = (e, prov) => (e && e.code === 'net' && prov && prov !== 'gemini')
   ? ' — ' + L(`${aiProvName(prov)} browser থেকে ধরা যায়নি (ad-blocker/firewall বা provider browser-call আটকে রেখেছে হতে পারে)। অন্য key দিয়ে চালিয়ে যান।`, `${aiProvName(prov)} could not be reached from the browser (an ad-blocker/firewall, or the provider blocks browser calls). Carry on with another key.`)
   : '';
+// Manual run ("▶ AI চালান"): every page is written straight into its page the moment the AI finishes it — no
+// separate Apply step. Pages the AI already fixed are skipped (unless "redo"). One undo step covers the whole run.
+// Closing the dialog does NOT stop it: the floating chip keeps showing progress, and a summary toast arrives at the end.
 async function runAiPreview() {
   const sum = $('ttSum'), prev = $('ttPrev');
   if (state.aiRun) return;
@@ -5754,25 +5898,44 @@ async function runAiPreview() {
   if (!aiActiveKeys().length) { sum.textContent = '⚠️ ' + L('সব key বন্ধ করা আছে — অন্তত একটা চালু করুন', 'All keys are paused — switch at least one on'); return; }
   if (isOffline()) { sum.textContent = '⚠️ ' + AI_MSG.offline(); return; }
   const scope = ttScopeIdx();
-  const ids = state.pages.filter((p, i) => (!scope || scope.has(i)) && (p.text || '').trim() && (o.redo || p.aiFixedHash !== hashStr(p.text))).map(p => p.id);
-  if (!ids.length) { sum.textContent = '✅ ' + L('AI-fix করার মতো page নেই', 'No pages left to fix'); return; }
-  const run = state.aiRun = { cancel: false }, changes = [];
+  const inScope = state.pages.filter((p, i) => (!scope || scope.has(i)) && (p.text || '').trim());
+  const ids = inScope.filter(p => !_aiBusyIds.has(p.id) && !_aiQ.includes(p.id) && (o.redo || p.aiFixedHash !== hashStr(p.text))).map(p => p.id);
+  if (!ids.length) { sum.textContent = '✅ ' + L('AI-fix করার মতো page নেই — আগেই ঠিক করা হয়ে গেছে', 'No pages left to fix — they are already done'); return; }
+  const skippedFixed = inScope.length - ids.length;
+  const run = state.aiRun = { cancel: false }, group = {}, done = [];
+  let stale = 0;
   tt.aiHold = null;
   prev.innerHTML = `<div class="ai-stoprow"><button class="btn btn-secondary" data-tt="ai-stop">■ ${L('থামান', 'Stop')}</button></div><div id="aiBoard" class="ai-board"></div>`;
-  sum.textContent = L('AI চলছে… নিচে দেখুন কোন key কোন page করছে', 'AI running… see below which key is on which page');
+  sum.textContent = L('AI চলছে — প্রতিটা page শেষ হলেই নিজে বসে যাবে; dialog বন্ধ করলে বা app background-এ গেলেও চলবে', 'AI running — each page is written in as soon as it is done; it keeps going if you close this or leave the app');
   let res;
-  try { res = await aiRunPages(ids, o, run, c => changes.push(c), () => aiPaintAll()); }
-  finally { state.aiRun = null; }
+  try {
+    res = await aiRunPages(ids, o, run, c => {
+      const r = applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix', group);
+      if (r.applied) done.push(c); else stale++;
+    }, () => aiPaintAll());
+  } finally { state.aiRun = null; }
   aiPaintAll();
-  if (!$('ttDlg')) return;                                               // dialog was closed meanwhile
-  const extra = (res.guard ? ' · ⚠️ ' + L(`${res.guard}টি page বাদ (AI বেশি বদলেছে)`, `${res.guard} skipped (AI changed too much)`) : '')
-    + (res.failed ? ' · ⚠️ ' + L(`${res.failed}টি page হয়নি`, `${res.failed} failed`) + (res.lastErr ? ': ' + aiErrText(res.lastErr) : '') : '')
-    + (run.cancel && !res.fatal ? ' · ■ ' + L('থামানো হয়েছে', 'stopped') : '')
-    + (res.fatal ? ' · ❌ ' + aiErrText(res.fatal) : '');
-  const plan = { changes, extra };
-  if (tt.tab !== 'ai') { tt.aiHold = plan; return; }                     // user switched tab meanwhile — show it when they come back
-  prev.innerHTML = '';
-  renderTtPlan(plan);
+  const left = run.stat ? Math.max(0, run.stat.total - run.stat.done) : 0;
+  const flagged = done.filter(c => c.flags && c.flags.added.length);
+  const parts = [done.length ? '✅ ' + L(`${done.length}টি page ঠিক হয়ে বসে গেছে`, `${done.length} page(s) fixed and applied`) : L('কোনো page বদলায়নি', 'No page needed a change')];
+  if (res.same) parts.push(L(`${res.same}টি আগের মতোই ঠিক ছিল`, `${res.same} were already fine`));
+  if (skippedFixed) parts.push(L(`${skippedFixed}টি আগেই ঠিক করা — বাদ`, `${skippedFixed} already fixed — skipped`));
+  if (res.guard) parts.push('⚠️ ' + L(`${res.guard}টি page বাদ (AI বেশি বদলেছে)`, `${res.guard} skipped (AI changed too much)`));
+  if (res.failed) parts.push('⚠️ ' + L(`${res.failed}টি page হয়নি`, `${res.failed} failed`) + (res.lastErr ? ': ' + aiErrText(res.lastErr) : ''));
+  if (stale) parts.push(L(`${stale}টি বাদ (চলার মধ্যে নিজে edit করেছেন)`, `${stale} skipped (you edited them meanwhile)`));
+  if (res.cancelled) parts.push('■ ' + L('থামানো হয়েছে', 'stopped'));
+  if (res.fatal) parts.push('❌ ' + (res.fatal.code === 'rate'
+    ? L(`Free limit শেষ — বাকি ${left}টি page পরে আবার চালান (যেগুলো হয়ে গেছে সেগুলো আর হবে না)`, `Free limit used up — run again later for the remaining ${left} page(s) (finished ones won't repeat)`)
+    : aiErrText(res.fatal) + (left ? L(` — বাকি ${left}টি page আবার চালান`, ` — run again for the remaining ${left}`) : '')));
+  const txt = parts.join(' · ');
+  const html = flagged.length
+    ? `<div class="tt-hint">⚠️ ${L(`${flagged.length}টি page-এ AI নতুন সংখ্যা ঢুকিয়েছে — একটু দেখে নিন:`, `${flagged.length} page(s) got numbers the AI introduced — worth a look:`)}</div><div class="ex-row">`
+      + flagged.slice(0, 80).map(c => { const i = state.pages.findIndex(p => p.id === c.id); return i < 0 ? '' : `<button class="btn btn-secondary ai-mini" data-tt="goto-id" data-id="${esc(c.id)}">#${i + 1}</button>`; }).join('') + '</div>'
+    : '';
+  if (done.length) toast(L(`✨ ${done.length}টি page AI দিয়ে ঠিক হয়েছে`, `✨ ${done.length} page(s) fixed by AI`) + (flagged.length ? ' ⚠️' + flagged.length : ''), flagged.length ? 'warn' : 'ok', 7000, { label: L('↩ Undo', '↩ Undo'), fn: undoBulk });
+  else if (res.fatal || res.failed) toast('⚠️ ' + txt, 'warn', 5000);
+  if ($('ttDlg') && tt.tab === 'ai') { $('ttSum').textContent = txt; $('ttPrev').innerHTML = html; refreshTtUndo(); }
+  else tt.aiHold = { sum: txt, html };                                  // dialog closed / other tab — show it when they come back
 }
 $('aiFixBtn').onclick = () => openTextTools('ai');
 
@@ -5990,6 +6153,7 @@ async function runOcr(indices, opts) {
   const ids = indices.map(i => state.pages[i] && state.pages[i].id).filter(Boolean);   // ids, so reordering mid-run is harmless
   const run = state.ocrRun = { cancel: false, total: ids.length, n: 0 };
   const res = { done: 0, low: 0, failed: 0, cancelled: false };
+  const stopKeep = bgKeep.start();
   const progress = opts.onProgress || (() => {});
   try {
     for (const id of ids) {
@@ -6018,6 +6182,7 @@ async function runOcr(indices, opts) {
     }
   } finally {
     state.ocrRun = null;
+    stopKeep();
     await ocrIO.stop();
   }
   return res;
@@ -6328,6 +6493,7 @@ async function splitSpreads(idxs, pos, rtl) {
   if (pages.some(p => (p.text || '').trim()) && !confirm(L('কিছু পেজে আগেই text আছে। Split করলে text প্রথম অর্ধেকে থাকবে, পরেরটা খালি হবে। চালিয়ে যাবেন?', 'Some pages already have text. After the split the text stays on the first half and the second half is empty. Continue?'))) return 0;
   const snap = takeImgSnap(L('Split', 'Split spread'));
   let n = 0;
+  const stopKeep = bgKeep.start();
   try {
     for (const pg of pages) {
       const dims = await imgIO.size(pg.blob);
@@ -6341,6 +6507,7 @@ async function splitSpreads(idxs, pos, rtl) {
       n++;
     }
   } finally {
+    stopKeep();
     if (n) { commitImgSnap(snap); zoomReset(); renderAll(); scheduleSave(); }
   }
   if (n) editToast(L(`${n}টি spread দুই পেজে ভাগ হয়েছে`, `Split ${n} spread(s) into two pages`));
@@ -7477,7 +7644,7 @@ async function uploadImageWithRetry(blob, maxAttempts = 3) {
       if (attempt < maxAttempts) {
         // exponential backoff: 1s, 2s, 4s (429 হলে 8s+)
         const base = (e && e.status === 429) ? 8000 : 1000;
-        await new Promise(r => setTimeout(r, base * Math.pow(2, attempt - 1)));
+        await bgSleep(base * Math.pow(2, attempt - 1));
       }
     }
   }
@@ -7526,6 +7693,7 @@ async function uploadAllPages(onlyErrors = false) {
   if (!targets.length) { toast(t('allUploadedAlready'), 'ok'); return; }
 
   state.uploading = true;
+  const stopKeepUp = bgKeep.start();
   showProgress();
   uploadBanner.classList.remove('show');
 
@@ -7543,6 +7711,7 @@ async function uploadAllPages(onlyErrors = false) {
   }
 
   state.uploading = false;
+  stopKeepUp();
   $('uploadPhaseLabel').textContent = t('uploadPhaseLabel');
 
   const finalErrors = state.pages.filter(p => p.status === 'error').length;
@@ -7671,7 +7840,7 @@ async function openLens(i) {
   pg.status = 'uploading'; renderAll();
 
   // Exponential backoff between retries: 2nd = 2s, 3rd = 4s
-  if (attempt > 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 2)));
+  if (attempt > 1) await bgSleep(1000 * Math.pow(2, attempt - 2));
 
   try {
     const compressed = await compressBlob(await lensCopyBlob(pg.blob));
