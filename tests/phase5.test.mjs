@@ -12,7 +12,7 @@ const names = ['BACKUP_FORMAT', 'DOCX_PAGE_BREAK', 'normNl', 'xmlEscape', 'xmlUn
   'docxRuns', 'docxParagraph', 'buildDocxFiles', 'parseDocxPages', 'backupDirName', 'mimeForExt', 'imageExtFor', 'isImageName', 'naturalCompare',
   'buildBackupZip', 'readBackupZip'];
 const decls = names.map(n => extractDeclaration(source, n)).join('\n');
-const F = new Function(`${decls}\nreturn { ${names.join(', ')} };`)();
+const F = new Function(`const aiTag = () => '';\n${decls}\nreturn { ${names.join(', ')} };`)();
 
 const BN1 = 'বাংলাদেশ একটি দক্ষিণ এশীয় রাষ্ট্র।\nএর রাজধানী ঢাকা।';
 const BN2 = 'দ্বিতীয় পেজ: ক্ষুদ্র & "বৃহৎ" <tag> বিজ্ঞান\n\nতৃতীয় লাইন\tট্যাব সহ';
