@@ -38,6 +38,7 @@ test('certificate: all-ok answer puts a certificate on TOP of the all-text box a
   a.aiAddKey(KEY, 'A', true, 'gemini');
   addPages(w, ['প্রশ্ন ১: ৫ × ৬ = ৩০', 'প্রশ্ন ২: ২ + ৩ = ৫', 'প্রশ্ন ৩: শেষ']);
   a.renderAll();
+  a.state.certInclude = true;   // the certificate text is opt-in now (documents stay clean by default)
   const calls = fakeAi(w, '```json\n' + OK + '\n```');
   const c = await a.aiCertifyDocument({});
   assert.equal(calls.length, 1, 'whole document in ONE request');
@@ -115,4 +116,84 @@ test('background safety: PDF split renders with intent "print" (no requestAnimat
   assert.match(loadPdf, /render\(\{[^}]*intent: 'print'/, 'rAF is paused in hidden tabs');
   const cert = src.slice(src.indexOf('async function aiCertifyDocument'), src.indexOf("document.getElementById('certBtn')"));
   assert.match(cert, /bgKeep\.start\(\)/); assert.match(cert, /finally \{ stopKeep\(\); \}/);
+});
+
+test('doc-fix: the audit finding is repaired by the AI itself, re-checked, text stays clean, one Undo restores it', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  addPages(w, ['প্রশ্ন ১: ৫ × ৬ = ৩০', 'প্রশ্ন ২: ২ + ৩ = ৬', 'প্রশ্ন ৩: শেষ']);
+  a.renderAll();
+  const ISSUE = JSON.stringify({ verdict: 'issues', summary: 'x', issues: [{ page: 2, type: 'calculation', detail: '2 + 3 = 6 ভুল', fix: '2 + 3 = 5' }], calculationsChecked: 3, sequenceEnd: 'প্রশ্ন ৩' });
+  const FIXED = '=== Page 1 ===\nপ্রশ্ন ১: ৫ × ৬ = ৩০\n\n=== Page 2 ===\nপ্রশ্ন ২: ২ + ৩ = ৫\n\n=== Page 3 ===\nপ্রশ্ন ৩: শেষ';
+  const calls = fakeAi(w, n => n === 1 ? ISSUE : n === 2 ? FIXED : OK);
+  const c = await a.aiCertifyDocument({});
+  assert.equal(calls.length, 3, 'audit → fix → re-audit');
+  assert.match(calls[1], /<issues>[\s\S]*page 2[\s\S]*CORRECT: 2 \+ 3 = 5/);
+  assert.equal(c.verdict, 'ok'); assert.equal(c.fixedPages, 1);
+  assert.equal(a.state.pages[1].text, 'প্রশ্ন ২: ২ + ৩ = ৫');
+  assert.equal(a.state.pages[0].text, 'প্রশ্ন ১: ৫ × ৬ = ৩০', 'untouched pages stay as they were');
+  assert.ok(!a.buildAllText().startsWith('════'), 'no certificate/comment block in the document by default');
+  assert.equal(a.undoBulk(), true);
+  assert.equal(a.state.pages[1].text, 'প্রশ্ন ২: ২ + ৩ = ৬', 'one Undo restores everything the doc-fix changed');
+  w.close();
+});
+
+test('doc-fix: a fix that makes a sum worse, or drops most of the text, is refused', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  addPages(w, ['প্রশ্ন ১: ৫ × ৬ = ৩০', 'প্রশ্ন ২: ২ + ৩ = ৬', 'প্রশ্ন ৩: শেষ']);
+  a.renderAll();
+  const ISSUE = JSON.stringify({ verdict: 'issues', summary: 'x', issues: [{ page: 2, type: 'text', detail: 'd', fix: 'f' }], calculationsChecked: 0, sequenceEnd: '' });
+  const WORSE = '=== Page 1 ===\nপ্রশ্ন ১: ৫ × ৬ = ৩১\n\n=== Page 2 ===\nপ্রশ্ন ২: ২ + ৩ = ৬\n\n=== Page 3 ===\nপ্রশ্ন ৩: শেষ';
+  fakeAi(w, n => n === 1 ? ISSUE : WORSE);
+  await a.aiCertifyDocument({});
+  assert.equal(a.state.pages[0].text, 'প্রশ্ন ১: ৫ × ৬ = ৩০', 'the sum was not made worse');
+  w.close();
+});
+
+test('manual "পুরো text AI Fix": fixes even when the auto option is off, and the AI board in the dialog shows the same stage', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ docfix: false, auto: true, autoV2: true, certify: true }));
+  addPages(w, ['প্রশ্ন ১: ৫ × ৬ = ৩০', 'প্রশ্ন ২: ২ + ৩ = ৬', 'প্রশ্ন ৩: শেষ']);
+  a.renderAll();
+  const ISSUE = JSON.stringify({ verdict: 'issues', summary: 'x', issues: [{ page: 2, type: 'calculation', detail: 'd', fix: '2 + 3 = 5' }], calculationsChecked: 3, sequenceEnd: '' });
+  const FIXED = '=== Page 1 ===\nপ্রশ্ন ১: ৫ × ৬ = ৩০\n\n=== Page 2 ===\nপ্রশ্ন ২: ২ + ৩ = ৫\n\n=== Page 3 ===\nপ্রশ্ন ৩: শেষ';
+  // automatic run with the option off → report only
+  let calls = fakeAi(w, n => n === 1 ? ISSUE : OK);
+  await a.aiCertifyDocument({ auto: true });
+  assert.equal(calls.length, 1); assert.equal(a.state.pages[1].text, 'প্রশ্ন ২: ২ + ৩ = ৬');
+  // the button pressed by hand → always fixes
+  a.state.cert = null;
+  calls = fakeAi(w, n => n === 1 ? ISSUE : n === 2 ? FIXED : OK);
+  const f0 = w.fetch; w.fetch = async (u, i) => { if (!/\/models\?/.test(u)) await tick(40); return f0(u, i); };   // slow AI so the running state can be looked at
+  // open the AI dialog first so the board can be seen
+  a.openTextTools('ai'); await tick(30);
+  const p = a.aiCertifyDocument({ manual: true });
+  await tick(5);
+  assert.ok(w.document.getElementById('docBoard'), 'the AI dialog shows the whole-document stage while it runs');
+  assert.match(w.document.getElementById('docBoard').textContent, /পুরো document|whole document/i);
+  assert.match(w.document.getElementById('certPanel').className, /running/);
+  const c = await p;
+  assert.equal(c.verdict, 'ok'); assert.equal(a.state.pages[1].text, 'প্রশ্ন ২: ২ + ৩ = ৫');
+  assert.match(w.document.getElementById('docBoard').className, /ok/);
+  w.close();
+});
+
+test('uploaded formatted .txt: headers with or without a name become pages; a long text with no headers is split into page-sized parts', async () => {
+  const w = await bootApp(); const a = w.__app;
+  w.HTMLCanvasElement.prototype.getContext = () => new Proxy({}, { get: () => () => {}, set: () => true });
+  w.HTMLCanvasElement.prototype.toDataURL = () => 'data:image/png;base64,AAAA';
+  const mk = txt => ({ name: 'book.txt', type: 'text/plain', text: async () => txt });
+  await a.loadTxt(mk('════ সনদ ════\n\n=== পেজ 1 — a.jpg ===\nএক\n\n=== Page 2 ===\nদুই\n\n=== Page 3 — c.jpg · AI ✓ ===\nতিন'));
+  assert.equal(a.state.pages.length, 3);
+  assert.equal(a.state.pages[1].text, 'দুই'); assert.equal(a.state.pages[0].text, 'এক');
+  a.resetWorkspaceState && a.resetWorkspaceState();
+  const para = 'প্রশ্ন: ' + 'ক'.repeat(500);
+  const big = Array.from({ length: 40 }, () => para).join('\n\n');
+  const parts = a.splitBigText(big);
+  assert.ok(parts.length >= 4 && parts.every(x => x.length <= 4600), 'parts stay page-sized');
+  assert.equal(parts.join('\n\n').replace(/\s+/g, ''), big.replace(/\s+/g, ''), 'nothing is lost');
+  assert.equal(a.splitBigText('ছোট লেখা').length, 1);
+  w.close();
 });
