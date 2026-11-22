@@ -197,3 +197,81 @@ test('uploaded formatted .txt: headers with or without a name become pages; a lo
   assert.equal(a.splitBigText('ছোট লেখা').length, 1);
   w.close();
 });
+
+test('a cut-off JSON answer keeps the issues that were completed; plain garbage still gives null', async () => {
+  const w = await bootApp(); const { aiParseJson } = w.__app;
+  const cut = '{"verdict":"issues","summary":"x","issues":[{"page":3,"type":"text","detail":"এক","fix":"ক"},{"page":5,"type":"sequence","detail":"দুই \\" quote","fix":"খ"},{"page":9,"type":"text","detail":"কাটা পড়ল';
+  const r = aiParseJson(cut);
+  assert.equal(r.issues.length, 2); assert.equal(r.issues[1].page, 5); assert.equal(r.verdict, 'issues');
+  assert.equal(aiParseJson('এটা কোনো JSON না'), null);
+  assert.equal(aiParseJson('{"verdict":"ok","issues":[]}').verdict, 'ok');
+  w.close();
+});
+
+test('big document: one unreadable window does not throw the whole check away — it is halved, then counted as unchecked, never all-clear', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  const big = 'প্রশ্ন: ' + 'ক '.repeat(14000);   // ~28k chars per page → every page is its own audit window
+  addPages(w, [big + '১', big + '২', big + '৩', big + '৪']);
+  a.renderAll();
+  fakeAi(w, null);
+  const f0 = w.fetch;
+  w.fetch = async (u, i) => {
+    if (/\/models\?/.test(u)) return f0(u, i);
+    const txt = JSON.parse(i.body).contents[0].parts.map(p => p.text || '').join('');
+    const bad = /=== Page 2 ===/.test(txt);   // the window holding page 2 always comes back as unreadable text
+    return gem(bad ? 'sorry, I cannot do that' : OK);
+  };
+  w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ docfix: false, auto: true, autoV2: true }));
+  const c = await a.aiCertifyDocument({ manual: true });
+  assert.ok(c, 'the run finished instead of throwing');
+  assert.equal(c.unchecked, 1, 'only the unreadable page is counted as unchecked');
+  assert.equal(c.verdict, 'review', 'never called all-clear while a page was not checked');
+  w.close();
+});
+
+test('stop / failure midway loses nothing: the next run skips every piece already checked and carries on from where it stopped; an edited piece is re-checked', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ docfix: false, auto: true, autoV2: true }));
+  const big = 'প্রশ্ন: ' + 'ক '.repeat(14000);   // ~28k chars → one audit window per page
+  addPages(w, [big + '১', big + '২', big + '৩', big + '৪']);
+  a.renderAll();
+  // run 1: the user presses Stop while the 2nd piece is being answered
+  let calls = fakeAi(w, n => { if (n === 2) a.state.certRun.cancel = true; return OK; });
+  const r1 = await a.aiCertifyDocument({ manual: true });
+  assert.equal(r1, null); assert.equal(calls.length, 2);
+  assert.ok(a.state.certPartial, 'an "interrupted" state is kept');
+  assert.equal(a.state.certPartial.done, 2);
+  assert.match(w.document.getElementById('certPanel').textContent, /2\/4/);
+  // page 1 is edited during the pause → that piece is re-checked, page 2 is not; the 2 never-reached pieces are asked
+  a.state.pages[0].text = big + 'বদলানো';
+  calls = fakeAi(w, OK);
+  const r2 = await a.aiCertifyDocument({ manual: true });
+  assert.equal(calls.length, 3, 'only the edited piece + the 2 never-reached pieces are asked; page 2 is skipped');
+  assert.equal(r2.verdict, 'ok'); assert.equal(a.state.certPartial, null);
+  // after a finished run the next one starts fresh
+  calls = fakeAi(w, OK);
+  await a.aiCertifyDocument({ manual: true });
+  assert.equal(calls.length, 4, 'a finished run leaves no stale checkpoints');
+  w.close();
+});
+
+test('a failure (e.g. free limit) midway also keeps the finished pieces', async () => {
+  const w = await bootApp(); const a = w.__app;
+  a.aiAddKey(KEY, 'A', true, 'gemini');
+  w.localStorage.setItem(a.LS_AI_OPTS, JSON.stringify({ docfix: false, auto: true, autoV2: true }));
+  const big = 'প্রশ্ন: ' + 'ক '.repeat(14000);
+  addPages(w, [big + '১', big + '২', big + '৩', big + '৪']);
+  a.renderAll();
+  fakeAi(w, null);
+  const f0 = w.fetch; let n = 0;
+  w.fetch = async (u, i) => { if (/\/models\?/.test(u)) return f0(u, i); n++; if (n >= 3) return { ok: false, status: 400, headers: { get: () => null }, json: async () => ({ error: { message: 'API key not valid' } }) }; return gem(OK); };
+  const r1 = await a.aiCertifyDocument({ manual: true });
+  assert.equal(r1, null); assert.ok(a.state.certPartial && a.state.certPartial.done >= 2);
+  const calls = fakeAi(w, OK);
+  const r2 = await a.aiCertifyDocument({ manual: true });
+  assert.equal(calls.length, 2, 'only the pieces that were not finished are asked again');
+  assert.equal(r2.verdict, 'ok');
+  w.close();
+});

@@ -509,7 +509,7 @@ test('wiring: menu button, CSP (all providers) and service-worker cache are upda
   assert.match(html, /id="aiFixBtn"/);
   const csp = readFileSync(new URL('../vercel.json', import.meta.url), 'utf8');
   for (const h of ['generativelanguage.googleapis.com', 'api.groq.com', 'openrouter.ai', 'api.mistral.ai', 'api.cerebras.ai']) assert.match(csp, new RegExp('connect-src[^"]*https://' + h.replace(/\./g, '\\.')), h);
-  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v31/);
+  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v33/);
 });
 
 test('prompt carries the book-cleaning rules: markers, Sol→সমাধান, watermarks, no guessing, real examples, backslashes intact', async () => {
