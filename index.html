@@ -1250,6 +1250,220 @@ body.has-toast .work-bar { bottom:calc(1.25rem + var(--toast-stack-h, 0px) + .5r
 .switch-in { animation:switchIn .22s ease-out }
 @keyframes switchIn { from { opacity:.35; transform:translateY(6px) } to { opacity:1; transform:none } }
 .strip-hdr { gap:.75rem }
+
+/* ══════════════════════════════════════════════
+   MOBILE / RESPONSIVE FIXES (all phones, tablets, landscape)
+══════════════════════════════════════════════ */
+html, body { max-width: 100%; overflow-x: hidden; }
+.hdr-inner { min-width: 0; }
+.logo { min-width: 0; flex: 0 1 auto; }
+.hdr-right { flex: 0 0 auto; min-width: 0; }
+.step-bar { box-sizing: border-box; max-width: 100%; }
+#flowBtn { white-space: nowrap; }
+
+/* thumbnails: badges were clipped at every width */
+.page-thumb { width: 92px; }
+.page-thumb .pt-foot { flex-wrap: wrap; row-gap: 2px; }
+.page-thumb .pt-num { font-size: .72rem; }
+.page-thumb .pt-badge { font-size: .64rem; white-space: nowrap; }
+.page-thumb .pt-remove { width: 24px; height: 24px; font-size: 12px; }
+.page-thumb .pt-remove::after { content: ''; position: absolute; inset: -8px; }
+
+/* dialogs: use the *visible* viewport height (mobile URL bar) and always scroll */
+#ttDlg, #bmDlg, #exportDlg, #syncDlg, #ocrDlg, #ptDlg, #dupCompare { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.tt-box, #exportDlg .dc-box, #dupCompare .dc-box { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; }
+#syncDlg .tt-box { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); }
+#keyModal .modal, #libModal .modal { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); }
+.wl-card { max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); }
+.modal-bg { min-height: 100vh; min-height: 100dvh; }
+.cmp-scroll { max-height: 72vh; max-height: 72dvh; }
+.cmp-img img, #dupCompare .dc-grid img { max-height: 55dvh; }
+
+@media (max-width: 640px) {
+  .hdr-inner { gap: .35rem; padding-left: .5rem; padding-right: .5rem; }
+  .logo { gap: 7px; }
+  .logo-mark { width: 32px; height: 32px; }
+  .logo-tag { display: none; }
+  .hdr-right { gap: 0; }
+
+  /* header of preview/text panels: wrap, comfortable buttons */
+  .panel-hdr > div[style] { flex-wrap: wrap; row-gap: .4rem; }
+  .text-panel .panel-hdr { align-items: flex-start; }
+  .text-panel .panel-hdr > div[style] { width: 100%; display: grid !important; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: .4rem; }
+  .text-panel .panel-hdr .btn { min-height: 40px; padding: .3rem .5rem !important; font-size: .8rem !important; justify-content: center; }
+  .preview-panel .panel-hdr > div[style] { width: 100%; justify-content: flex-end; }
+  .preview-img-wrap { min-height: 200px; }
+  .preview-img-wrap img { max-height: 60dvh; }
+  .page-meta button { flex: 1 1 auto; }
+  .cmp-bar { gap: .4rem; }
+  .cmp-bar select { max-width: 100%; flex: 1 1 100%; min-height: 40px; }
+  .cmp-bar .btn { min-height: 40px; min-width: 40px; }
+  .cmp-panel { min-height: 0; }
+
+  /* tap targets */
+  .btn-icon { min-width: 40px; min-height: 40px; }
+  .lpc-btn { min-height: 38px; font-size: .8rem; }
+  .goto-input { min-height: 44px; width: 4.6rem; }
+  .ftr-social a { min-width: 40px; min-height: 40px; }
+  .ftr-bottom-links a, .ftr-legal a { display: inline-block; padding: .55rem .4rem; }
+  .results-hdr { padding: .65rem .8rem; }
+  .results-hdr .btn { min-height: 40px; }
+
+  /* text floor ≈12px */
+  .lpc-num, .lpc-status { font-size: .75rem; }
+  .lpc-name, .ll-sub { font-size: .8rem; }
+  .step-info span { font-size: .8rem; }
+  .txt-stats, .progress-detail, .progress-phase-pct, .progress-phase-label { font-size: .78rem; }
+  .ftr-kicker { font-size: .7rem; }
+  .ftr-text, .ftr-owner-list li, .ftr-bottom { font-size: .78rem; }
+
+  /* (More menu sheet moved to max-width:1000px block below) */
+  .more-menu-x { position: fixed; left: .7rem; right: .7rem; top: auto; bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); z-index: 9000; min-width: 0; max-height: 70vh; max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain; padding: 8px; box-shadow: 0 -8px 40px rgba(0,0,0,.5); }
+  .more-menu .btn { min-height: 48px; }
+}
+@media (max-width: 360px) {
+  .hdr-ctl-group { gap: 0; padding: .1rem; }
+  .hdr-ctl, .hdr-ctl.hdr-ctl-lang { width: 36px; min-width: 36px; height: 36px; }
+  .step-bar { gap: .6rem; padding-left: .75rem; padding-right: .75rem; }
+  #flowBtn { padding: .6rem .85rem; }
+  .wrap { padding-left: .8rem; padding-right: .8rem; }
+}
+@media (max-width: 344px) { .logo-text { display: none; } }
+
+/* tablets (641–1000px): 2-col workspace was cramped */
+@media (min-width: 641px) and (max-width: 900px) {
+  .text-panel .panel-hdr > div[style] { flex-wrap: wrap; }
+}
+
+/* touch devices of any width */
+@media (pointer: coarse) {
+  .btn-icon { min-width: 40px; min-height: 40px; }
+  .lpc-btn { min-height: 38px; font-size: .8rem; }
+  .ftr-social a { min-width: 40px; min-height: 40px; }
+  .ftr-bottom-links a, .ftr-legal a { display: inline-block; padding: .55rem .4rem; }
+  .lpc-num, .lpc-status { font-size: .75rem; }
+  .step-info span { font-size: .8rem; }
+}
+
+/* short screens (landscape phones) */
+@media (max-height: 520px) {
+  .hdr-inner { height: 48px; min-height: 48px; gap: .5rem; padding-left: max(.7rem, env(safe-area-inset-left, 0px)); padding-right: max(.7rem, env(safe-area-inset-right, 0px)); }
+  .logo-mark { width: 30px; height: 30px; }
+  .logo-tag { display: none; }
+  .hdr-ctl-group { gap: .12rem; padding: .12rem; }
+  .hdr-ctl, .hdr-ctl.hdr-ctl-lang { width: 38px; min-width: 38px; height: 38px; flex-direction: row; padding: 0; gap: 0; }
+  .hdr-ctl-label, .hdr-ctl-badge { display: none; }
+  .step-bar { padding-top: .35rem; padding-bottom: calc(.35rem + env(safe-area-inset-bottom, 0px)); padding-left: max(.9rem, env(safe-area-inset-left, 0px)); padding-right: max(.9rem, env(safe-area-inset-right, 0px)); }
+  #flowBtn { min-height: 40px; }
+  body.has-stepbar .wrap { padding-bottom: 4.5rem; }
+  .more-menu { position: fixed; left: auto; right: .7rem; top: auto; bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); min-width: 260px; max-height: calc(100dvh - 1.4rem); overflow-y: auto; z-index: 9000; }
+  .more-wrap { position: static; }
+}
+
+/* modal-bg: tall modals must scroll inside the overlay (was clipped top & bottom) */
+.modal-bg { overflow-y: auto; align-items: flex-start; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.modal-bg > .modal { margin: auto; }
+#cmpPanel, #reviewBar, #certPanel, #noteBar, #workspace, #resultsSection, #lensSection { scroll-margin-top: 64px; }
+
+/* phones, foldables, tablets, landscape: comfortable buttons + readable text at EVERY width (not only ≤640px) */
+@media (pointer: coarse), (max-width: 900px) {
+  .btn, .action-row .btn, .more-menu .btn { min-height: 44px; }
+  .panel-hdr .btn, .txt-foot .btn, .results-hdr .btn, .strip-actions .btn { min-height: 40px; font-size: .8rem !important; }
+  .panel-hdr .btn, .txt-foot .btn { padding-left: .6rem !important; padding-right: .6rem !important; }
+  .page-meta button { min-height: 44px; min-width: 44px; }
+  .hdr-ctl-label { font-size: .64rem; }
+  .hdr-ctl-badge { font-size: .62rem; }
+  .logo-tag { font-size: .74rem; }
+  .qual-lbl, #qualityLabel { font-size: .7rem; }
+  #qualitySel { min-height: 36px; }
+  .page-thumb .pt-badge { font-size: .7rem; }
+  .page-thumb .pt-num { font-size: .75rem; }
+  .zoom-badge, .chip, #statsChip, #projWhere, .txt-stats, .progress-detail, .progress-phase-pct { font-size: .75rem; }
+  .ftr-text, .ftr-owner-list li, .ftr-bottom, .ftr-legal, .ftr-bottom-links a { font-size: .8rem; }
+  .ftr-kicker { font-size: .72rem; }
+  .ftr-bottom-links a, .ftr-legal a { display: inline-block; padding: .75rem .55rem; min-height: 40px; box-sizing: border-box; }
+  .ftr-social a { min-width: 40px; min-height: 40px; }
+  .hdr-ctl-badge { display: inline-flex; }
+}
+@media (max-width: 640px) { .hdr-ctl-badge { display: none; } }
+
+@media (pointer: coarse), (max-width: 900px) {
+  #undoPageBtn, #redoPageBtn, #bookmarkBtn, #noteBtn, #quickSaveBtn { min-width: 44px; }
+  .ftr-kicker, #ftrKicker2, #ftrKicker3 { font-size: .72rem; }
+  #keyBadge { font-size: .62rem; }
+}
+
+/* "More" menu → bottom sheet on every non-desktop width (was clipped off the left edge) */
+@media (max-width: 1000px) {
+  .more-wrap { position: static; }
+  .more-menu { position: fixed; left: .7rem; right: .7rem; top: auto; bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); z-index: 9000; min-width: 0; max-width: 520px; margin: 0 auto; max-height: 70vh; max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain; padding: 8px; box-shadow: 0 -8px 40px rgba(0,0,0,.5); }
+  .more-menu .btn { min-height: 48px; }
+}
+@media (max-height: 520px) { .more-menu { left: auto; right: .7rem; margin: 0; min-width: 260px; max-height: calc(100dvh - 1.4rem); } }
+
+@media (max-width: 1000px) { .more-wrap { width: 100%; } .more-wrap > #moreBtn { width: 100%; } }
+@media (max-width: 640px) { .txt-foot .txt-stats { flex: 1 0 100%; } }
+
+/* ═══ COMPACT MOBILE (≤640px): tighter spacing, taps stay ≥38px ═══ */
+@media (max-width: 640px) {
+  .wrap { padding-top: .6rem; }
+  .hdr-inner { height: 48px; min-height: 48px; }
+  .logo-mark { width: 28px; height: 28px; }
+  .logo-wordmark { font-size: 1rem; }
+  .hdr-ctl, .hdr-ctl.hdr-ctl-lang { width: 34px; min-width: 34px; height: 34px; }
+  .btn, .action-row .btn, .more-menu .btn { min-height: 40px; font-size: .84rem; padding: .45rem .7rem; }
+  .more-menu .btn { min-height: 44px; }
+  .upload-area { padding: 1.1rem .8rem; }
+  .upload-area p, .upload-area .upload-sub { font-size: .8rem; }
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin-top: .6rem; }
+  .action-row > .btn, .action-row > .more-wrap, .action-row > .more-wrap > .btn { width: 100%; }
+  .action-row > .btn:first-child, .action-row > #resumeBtn { grid-column: 1 / -1; }
+  .workspace { gap: .5rem; margin-top: .6rem; }
+  .panel-hdr { padding: .4rem .55rem; gap: .3rem; }
+  .panel-title { font-size: .85rem; }
+  .preview-img-wrap { min-height: 150px; }
+  .preview-img-wrap img { max-height: 42dvh; }
+  .goto-input { min-height: 38px; width: 4.2rem; }
+  .btn-icon { min-width: 38px; min-height: 38px; }
+  .panel-hdr .btn, .txt-foot .btn, .results-hdr .btn, .strip-actions .btn { min-height: 38px; font-size: .78rem !important; padding: .25rem .4rem !important; }
+  .text-panel .panel-hdr > div[style] { gap: .3rem; grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); }
+  .page-meta { padding: .3rem .5rem; gap: .3rem; }
+  .page-meta button, .page-meta button[id] { min-height: 38px; padding: 0 .6rem; }
+  .txt-body { padding: .4rem; }
+  .txt-body textarea { min-height: 190px; padding: .55rem; }
+  .txt-foot { gap: .3rem; padding-top: .4rem; }
+  .page-thumb { width: 78px; }
+  .strip-wrap { margin-top: .7rem; }
+  .strip-hdr { margin-bottom: .4rem; }
+  .progress-block { padding: .5rem .6rem; margin-top: .5rem; }
+  .lens-launch { padding: .6rem; margin-top: .6rem; }
+  .lens-page-card { flex-basis: 118px; padding: .45rem .55rem; gap: .3rem; }
+  .lpc-btn { min-height: 36px; }
+  .results-hdr { padding: .5rem .6rem; }
+  .step-bar { padding-top: .4rem; padding-bottom: calc(.4rem + env(safe-area-inset-bottom, 0px)); }
+  #flowBtn { min-height: 40px; padding: .45rem .8rem; }
+  body.has-stepbar .wrap { padding-bottom: 4.2rem; }
+  /* footer: compact */
+  .ftr-inner { gap: .5rem; padding: .7rem .8rem; }
+  .ftr-col .ftr-text, .ftr-owner-list { font-size: .75rem; line-height: 1.4; }
+  .ftr-meta { display: none; }
+  .ftr-bottom { padding-top: .4rem; gap: 0; }
+  .ftr-bottom-links a, .ftr-legal a { padding: .5rem .45rem; min-height: 38px; }
+  .ftr-social a { min-width: 38px; min-height: 38px; }
+}
+
+@media (max-width: 640px) {
+  #keyBadge, #langBtnBadge { display: none !important; }
+  .strip-hdr { flex-wrap: wrap; row-gap: .25rem; }
+  .strip-hdr .proj-chip { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; gap: .4rem; }
+  .strip-hdr .proj-chip b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .strip-hdr .proj-chip #projWhere { flex: none; }
+  .strip-label { font-size: .75rem; }
+  .page-thumb .pt-foot { padding: 2px 4px; column-gap: 3px; }
+  .page-thumb .pt-badge { font-size: .62rem; padding: 1px 3px; }
+  .page-thumb .pt-num { font-size: .68rem; }
+}
+@media (max-width: 640px) { .action-row > .more-wrap { grid-column: 1 / -1; } }
 </style>
 </head>
 <body>
@@ -5391,6 +5605,8 @@ const AI_MSG = {
   server: () => L('AI server সমস্যা', 'AI server problem'),
   bad: () => L('Request গ্রহণ হয়নি', 'Request was rejected'),
   format: () => L('AI-এর উত্তর বোঝা যায়নি — আবার চেষ্টা করুন', 'Could not read the AI answer — try again'),
+  novision: () => L('ছবি পড়তে পারে এমন model নেই — একটি Gemini key যোগ করুন (এই page ছবি থেকে পড়তে হবে)', 'No image-capable model — add a Gemini key (this page has to be read from its image)'),
+  noimg: () => L('Page-এর ছবি পড়া যায়নি', 'Could not read the page image'),
 };
 class AiError extends Error {
   constructor(code, wait, detail) { super(AI_MSG[code] ? AI_MSG[code]() : String(code)); this.code = code; this.wait = wait || 0; this.detail = detail || ''; }
@@ -5562,6 +5778,7 @@ async function aiGenerate(mk, hasImg, rec) {
   for (const m of models) {
     if (_aiBad.has(key.slice(-8) + '::' + m.name)) continue;
     const withImage = !!(hasImg && m.vision);
+    if (mk.needImg && !withImage) continue;      // "read this page from the image" must never go to a text-only model
     const rq = mk(withImage);
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -5584,7 +5801,7 @@ async function aiGenerate(mk, hasImg, rec) {
     }
   }
   if (last && last.code === 'rate') last.wait = wait || 30;
-  throw last || new AiError('model');
+  throw last || new AiError(mk.needImg ? 'novision' : 'model');
 }
 
 // Tries every saved key in order, skipping any still "cooling down" from a recent rate-limit,
@@ -5620,7 +5837,7 @@ async function aiGenerateAnyKey(mk, hasImg, preferId, run) {
       aiUsageNote(k.id, { ok: false, code: e.code });
       if (e.code === 'rate') { _aiCoolingUntil.set(k.key, Date.now() + Math.max(e.wait || 30, 3) * 1000); continue; }
       if (e.code === 'key') { continue; }               // this key is bad — try the next one
-      if (e.code === 'model' && tryOrder.length > 1) continue;   // this key has no usable model — another key may
+      if ((e.code === 'model' || e.code === 'novision') && tryOrder.length > 1) continue;   // this key has no usable model — another key may
       throw e;                                           // offline / blocked / truncated / server etc. — don't burn through keys
     }
   }
@@ -5780,21 +5997,51 @@ function aiVerify(before, after) {
   a.forEach((n, k) => { if (n > (b.get(k) || 0)) lost.push(k); });
   return { added, lost };
 }
-async function aiImageB64(blob) {
+async function aiImageB64(blob, maxSide, q) {
   try {
     const bmp = await createImageBitmap(blob);
-    const sc = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+    const sc = Math.min(1, (maxSide || 1800) / Math.max(bmp.width, bmp.height));
     const cv = document.createElement('canvas');
     cv.width = Math.max(1, Math.round(bmp.width * sc)); cv.height = Math.max(1, Math.round(bmp.height * sc));
     cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
-    const out = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.85));
+    const out = await new Promise(r => cv.toBlob(r, 'image/jpeg', q || 0.85));
     return out ? { mimeType: 'image/jpeg', data: await blobToBase64(out) } : null;
   } catch { return null; }
 }
+// ── Is the OCR text of this page unusable? Then the AI must read the page from its IMAGE instead of "correcting" garbage. ──
+// Local and free: empty/tiny text, broken-glyph noise, Bangla words that start with a vowel sign / hasanta (a classic OCR breakage),
+// pages that are mostly one-character lines, or text that is mostly "[OCR-এ হারিয়ে গেছে]" markers.
+function aiBadOcr(pg) {
+  if (!(pg && pg.blob && !pg.txtOnly)) return { bad: false, why: '' };      // no image to read from → nothing to rescue
+  const raw = normNl(pg.text || '').trim(), flat = raw.replace(/\s+/g, '');
+  if (!flat.length) return { bad: true, why: 'empty' };
+  if (flat.length < 20) return { bad: true, why: 'tiny' };
+  const junk = (flat.match(/[�\p{Co}\p{Cc}─-╿■-◿]/gu) || []).length;
+  if (junk / flat.length > 0.05) return { bad: true, why: 'noise' };
+  const words = raw.match(/[ঀ-৿]+/g) || [];
+  if (words.length >= 12) {
+    const broken = words.filter(w => /^[া-্ৗৢৣঁ-ঃ]/.test(w)).length;
+    if (broken / words.length > 0.1) return { bad: true, why: 'broken-bangla' };
+  }
+  const lines = raw.split('\n').map(s => s.replace(/\s+/g, '')).filter(Boolean);
+  if (lines.length >= 10 && lines.filter(s => s.length <= 2).length / lines.length > 0.55) return { bad: true, why: 'fragments' };
+  if ((raw.match(/\[OCR-এ হারিয়ে গেছে\]/g) || []).length >= 3) return { bad: true, why: 'lost-markers' };
+  return { bad: false, why: '' };
+}
+// Prepended to the normal prompt: same rules for math/numbering/markers, but the IMAGE is now the only source of truth.
+function aiOcrPrompt(o, hasCtx) {
+  return [
+    'MODE: READ THIS PAGE FROM THE IMAGE (this overrides any rule below that says "repair the OCR text only")',
+    'The OCR text of this page is missing, damaged or unreliable (it can be empty or pure garbage). Look at the page IMAGE and write out the COMPLETE text exactly as it is printed, in reading order: every question, option, solution, table, number, unit and formula. Do not skip a line, do not summarise, do not solve or add anything that is not printed. The OCR text inside <ocr_text> is only a weak hint for spelling — if it disagrees with the image, the image wins; if it is empty, ignore it.',
+    'CONTINUITY: <previous_page_tail> / <next_page_head> are read-only context from the already-processed neighbouring pages. Use them to keep question numbering, notation, spelling and math style consistent, and to understand text that continues across the page break (e.g. an option list or solution that carries on from the previous page: start with the continuation exactly as printed here). Never copy or repeat their text in your output. The "Page X of N" line tells you where this page sits in the book.',
+    'Everything else below (what to fix, math style, markers, output rules) still applies; where it says "fix the OCR", read it from the image instead.',
+    '',
+  ].join('\n') + aiSystemPrompt(o, true, hasCtx);
+}
 const aiTail = t => { const s = normNl(t || '').trim(); return s.length > AI_CTX_CHARS ? '…' + s.slice(-AI_CTX_CHARS) : s; };
 const aiHead = t => { const s = normNl(t || '').trim(); return s.length > AI_CTX_CHARS ? s.slice(0, AI_CTX_CHARS) + '…' : s; };
-function aiUserText(chunk, k, n, prev, next) {
-  return (n > 1 ? `This is part ${k + 1} of ${n} of one page.\n` : '')
+function aiUserText(chunk, k, n, prev, next, info) {
+  return (info ? info + '\n' : '') + (n > 1 ? `This is part ${k + 1} of ${n} of one page.\n` : '')
     + (prev ? '<previous_page_tail>\n' + prev + '\n</previous_page_tail>\n' : '')
     + 'Correct this page.\n<ocr_text>\n' + chunk + '\n</ocr_text>'
     + (next ? '\n<next_page_head>\n' + next + '\n</next_page_head>' : '');
@@ -5806,7 +6053,7 @@ function aiUserText(chunk, k, n, prev, next) {
 //    introduced: one extra "auditor" call that puts the author's digits back unless the image / the chain proves the repair.
 // preferId: when a parallel per-key worker calls this, it passes its own key id so this page
 // mostly stays on that worker's key (only borrowing another if that one is cooling down).
-async function aiFixPage(pg, o, preferId, run) {
+async function aiFixPageText(pg, o, preferId, run) {
   const before = pg.text || '';
   const chunks = aiSplit(before);
   const idx = state.pages.indexOf(pg);
@@ -5819,7 +6066,7 @@ async function aiFixPage(pg, o, preferId, run) {
   const outs = []; let model = '', keyName = '', keyId = '', usedImg = false;
   for (let k = 0; k < chunks.length; k++) {
     const prev = k === 0 ? pPrev : aiTail(chunks[k - 1]), next = k === chunks.length - 1 ? pNext : aiHead(chunks[k + 1]);
-    const mk = withImg => ({ system: aiSystemPrompt(o, withImg, !!(prev || next)), img: withImg ? img : null, text: aiUserText(chunks[k], k, chunks.length, prev, next) });
+    const mk = withImg => ({ system: aiSystemPrompt(o, withImg, !!(prev || next)), img: withImg ? img : null, text: aiUserText(chunks[k], k, chunks.length, prev, next, aiPageInfo(pg, idx)) });
     const r = await aiGenerateAnyKey(mk, !!img, preferId, run);
     outs.push(aiClean(r.text)); model = r.model; keyName = r.keyName || keyName; keyId = r.keyId || keyId; usedImg = r.withImage;
   }
@@ -5844,6 +6091,53 @@ async function aiFixPage(pg, o, preferId, run) {
     } catch (e) { if (e instanceof AiError && (e.code === 'offline' || e.code === 'key' || e.code === 'cancel')) throw e; /* auditor is best-effort: keep the first result, flagged */ }
   }
   return { after, model, withImage: usedImg, keyName, keyId, flags, reviewed };
+}
+const aiPageInfo = (pg, idx) => `Page ${(idx >= 0 ? idx : 0) + 1} of ${state.pages.length}` + (pg && pg.name ? ` (${String(pg.name).slice(0, 60)})` : '') + '.';
+const _aiWorking = new Set();      // page ids a worker is fixing right now (the next page waits for them, so its context is the FIXED text)
+
+// Reads ONE page from its image (OCR text empty / garbage / rejected by the safety guard). Needs a vision model.
+// Gets the same neighbour context as a normal fix — plus it waits (max 45 s) for the previous page if that one is being fixed this very moment.
+async function aiFixPageOcr(pg, o, preferId, run, img) {
+  const before = normNl(pg.text || '');
+  const idx = state.pages.indexOf(pg);
+  const ctxOn = o.context !== false && idx >= 0;
+  if (ctxOn && idx > 0) { const pid = state.pages[idx - 1].id, t0 = Date.now(); while (_aiWorking.has(pid) && !(run && run.cancel) && Date.now() - t0 < 45000) await aiSleep(500); }
+  const usable = p => p && !aiBadOcr(p).bad && (p.text || '').trim();
+  const pPrev = ctxOn && idx > 0 && usable(state.pages[idx - 1]) ? aiTail(state.pages[idx - 1].text) : '';
+  const pNext = ctxOn && idx < state.pages.length - 1 && usable(state.pages[idx + 1]) ? aiHead(state.pages[idx + 1].text) : '';
+  const hint = before.trim() ? (before.length > AI_CHUNK ? before.slice(0, AI_CHUNK) + '…' : before) : '';
+  const mk = withImg => ({
+    system: aiOcrPrompt(o, !!(pPrev || pNext)), img: withImg ? img : null,
+    text: aiPageInfo(pg, idx) + '\n' + (pPrev ? '<previous_page_tail>\n' + pPrev + '\n</previous_page_tail>\n' : '')
+      + 'The OCR text of this page is missing or unreliable. Read the page image and write its complete text.\n<ocr_text>\n' + hint + '\n</ocr_text>'
+      + (pNext ? '\n<next_page_head>\n' + pNext + '\n</next_page_head>' : ''),
+  });
+  mk.needImg = true;
+  const r = await aiGenerateAnyKey(mk, true, preferId, run);
+  if (!r.withImage) throw new AiError('novision');
+  const after = aiClean(r.text);
+  if (!after.replace(/\s+/g, '').length || after.length > 30000) throw new AiError('blocked');
+  return { after, model: r.model, withImage: true, keyName: r.keyName, keyId: r.keyId, flags: { added: [], lost: [] }, reviewed: false, ocr: true };
+}
+
+// Fixes ONE page. Bad / empty OCR → read from the image. Otherwise the normal proofreading; if the safety guard rejects that
+// (the OCR was so damaged that the proper text is very different) → automatically read the page from the image instead.
+async function aiFixPage(pg, o, preferId, run) {
+  const bad = aiBadOcr(pg);
+  const getImg = () => aiImageB64(pg.blob, 2400, 0.9);
+  if (bad.bad) {
+    const img = await getImg();
+    if (img) return aiFixPageOcr(pg, o, preferId, run, img);
+    if (!(pg.text || '').trim()) throw new AiError('noimg');
+  }
+  try { return await aiFixPageText(pg, o, preferId, run); }
+  catch (e) {
+    if (e instanceof AiError && e.code === 'guard' && pg.blob && !pg.txtOnly) {
+      const img = await getImg();
+      if (img) return aiFixPageOcr(pg, o, preferId, run, img);
+    }
+    throw e;
+  }
 }
 
 // ── Live status: which key/AI is working on which page, how far along, in the key's own colour ──
@@ -5973,8 +6267,8 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
       }
       const ps = stat.pages.get(id), ks = kstat(preferId);
       const pg = state.pages.find(p => p.id === id);
-      if (!pg || !(pg.text || '').trim()) { ps.st = 'same'; stat.same++; stat.done++; progress(); continue; }
-      active++; ps.st = 'run'; ps.key = preferId; ps.t = Date.now(); ps.err = ''; if (ks) ks.busy.add(id);
+      if (!pg || (!(pg.text || '').trim() && !(pg.blob && !pg.txtOnly))) { ps.st = 'same'; stat.same++; stat.done++; progress(); continue; }   // empty AND no image → nothing to work with
+      active++; _aiWorking.add(id); ps.st = 'run'; ps.key = preferId; ps.t = Date.now(); ps.err = ''; if (ks) ks.busy.add(id);
       progress();
       const before = pg.text;
       let requeued = false;
@@ -5989,7 +6283,7 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
             res.ok++; stat.ok++; ps.st = 'ok';
             if (r.flags && r.flags.added.length) stat.flagged++;
             if (r.reviewed) stat.reviewed++;
-            onItem({ id: pg.id, i: state.pages.indexOf(pg), before, after: r.after, keyName: r.keyName, flags: r.flags, reviewed: r.reviewed, note: aiNote(r) });
+            onItem({ id: pg.id, i: state.pages.indexOf(pg), before, after: r.after, keyName: r.keyName, flags: r.flags, reviewed: r.reviewed, ocr: !!r.ocr, note: aiNote(r) });
           }
           break;
         } catch (e) {
@@ -6017,7 +6311,7 @@ async function aiRunPages(ids, o, run, onItem, onProgress) {
           res.lastErr = e; break;
         }
       }
-      active--; ps.ms = Date.now() - ps.t;
+      active--; _aiWorking.delete(id); ps.ms = Date.now() - ps.t;
       stat.keys.forEach(k => k.busy.delete(id));
       if (!requeued && ps.st !== 'wait') { const kf = kstat(ps.key); if (kf) kf.done++; stat.done++; }
       progress();
@@ -6037,6 +6331,7 @@ function aiNote(r) {
   if (r.keyName) p.push(r.keyName);
   if (r.flags && r.flags.added.length) p.push('⚠️ ' + L('নতুন সংখ্যা: ', 'new numbers: ') + r.flags.added.slice(0, 6).join(', '));
   if (r.reviewed) p.push('🔎 ' + L('২য় যাচাই হয়েছে', '2nd check done'));
+  if (r.ocr) p.push('🖼 ' + L('ছবি থেকে নতুন করে পড়া হয়েছে', 'read again from the image'));
   return p.join(' · ');
 }
 
@@ -6047,6 +6342,7 @@ const _aiQ = []; let _aiInflight = 0, _aiRot = 0, _aiDone = { n: 0, flags: 0, fi
 // fresh=true: new OCR/paste text just arrived → it replaces whatever was there, so the page is eligible again.
 // fresh=false (the Save button): only pages the AI has never fixed — a human edit on a ✨ AI page is never overwritten.
 function aiAutoAfterPaste(pg, fresh = true) {
+  aiSweepSoon(3000);
   if (!pg || !(pg.text || '').trim() || !aiOpts().auto || !aiActiveKeys().length || isOffline()) return;
   if (fresh) pg.aiFixedHash = null; else if (pg.aiFixedHash) return;
   if (!_aiQ.includes(pg.id)) _aiQ.push(pg.id);
@@ -6057,19 +6353,39 @@ function aiPumpQueue() {
   while (_aiQ.length && _aiInflight < cap) {
     const take = _aiQ.splice(0, Math.min(_aiQ.length, cap - _aiInflight));
     _aiInflight += take.length;
-    aiRunBatch(take, _aiRot++).finally(() => { _aiInflight -= take.length; aiPumpQueue(); if (!_aiQ.length && !_aiInflight) aiMaybeCertify(); });
+    aiRunBatch(take, _aiRot++).finally(() => { _aiInflight -= take.length; aiPumpQueue(); if (!_aiQ.length && !_aiInflight) { aiMaybeCertify(); aiSweepSoon(1500); } });
   }
 }
 // One summary toast for a burst of finished pages instead of a toast per page.
-function aiAutoToast(i, flagged) {
-  const d = _aiDone; d.n++; if (flagged) d.flags++; if (d.n === 1) d.first = i;
+function aiAutoToast(i, flagged, ocr) {
+  const d = _aiDone; d.n++; if (flagged) d.flags++; if (ocr) d.ocr = (d.ocr || 0) + 1; if (d.n === 1) d.first = i;
   clearTimeout(d.t);
   d.t = setTimeout(() => {
     const m = d.n === 1 ? L(`✨ Page ${d.first + 1} AI দিয়ে ঠিক হয়েছে (আবার হবে না)`, `✨ Page ${d.first + 1} fixed by AI (won't repeat)`)
       : L(`✨ ${d.n}টা page AI দিয়ে ঠিক হয়েছে (আবার হবে না)`, `✨ ${d.n} pages fixed by AI (won't repeat)`);
-    toast(m + (d.flags ? ' ⚠️ ' + L(`${d.flags}টায় নতুন সংখ্যা — Review দেখুন`, `${d.flags} with new numbers — check Review`) : ''), d.flags ? 'warn' : 'ok', 3500);
+    toast(m + (d.ocr ? ' 🖼 ' + L(`${d.ocr}টা page ছবি থেকে নতুন করে পড়া`, `${d.ocr} re-read from the image`) : '') + (d.flags ? ' ⚠️ ' + L(`${d.flags}টায় নতুন সংখ্যা — Review দেখুন`, `${d.flags} with new numbers — check Review`) : ''), d.flags ? 'warn' : 'ok', 3500);
     _aiDone = { n: 0, flags: 0, first: 0, t: null };
   }, 700);
+}
+// Pages that would otherwise stay bad forever: OCR text unusable (garbage / tiny), or EMPTY but already passed over
+// (the user moved on, later pages have text). They are queued automatically (max 2 tries each per session) and read from the image.
+const _aiSweepN = new Map(); let _aiSweepT = null;
+function aiSweepSoon(ms) { clearTimeout(_aiSweepT); _aiSweepT = setTimeout(aiSweep, ms || 2500); }
+function aiSweep() {
+  try {
+    if (!aiOpts().auto || !aiActiveKeys().length || isOffline() || state.aiRun) return;
+    const pgs = state.pages; let last = -1, added = 0;
+    pgs.forEach((p, i) => { if ((p.text || '').trim()) last = i; });
+    pgs.forEach((p, i) => {
+      if (!(p.blob && !p.txtOnly) || _aiQ.includes(p.id) || _aiBusyIds.has(p.id)) return;
+      if (p.aiFixedHash && p.aiFixedHash === hashStr(p.text || '')) return;
+      const has = (p.text || '').trim(), bad = aiBadOcr(p).bad;
+      if (!(has ? bad : (i < state.current && i < last))) return;
+      const n = _aiSweepN.get(p.id) || 0; if (n >= 2) return;
+      _aiSweepN.set(p.id, n + 1); _aiQ.push(p.id); added++;
+    });
+    if (added) aiPumpQueue();
+  } catch (e) { /* best effort */ }
 }
 const _aiBusyIds = new Set();      // pages an auto batch is working on right now (a manual run must not double up on them)
 async function aiRunBatch(ids, rot) {
@@ -6079,7 +6395,7 @@ async function aiRunBatch(ids, rot) {
   try {
     res = await aiRunPages(ids, aiOpts(), { cancel: false, rot }, c => {        // each page is applied the moment it finishes
       const r = applyTextChanges([{ id: c.id, before: c.before, after: c.after }], 'AI fix', group);
-      if (r.applied) aiAutoToast(c.i, !!(c.flags && c.flags.added.length));
+      if (r.applied) aiAutoToast(c.i, !!(c.flags && c.flags.added.length), c.ocr);
     });
   } finally { ids.forEach(id => _aiBusyIds.delete(id)); }
   if (res.fatal) {
@@ -6256,8 +6572,8 @@ async function runAiPreview() {
   if (!aiActiveKeys().length) { sum.textContent = '⚠️ ' + L('সব key বন্ধ করা আছে — অন্তত একটা চালু করুন', 'All keys are paused — switch at least one on'); return; }
   if (isOffline()) { sum.textContent = '⚠️ ' + AI_MSG.offline(); return; }
   const scope = ttScopeIdx();
-  const inScope = state.pages.filter((p, i) => (!scope || scope.has(i)) && (p.text || '').trim());
-  const ids = inScope.filter(p => !_aiBusyIds.has(p.id) && !_aiQ.includes(p.id) && (o.redo || p.aiFixedHash !== hashStr(p.text))).map(p => p.id);
+  const inScope = state.pages.filter((p, i) => (!scope || scope.has(i)) && ((p.text || '').trim() || (p.blob && !p.txtOnly)));
+  const ids = inScope.filter(p => !_aiBusyIds.has(p.id) && !_aiQ.includes(p.id) && (o.redo || p.aiFixedHash !== hashStr(p.text || ''))).map(p => p.id);
   if (!ids.length) { sum.textContent = '✅ ' + L('AI-fix করার মতো page নেই — আগেই ঠিক করা হয়ে গেছে', 'No pages left to fix — they are already done'); return; }
   const skippedFixed = inScope.length - ids.length;
   const run = state.aiRun = { cancel: false }, group = {}, done = [];
@@ -8358,6 +8674,7 @@ function renderAll() {
   lensSection.classList.toggle('hidden', !has);
   if (!has) return;
   refreshFlags();
+  try { aiSweepSoon(4000); } catch {}   // bad / skipped pages get read from their image automatically
   pageCount.textContent = state.pages.length;
   updateProjChip();
   renderStrip();
@@ -9282,6 +9599,19 @@ window.addEventListener('appinstalled', () => {
   installBar.classList.add('hidden');
   console.log('[PWA] App installed!');
 });
+
+// ── Mobile: bring inline panels into view after the tap (they used to open off-screen) ──
+(() => {
+  const inView = el => { const r = el.getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight * .6; };
+  const reveal = (id, delay) => setTimeout(() => {
+    const el = document.getElementById(id);
+    if (!el || el.classList.contains('hidden') || el.offsetParent === null) return;
+    if (!inView(el)) { try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { el.scrollIntoView(); } }
+  }, delay || 160);
+  const map = { cmpBtn: 'cmpPanel', reviewBtn: 'reviewBar', certBtn: 'certPanel', noteBtn: 'noteBar' };
+  Object.keys(map).forEach(b => { const e = document.getElementById(b); if (e) e.addEventListener('click', () => reveal(map[b], b === 'certBtn' ? 600 : 160)); });
+  // pages added / workspace opens: keep the page where the user is (no jump) – only the compare toggle needs it
+})();
 </script>
 </body>
 </html>
