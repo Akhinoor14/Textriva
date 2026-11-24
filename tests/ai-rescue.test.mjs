@@ -76,3 +76,20 @@ test('sweep: a skipped (empty) page behind the reader and a garbage page are que
   assert.equal(P[4].text, '');
   assert.ok(calls.filter(isGen).length >= 2);
 });
+
+test('cut-off item at the page end: the next page head is sent (longer), the prompt allows finishing it, borrowed numbers are not "new numbers"', async () => {
+  const w = await bootApp(); const a = w.__app;
+  const P1 = 'প্রশ্ন ০৭। একটি বস্তুর ভর 5 kg। বল প্রয়োগ করলে ত্বরণ কত হবে?\n(a) 2 m/s²';
+  const P2 = '(b) 4 m/s²\n(c) 9 m/s²\n(d) 12 m/s²\nপ্রশ্ন ০৮। ' + 'ক'.repeat(2000);
+  const FIXED = 'প্রশ্ন ০৭। একটি বস্তুর ভর 5 kg। বল প্রয়োগ করলে ত্বরণ কত হবে?\n(a) 2 m/s²\n(b) 4 m/s²\n(c) 9 m/s²\n(d) 12 m/s²';
+  const calls = mock(w, () => reply(FIXED));
+  addPages(w, [P1, P2]); a.aiAddKey(KEY, 'k1', true);
+  const r = await a.aiFixPage(a.state.pages[0], { useImage: false, math: 'unicode' }, 'x');
+  assert.equal(r.after, FIXED);
+  assert.deepEqual(Array.from(r.flags.added), []);           // 4, 9, 12 came from the next page head → not flagged
+  assert.equal(r.reviewed, false); assert.equal(calls.filter(isGen).length, 1);
+  const b = JSON.parse(calls.filter(isGen)[0].init.body);
+  assert.match(b.systemInstruction.parts[0].text, /COMPLETING A CUT-OFF ITEM/);
+  const head = b.contents[0].parts.at(-1).text.match(/<next_page_head>\n([\s\S]*?)\n<\/next_page_head>/)[1];
+  assert.match(head, /\(b\) 4 m\/s²/); assert.ok(head.length > 1000 && head.length <= 1405);
+});

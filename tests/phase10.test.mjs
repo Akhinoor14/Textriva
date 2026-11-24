@@ -66,7 +66,7 @@ test('system prompt: calculation audit always on; neighbour-page rules only when
   const a = aiSystemPrompt({ math: 'latex' }, false, false), b = aiSystemPrompt({ math: 'latex' }, false, true);
   for (const p of [a, b]) { assert.match(p, /CALCULATIONS — VERIFY, NEVER SOLVE/); assert.match(p, /FINAL CHECKLIST/); assert.match(p, /1S0/); assert.match(p, /12 × 5 = 60/); }
   assert.doesNotMatch(a, /NEIGHBOURING PAGES/); assert.doesNotMatch(a, /previous_page_tail/);
-  assert.match(b, /NEIGHBOURING PAGES/); assert.match(b, /READ-ONLY/); assert.match(b, /NEVER copy, move or repeat text from a neighbour/);
+  assert.match(b, /NEIGHBOURING PAGES/); assert.match(b, /<previous_page_tail>/); assert.match(b, /COMPLETING A CUT-OFF ITEM/);
   assert.match(a, /never see the neighbouring pages/); assert.match(b, /read-only excerpt of the neighbouring pages/);
 });
 
@@ -509,7 +509,7 @@ test('wiring: menu button, CSP (all providers) and service-worker cache are upda
   assert.match(html, /id="aiFixBtn"/);
   const csp = readFileSync(new URL('../vercel.json', import.meta.url), 'utf8');
   for (const h of ['generativelanguage.googleapis.com', 'api.groq.com', 'openrouter.ai', 'api.mistral.ai', 'api.cerebras.ai']) assert.match(csp, new RegExp('connect-src[^"]*https://' + h.replace(/\./g, '\\.')), h);
-  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v33/);
+  assert.match(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), /textriva-v34/);
 });
 
 test('prompt carries the book-cleaning rules: markers, Sol→সমাধান, watermarks, no guessing, real examples, backslashes intact', async () => {
