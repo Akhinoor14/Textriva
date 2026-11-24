@@ -10,7 +10,7 @@ const source = getModuleSource();
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const names = ['BACKUP_FORMAT', 'DOCX_PAGE_BREAK', 'normNl', 'xmlEscape', 'xmlUnescape', 'buildMarkdown', 'buildProjectJson', 'parseProjectJson',
   'docxRuns', 'docxParagraph', 'buildDocxFiles', 'parseDocxPages', 'backupDirName', 'mimeForExt', 'imageExtFor', 'isImageName', 'naturalCompare',
-  'buildBackupZip', 'readBackupZip'];
+  'buildBackupZip', 'readBackupZip', 'MATH_RE', 'splitMath', 'textHasMath', 'docxHiddenRun', 'docxTextParas'];
 const decls = names.map(n => extractDeclaration(source, n)).join('\n');
 const F = new Function(`const aiTag = () => '';\n${decls}\nreturn { ${names.join(', ')} };`)();
 

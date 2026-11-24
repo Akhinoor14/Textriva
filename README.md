@@ -160,7 +160,9 @@ and the `isFresh`/`REMOTE_TTL` freshness window logic.
 ## ⬇ Export & import (Phase 5)
 
 **Export…** (action row) → choose format + layout (page-wise / merged) + page headings:
-`.docx` (Word; Bangla uses the complex-script font slot, Nirmala UI on Windows), **PDF** (opens the browser print dialog → *Save as PDF*, so Bangla conjuncts are shaped correctly), `.md`, `.txt` (existing format), `.json` (full project, no images), **Backup .zip** (project.json + text.txt + images). The dialog also has **Copy as Markdown**.
+`.docx` (Word; Bangla uses the complex-script font slot, Nirmala UI on Windows), **PDF** (opens the browser print dialog → *Save as PDF*, so Bangla conjuncts are shaped correctly), **Web page `.html`**, `.md`, `.txt` (existing format), `.json` (full project, no images), **Backup .zip** (project.json + text.txt + images). The dialog also has **Copy as Markdown**.
+
+**Equations in exports:** `$…$`, `$$…$$`, `\(…\)`, `\[…\]`, `\begin{…}` are typeset (same KaTeX as Read mode) in **PDF**, **`.docx`** (native, editable Word equations; a hidden copy of the `$…$` source lets a re-imported .docx get its LaTeX back; formulas KaTeX rejects stay as LaTeX text) and **`.html`** (one self-contained offline file, only the used KaTeX fonts embedded). `.md`, `.txt`, `.json` and the backup ZIP keep the LaTeX source. If KaTeX cannot load (first use offline) formulas stay as plain LaTeX with a toast.
 
 **Library → 📦 Export all (.zip)** backs up every local project; **📥 Import backup** restores them (works without Google). Imported projects are added as new Library projects.
 

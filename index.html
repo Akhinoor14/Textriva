@@ -7710,7 +7710,7 @@ function buildDocxFiles(title, pages, opts) {
   const body = [];
   if (title) body.push(docxParagraph(title, 'TextrivaTitle'));
   if (opts.cert) { normNl(opts.cert).split('\n').forEach(line => body.push(docxParagraph(line))); body.push(docxParagraph('')); }
-  const textParas = t => (normNl(t) === '' ? [] : normNl(t).split('\n').map(line => docxParagraph(line)));
+  const textParas = t => docxTextParas(t, opts);
   if (merged) {
     const texts = pages.map(p => normNl(p.text).trim()).filter(Boolean);
     texts.forEach((t, i) => { if (i) body.push(docxParagraph('')); body.push(...textParas(t)); });
@@ -7721,7 +7721,7 @@ function buildDocxFiles(title, pages, opts) {
       body.push(...textParas(p.text));
     });
   }
-  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"', M = 'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"';
   const H = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
   const styleP = (id, name, rpr, ppr) => '<w:style w:type="paragraph" w:styleId="' + id + '"><w:name w:val="' + name + '"/><w:basedOn w:val="Normal"/><w:qFormat/>' + (ppr ? '<w:pPr>' + ppr + '</w:pPr>' : '') + '<w:rPr>' + rpr + '</w:rPr></w:style>';
   return {
@@ -7733,7 +7733,7 @@ function buildDocxFiles(title, pages, opts) {
       + styleP('TextrivaTitle', 'Textriva Title', '<w:b/><w:bCs/><w:sz w:val="36"/><w:szCs w:val="36"/>', '<w:spacing w:after="240"/>')
       + styleP('TextrivaPageHeading', 'Textriva Page Heading', '<w:b/><w:bCs/><w:sz w:val="28"/><w:szCs w:val="28"/>', '<w:keepNext/>')
       + '</w:styles>',
-    'word/document.xml': H + '<w:document ' + W + '><w:body>' + body.join('') + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>',
+    'word/document.xml': H + '<w:document ' + W + ' ' + M + '><w:body>' + body.join('') + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>',
   };
 }
 
@@ -7749,6 +7749,7 @@ function parseDocxPages(xml) {
     const para = m[0];
     const st = /<w:pStyle\s+w:val="([^"]*)"/.exec(para);
     if (st && st[1].indexOf('Textriva') === 0) continue;
+    if (/<m:oMath/.test(para) && !/<w:t[\s>\/]/.test(para)) continue;   // a display equation: its hidden LaTeX copy sits in the paragraph before
     let buf = '', sawBreak = false, t;
     tokRe.lastIndex = 0;
     while ((t = tokRe.exec(para)) !== null) {
@@ -7766,6 +7767,189 @@ function parseDocxPages(xml) {
   }
   if (lines.length || pages.length === 0) endPage();
   return pages;
+}
+
+// ── Equations for Word: KaTeX MathML → OMML (native, editable Word equations) ──
+// (Pure: needs only a DOM Element tree of KaTeX's MathML; latexToOmml() is the browser glue.)
+const OMML_NARY = new Set(['∑', '∏', '∐', '∫', '∬', '∭', '∮', '∯', '∰', '⋃', '⋂', '⋁', '⋀', '⨁', '⨂', '⨀', '⨄', '⨆']);
+const OMML_INT = new Set(['∫', '∬', '∭', '∮', '∯', '∰']);
+const OMML_ACC = { '^': '\u0302', '\u02C6': '\u0302', '~': '\u0303', '\u02DC': '\u0303', '\u00AF': '\u0304', '\u02C9': '\u0304', '\u02D9': '\u0307', '\u00A8': '\u0308', '\u02C7': '\u030C', '\u00B4': '\u0301', '`': '\u0300', '\u2192': '\u20D7', '\u20D7': '\u20D7', '\u02D8': '\u0306' };
+const OMML_BREAK = /^[=≠<>≤≥≈≡∼+\-−±∓,;:→⇒⇔↔∈∉⊂⊆⊃⊇∝]$/;
+const OMML_OPEN = /^[\u0028\u005B\u007B\u27E8\u230A\u2308]$/;
+const OMML_CLOSE = /^[\u0029\u005D\u007D\u27E9\u230B\u2309]$/;
+const OMML_ALPHA = {
+  'double-struck': { A: 0x1D538, a: 0x1D552, d: 0x1D7D8, ex: { C: 'ℂ', H: 'ℍ', N: 'ℕ', P: 'ℙ', Q: 'ℚ', R: 'ℝ', Z: 'ℤ' } },
+  script: { A: 0x1D49C, a: 0x1D4B6, ex: { B: 'ℬ', E: 'ℰ', F: 'ℱ', H: 'ℋ', I: 'ℐ', L: 'ℒ', M: 'ℳ', R: 'ℛ', e: 'ℯ', g: 'ℊ', o: 'ℴ' } },
+  fraktur: { A: 0x1D504, a: 0x1D51E, ex: { C: 'ℭ', H: 'ℌ', I: 'ℑ', R: 'ℜ', Z: 'ℨ' } },
+};
+const ommKids = el => Array.from((el && el.children) || []);
+const ommTag = el => String((el && (el.localName || el.tagName)) || '').toLowerCase();
+const ommText = el => String((el && el.textContent) || '').replace(/[\u2061-\u2064]/g, '');
+function ommAlpha(text, variant) {
+  const m = OMML_ALPHA[variant];
+  if (!m) return text;
+  return Array.from(text).map(ch => {
+    if (m.ex[ch]) return m.ex[ch];
+    if (ch >= 'A' && ch <= 'Z') return String.fromCodePoint(m.A + ch.charCodeAt(0) - 65);
+    if (ch >= 'a' && ch <= 'z') return String.fromCodePoint(m.a + ch.charCodeAt(0) - 97);
+    if (m.d && ch >= '0' && ch <= '9') return String.fromCodePoint(m.d + ch.charCodeAt(0) - 48);
+    return ch;
+  }).join('');
+}
+// One math run. sty: p (upright) | b | bi | i | '' (Word's default: letters italic); nor = ordinary text inside an equation.
+function ommRun(text, sty, nor) {
+  if (!text) return '';
+  const pr = nor ? '<m:rPr><m:nor/></m:rPr>' : (sty ? '<m:rPr><m:sty m:val="' + sty + '"/></m:rPr>' : '');
+  const fo = nor ? '' : '<w:rPr><w:rFonts w:ascii="Cambria Math" w:hAnsi="Cambria Math"/></w:rPr>';
+  return '<m:r>' + pr + fo + '<m:t xml:space="preserve">' + xmlEscape(text) + '</m:t></m:r>';
+}
+function ommLeaf(el, tag) {
+  const raw = ommText(el);
+  if (tag === 'mtext') return ommRun(raw, '', true);
+  const v = el.getAttribute('mathvariant') || '';
+  if (tag === 'mo') return ommRun(raw, v === 'bold' ? 'b' : /[A-Za-z]{2,}/.test(raw) ? 'p' : '');
+  if (OMML_ALPHA[v]) return ommRun(ommAlpha(raw, v), 'p');
+  const sty = v === 'normal' ? 'p' : v === 'bold' ? 'b' : v === 'bold-italic' ? 'bi' : v === 'italic' ? 'i' : (tag === 'mi' && Array.from(raw).length > 1) ? 'p' : '';
+  return ommRun(raw, sty);
+}
+function ommArg(el) { return ommSeq(el ? [el] : []); }
+function ommIsBreak(el) { return ommTag(el) === 'mo' && OMML_BREAK.test(ommText(el).trim()); }
+function ommDelta(el) {
+  if (ommTag(el) !== 'mo') return 0;
+  const t = ommText(el).trim();
+  return OMML_OPEN.test(t) ? 1 : OMML_CLOSE.test(t) ? -1 : 0;
+}
+function ommNaryOf(el) {
+  const tag = ommTag(el), k = ommKids(el);
+  if (tag === 'mo') { const c = ommText(el).trim(); return OMML_NARY.has(c) ? { chr: c, sub: null, sup: null } : null; }
+  if (!k.length || ommTag(k[0]) !== 'mo' || !OMML_NARY.has(ommText(k[0]).trim())) return null;
+  const chr = ommText(k[0]).trim();
+  if (tag === 'msubsup' || tag === 'munderover') return { chr, sub: k[1], sup: k[2] };
+  if (tag === 'msub' || tag === 'munder') return { chr, sub: k[1], sup: null };
+  if (tag === 'msup' || tag === 'mover') return { chr, sub: null, sup: k[1] };
+  return null;
+}
+function ommNary(n, body) {
+  const hide = (n.sub ? '' : '<m:subHide m:val="1"/>') + (n.sup ? '' : '<m:supHide m:val="1"/>');
+  return '<m:nary><m:naryPr><m:chr m:val="' + xmlEscape(n.chr) + '"/><m:limLoc m:val="' + (OMML_INT.has(n.chr) ? 'subSup' : 'undOvr') + '"/>' + hide + '</m:naryPr>'
+    + '<m:sub>' + (n.sub ? ommArg(n.sub) : '') + '</m:sub><m:sup>' + (n.sup ? ommArg(n.sup) : '') + '</m:sup><m:e>' + body + '</m:e></m:nary>';
+}
+// A list of sibling MathML nodes. A big operator (∑ ∫ …) takes the terms after it as its operand, up to a top-level relation / + / −.
+function ommSeq(list) {
+  let out = '';
+  for (let i = 0; i < list.length; i++) {
+    const n = ommNaryOf(list[i]);
+    if (!n) { out += ommNode(list[i]); continue; }
+    const body = []; let depth = 0, j = i + 1;
+    for (; j < list.length; j++) {
+      if (depth <= 0 && ommIsBreak(list[j])) break;
+      const d = ommDelta(list[j]);
+      if (depth + d < 0) break;
+      depth += d; body.push(list[j]);
+    }
+    out += ommNary(n, ommSeq(body));
+    i = j - 1;
+  }
+  return out;
+}
+// \left( … \right) → delimiters (also matrices and cases, whose closing fence may be absent)
+function ommFenced(k) {
+  const isF = e => ommTag(e) === 'mo' && e.getAttribute('fence') === 'true';
+  if (k.length < 2 || !isF(k[0])) return null;
+  const closed = k.length > 2 && isF(k[k.length - 1]);
+  if (!closed && !(k.length === 2 && ommTag(k[1]) === 'mtable')) return null;
+  const inner = k.slice(1, closed ? -1 : undefined);
+  const fc = e => { const t = ommText(e); return t === '\u2223' ? '|' : t === '\u2225' ? '\u2016' : t; };   // KaTeX's vmatrix bars → Word's | and ‖
+  return '<m:d><m:dPr><m:begChr m:val="' + xmlEscape(fc(k[0])) + '"/><m:endChr m:val="' + (closed ? xmlEscape(fc(k[k.length - 1])) : '') + '"/></m:dPr><m:e>' + ommSeq(inner) + '</m:e></m:d>';
+}
+function ommTable(el) {
+  const rows = ommKids(el).filter(r => ommTag(r) === 'mtr').map(r => ommKids(r).filter(c => ommTag(c) === 'mtd').map(c => ommSeq(ommKids(c))));
+  const al = (el.getAttribute('columnalign') || '').trim();
+  if (/left|right/.test(al)) {   // aligned / cases → equation array
+    const gap = /^(left\s*)+$/.test(al) ? ommRun('\u2003', '') : '';
+    return '<m:eqArr>' + rows.map(r => '<m:e>' + r.join(gap) + '</m:e>').join('') + '</m:eqArr>';
+  }
+  return '<m:m>' + rows.map(r => '<m:mr>' + r.map(c => '<m:e>' + c + '</m:e>').join('') + '</m:mr>').join('') + '</m:m>';
+}
+function ommLimits(tag, k) {
+  const base = k[0];
+  const under = (tag === 'munder' || tag === 'munderover') ? k[1] : null;
+  const over = tag === 'mover' ? k[1] : tag === 'munderover' ? k[2] : null;
+  const oc = over && ommTag(over) === 'mo' ? ommText(over).trim() : '';
+  const uc = under && ommTag(under) === 'mo' ? ommText(under).trim() : '';
+  if (over && !under && oc) {
+    if (/^[\u203E\u2015]$/.test(oc)) return '<m:bar><m:barPr><m:pos m:val="top"/></m:barPr><m:e>' + ommArg(base) + '</m:e></m:bar>';
+    if (OMML_ACC[oc]) return '<m:acc><m:accPr><m:chr m:val="' + OMML_ACC[oc] + '"/></m:accPr><m:e>' + ommArg(base) + '</m:e></m:acc>';
+  }
+  if (under && !over && /^[\u203E\u2015_]$/.test(uc)) return '<m:bar><m:barPr><m:pos m:val="bot"/></m:barPr><m:e>' + ommArg(base) + '</m:e></m:bar>';
+  let inner = ommArg(base);
+  if (under) inner = '<m:limLow><m:e>' + inner + '</m:e><m:lim>' + ommArg(under) + '</m:lim></m:limLow>';
+  if (over) inner = '<m:limUpp><m:e>' + inner + '</m:e><m:lim>' + ommArg(over) + '</m:lim></m:limUpp>';
+  return inner;
+}
+function ommNode(el) {
+  const tag = ommTag(el), k = ommKids(el);
+  if (tag === 'mi' || tag === 'mn' || tag === 'mo' || tag === 'mtext') return ommLeaf(el, tag);
+  if (tag === 'mspace') { const w = parseFloat(el.getAttribute('width') || '0'); return w > 0 ? ommRun(w < 0.5 ? '\u2009' : '\u2003', '') : ''; }
+  if (tag === 'semantics') return ommSeq(k.filter(c => !/^annotation/.test(ommTag(c))).slice(0, 1));
+  if (tag === 'mrow') return ommFenced(k) || ommSeq(k);
+  if (tag === 'mfrac') {
+    const lt = el.getAttribute('linethickness');
+    return '<m:f>' + (lt != null && parseFloat(lt) === 0 ? '<m:fPr><m:type m:val="noBar"/></m:fPr>' : '') + '<m:num>' + ommArg(k[0]) + '</m:num><m:den>' + ommArg(k[1]) + '</m:den></m:f>';
+  }
+  if (tag === 'msqrt') return '<m:rad><m:radPr><m:degHide m:val="1"/></m:radPr><m:deg/><m:e>' + ommSeq(k) + '</m:e></m:rad>';
+  if (tag === 'mroot') return '<m:rad><m:deg>' + ommArg(k[1]) + '</m:deg><m:e>' + ommArg(k[0]) + '</m:e></m:rad>';
+  if (tag === 'msup') return '<m:sSup><m:e>' + ommArg(k[0]) + '</m:e><m:sup>' + ommArg(k[1]) + '</m:sup></m:sSup>';
+  if (tag === 'msub') return '<m:sSub><m:e>' + ommArg(k[0]) + '</m:e><m:sub>' + ommArg(k[1]) + '</m:sub></m:sSub>';
+  if (tag === 'msubsup') return '<m:sSubSup><m:e>' + ommArg(k[0]) + '</m:e><m:sub>' + ommArg(k[1]) + '</m:sub><m:sup>' + ommArg(k[2]) + '</m:sup></m:sSubSup>';
+  if (tag === 'munder' || tag === 'mover' || tag === 'munderover') return ommLimits(tag, k);
+  if (tag === 'mtable') return ommTable(el);
+  if (tag === 'mphantom') return '<m:phant><m:phantPr><m:show m:val="0"/></m:phantPr><m:e>' + ommSeq(k) + '</m:e></m:phant>';
+  if (tag === 'menclose' && /box/.test(el.getAttribute('notation') || '')) return '<m:borderBox><m:e>' + ommSeq(k) + '</m:e></m:borderBox>';
+  return k.length ? ommSeq(k) : ommRun(ommText(el), '');
+}
+// LaTeX → OMML string (the inside of <m:oMath>), or null when KaTeX rejects the formula.
+function latexToOmml(katex, tex, display) {
+  try {
+    const html = katex.renderToString(tex, { output: 'mathml', displayMode: !!display, throwOnError: true, strict: 'ignore', trust: false });
+    const math = new DOMParser().parseFromString(html, 'text/html').querySelector('math');
+    const out = math ? ommNode(math) : '';
+    return out || null;
+  } catch { return null; }
+}
+function textHasMath(s) { return splitMath(String(s == null ? '' : s)).some(p => p.k === 'm'); }
+// Hidden copy of the original $…$ source next to each equation, so a re-imported .docx gets its LaTeX back.
+const docxHiddenRun = raw => '<w:r><w:rPr><w:vanish/></w:rPr><w:t xml:space="preserve">' + xmlEscape(String(raw).replace(/\n/g, ' ')) + '</w:t></w:r>';
+// A page's text → paragraphs; $…$ / $$…$$ become real Word equations when opts.math(tex, display) returns OMML.
+function docxTextParas(text, opts) {
+  const t = normNl(text);
+  if (t === '') return [];
+  const plain = () => t.split('\n').map(line => docxParagraph(line));
+  const mathFn = opts && opts.math;
+  if (!mathFn || !textHasMath(t)) return plain();
+  const paras = []; let cur = '', skipNl = false;
+  const flush = () => { paras.push('<w:p>' + cur + '</w:p>'); cur = ''; };
+  const addText = s => {
+    const lines = s.split('\n');
+    lines.forEach((line, j) => {
+      if (j) { if (j === 1 && skipNl && lines[0] === '' && cur === '') { skipNl = false; } else flush(); }
+      cur += docxRuns(line);
+    });
+    if (s !== '') skipNl = false;
+  };
+  for (const p of splitMath(t)) {
+    if (p.k === 't') { addText(p.v); continue; }
+    const omml = mathFn(p.v, p.disp);
+    if (omml == null) { addText(p.raw); continue; }
+    if (p.disp) {
+      if (cur !== '') flush();
+      paras.push('<w:p><w:pPr><w:rPr><w:vanish/></w:rPr></w:pPr>' + docxHiddenRun(p.raw) + '</w:p>');
+      paras.push('<w:p><m:oMathPara><m:oMath>' + omml + '</m:oMath></m:oMathPara></w:p>');
+      skipNl = true;
+    } else { cur += '<m:oMath>' + omml + '</m:oMath>' + docxHiddenRun(p.raw); skipNl = false; }
+  }
+  if (cur !== '') flush();
+  return paras;
 }
 
 // ── Backup ZIP (manifest.json + one folder per project: project.json, text.txt, images/) ──
@@ -7856,30 +8040,101 @@ const exportBaseName = () => (state.sourceFileName || 'textriva').replace(/\.[^/
 const exportPages = () => state.pages.map(p => ({ name: p.name, text: p.text || '', status: p.status, txtOnly: !!p.txtOnly, ocr: p.ocr || null, flags: p.flags || [], reviewed: !!p.reviewed, hash: p.hash || null, phash: p.phash || null }));
 const exportMeta = () => ({ name: projectName(), sourceFileName: state.sourceFileName || '', createdAt: (state.proj && state.proj.createdAt) || Date.now(), updatedAt: Date.now() });
 
-async function printAsPdf(title, pages, opts) {
-  const label = L('পেজ', 'Page');
+// ── Rendered output (PDF print + standalone .html): same renderer as Read mode, so equations come out as real typeset math ──
+const RENDER_CSS = '@page{size:A4;margin:18mm}*{box-sizing:border-box}'
+  + "body{font-family:'Noto Sans Bengali','Noto Sans','Nirmala UI','Vrinda',system-ui,sans-serif;font-size:12pt;line-height:1.7;color:#000;background:#fff;margin:0 auto;max-width:48rem;padding:1rem}"
+  + '.pg{white-space:pre-wrap;word-wrap:break-word}section.pg+section.pg{border-top:1px solid #ccc;margin-top:1.5rem;padding-top:1rem}'
+  + '.cert{white-space:pre-wrap;border:1px solid #888;padding:8px 10px;font-size:10pt;margin:0 0 14px}h1{font-size:18pt}h2{font-size:13pt;margin:0 0 .5em}'
+  + '.katex{font-size:1.08em;white-space:normal}.katex-display{margin:.7em 0;padding:.15em 0;overflow-x:auto;overflow-y:hidden;break-inside:avoid}'
+  + '.rd-h{display:block;font-weight:700;font-size:1.12em;margin:.5em 0 .1em}.rd-tbl{border-collapse:collapse;margin:.5em 0;max-width:100%;white-space:normal}'
+  + '.rd-tbl td{border:1px solid #888;padding:.3em .6em;vertical-align:top}.rd-err{font-family:monospace;color:#555}'
+  + '@media print{body{max-width:none;padding:0}.br{break-after:page}.br:last-child{break-after:auto}section.pg+section.pg{border:0;margin:0;padding:0}.katex-display{overflow:visible}}';
+function buildRenderedBody(title, pages, opts, katex) {
+  const label = opts.pageLabel || 'Page';
   const items = pages.map((p, i) => ({ n: i + 1, name: p.name, text: normNl(p.text).trim() })).filter(x => x.text);
+  const rd = txt => renderReadHtml(txt, katex || null, 'html');
   const sections = opts.merged
-    ? `<div class="pg">${esc(items.map(x => x.text).join('\n\n'))}</div>`
-    : items.map(x => `<section class="pg br">${opts.headings ? `<h2>${esc(label + ' ' + x.n + (x.name ? ' — ' + x.name : ''))}</h2>` : ''}${esc(x.text)}</section>`).join('');
+    ? '<div class="pg">' + rd(items.map(x => x.text).join('\n\n')) + '</div>'
+    : items.map(x => '<section class="pg br">' + (opts.headings ? '<h2>' + esc(label + ' ' + x.n + (x.name ? ' — ' + x.name : '')) + '</h2>' : '') + rd(x.text) + '</section>').join('');
+  return '<h1>' + esc(title) + '</h1>' + (opts.cert ? '<pre class="cert">' + esc(opts.cert) + '</pre>' : '') + sections;
+}
+// Which KaTeX font files a rendered body really uses (a standalone .html embeds only those).
+function katexNeededFonts(html) {
+  const need = ['KaTeX_Main-Regular', 'KaTeX_Math-Italic', 'KaTeX_Size1-Regular', 'KaTeX_Size2-Regular', 'KaTeX_Size3-Regular', 'KaTeX_Size4-Regular'];
+  const add = (re, names) => { if (re.test(html)) names.forEach(n => need.push('KaTeX_' + n)); };
+  add(/mathbf|textbf|boldsymbol/, ['Main-Bold', 'Math-BoldItalic', 'Main-BoldItalic']);
+  add(/mathit|textit/, ['Main-Italic', 'Main-BoldItalic']);
+  add(/amsrm|mathbb/, ['AMS-Regular']);
+  add(/mathcal/, ['Caligraphic-Regular', 'Caligraphic-Bold']);
+  add(/mathfrak/, ['Fraktur-Regular', 'Fraktur-Bold']);
+  add(/mathscr/, ['Script-Regular']);
+  add(/mathsf|textsf/, ['SansSerif-Regular', 'SansSerif-Bold', 'SansSerif-Italic']);
+  add(/mathtt|texttt/, ['Typewriter-Regular']);
+  return Array.from(new Set(need));
+}
+// katex.min.css → only the needed @font-face blocks, each with its woff2 inlined as a data: URI (fonts: name → base64).
+function katexCssFor(css, fonts) {
+  return String(css).replace(/@font-face\s*\u007B[^\u007D]*\u007D/g, blk => {
+    const m = /url\(\s*['"]?(?:\.\/)?fonts\/(KaTeX_[\w-]+)\.woff2['"]?\s*\)/.exec(blk);
+    if (!m || !fonts[m[1]]) return '';
+    return blk.replace(/src:[^;\u007D]*/, 'src:url(data:font/woff2;base64,' + fonts[m[1]] + ') format("woff2")');
+  });
+}
+function buildStandaloneHtml(title, bodyHtml, css) {
+  return '<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(title) + '</title><style>' + css + '</style></head><body>' + bodyHtml + '</body></html>';
+}
+// KaTeX is needed only when some page has math; if it cannot load (first use while offline) the LaTeX stays as plain text.
+async function katexForPages(pages) {
+  if (!pages.some(p => textHasMath(p.text))) return null;
+  try { return await loadKatex(); } catch {
+    toast(L('Equation render করা গেল না (KaTeX load হয়নি) — LaTeX text হিসেবেই রাখা হলো', 'Could not typeset equations (KaTeX did not load) — kept as plain LaTeX text'), '', 5000);
+    return null;
+  }
+}
+async function fetchB64(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ' ' + r.status);
+  const u8 = new Uint8Array(await r.arrayBuffer());
+  let s = '';
+  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+async function buildExportHtml(title, pages, opts) {
+  const k = await katexForPages(pages);
+  const body = buildRenderedBody(title, pages, opts, k);
+  let katexCss = '';
+  if (k && /class="katex/.test(body)) {
+    try {
+      const css = await (await fetch('/assets/katex/katex.min.css')).text();
+      const fonts = {};
+      for (const n of katexNeededFonts(body)) { try { fonts[n] = await fetchB64('/assets/katex/fonts/' + n + '.woff2'); } catch {} }
+      katexCss = katexCssFor(css, fonts);
+    } catch {}
+  }
+  return buildStandaloneHtml(title, body, katexCss + RENDER_CSS);
+}
+
+async function printAsPdf(title, pages, opts) {
+  const k = await katexForPages(pages);
+  const body = buildRenderedBody(title, pages, { ...opts, pageLabel: L('পেজ', 'Page') }, k);
   const html = `<!doctype html><html lang="bn"><head><meta charset="utf-8"><title>${esc(title)}</title>`
     + `<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">`
-    + `<style>@page{size:A4;margin:18mm}body{font-family:'Noto Sans Bengali','Noto Sans','Nirmala UI','Vrinda',sans-serif;font-size:12pt;line-height:1.7;color:#000;background:#fff}`
-    + `.pg{white-space:pre-wrap;word-wrap:break-word}.br{break-after:page}.br:last-child{break-after:auto}.cert{white-space:pre-wrap;border:1px solid #888;padding:8px 10px;font-size:10pt;margin:0 0 14px}h1{font-size:18pt}h2{font-size:13pt;margin:0 0 .5em}</style></head>`
-    + `<body><h1>${esc(title)}</h1>${opts.cert ? `<pre class="cert">${esc(opts.cert)}</pre>` : ''}${sections}</body></html>`;
+    + (k ? `<link rel="stylesheet" href="${location.origin}/assets/katex/katex.min.css">` : '')
+    + `<style>${RENDER_CSS}</style></head><body>${body}</body></html>`;
   const f = document.createElement('iframe');
   f.setAttribute('aria-hidden', 'true');
   f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  const loaded = new Promise(r => { f.onload = r; });
   f.srcdoc = html;
   document.body.appendChild(f);
-  await new Promise(r => { f.onload = r; });
-  try { await f.contentWindow.document.fonts.ready; } catch {}
+  await loaded;
+  try { const d = f.contentWindow.document; void d.body.offsetHeight; await d.fonts.ready; await new Promise(r => setTimeout(r, 150)); await d.fonts.ready; } catch {}   // layout first, so the math fonts are really loaded before printing
   toast(L('Print window-এ "Save as PDF" বেছে নিন', 'In the print dialog choose "Save as PDF"'), 'ok', 5000);
   setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('❌ ' + e.message, 'err', 4000); } }, 250);
   setTimeout(() => f.remove(), 120000);
 }
 
-// fmt: txt | md | docx | pdf | json | zip
+// fmt: txt | md | docx | html | pdf | json | zip
 async function doExport(fmt, opts) {
   opts = Object.assign({}, opts, { cert: certBlock() });
   const pages = exportPages(), title = projectName(), base = exportBaseName();
@@ -7900,10 +8155,13 @@ async function doExport(fmt, opts) {
   } else if (fmt === 'docx') {
     const JSZip = await loadJSZip();
     const zip = new JSZip();
-    const files = buildDocxFiles(title, pages, { ...opts, pageLabel });
-    Object.keys(files).forEach(k => zip.file(k, files[k]));
+    const kx = await katexForPages(pages);   // equations → native Word equations (needs KaTeX); without it they stay as LaTeX text
+    const files = buildDocxFiles(title, pages, { ...opts, pageLabel, math: kx ? (tex, disp) => latexToOmml(kx, tex, disp) : null });
+    Object.keys(files).forEach(k => zip.file(k, files[k], { createFolders: false }));   // no folder entries: some cloud viewers refuse them
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
     downloadBlob(blob, base + '.docx');
+  } else if (fmt === 'html') {
+    downloadBlob(new Blob([await buildExportHtml(title, pages, { ...opts, pageLabel })], { type: 'text/html;charset=utf-8' }), base + '.html');
   } else if (fmt === 'zip') {
     const JSZip = await loadJSZip();
     const zip = new JSZip();
@@ -7926,13 +8184,15 @@ function openExportDlg() {
     <strong>⬇ ${L('Export', 'Export')}</strong>
     <div class="ex-row"><label for="exFmt">${L('Format', 'Format')}</label>
       <select id="exFmt">
-        <option value="docx">Word (.docx)</option>
-        <option value="pdf">PDF (${L('print → Save as PDF', 'print → Save as PDF')})</option>
+        <option value="docx">Word (.docx) — ${L('equation সহ', 'with equations')}</option>
+        <option value="pdf">PDF — ${L('equation সহ (print → Save as PDF)', 'with equations (print → Save as PDF)')}</option>
+        <option value="html">${L('Web page (.html) — equation সহ, offline খোলে', 'Web page (.html) — with equations, opens offline')}</option>
         <option value="md">Markdown (.md)</option>
         <option value="txt">${L('Text (.txt)', 'Text (.txt)')}</option>
         <option value="json">JSON (${L('পুরো project, ছবি ছাড়া', 'full project, no images')})</option>
         <option value="zip">${L('Backup (.zip, ছবি সহ)', 'Backup (.zip, with images)')}</option>
       </select></div>
+    <div class="ex-row" style="margin-top:-.2rem"><small style="color:var(--dim)">${L('Equation সুন্দর করে দেখায়: Word, PDF, HTML। .md / .txt / .json-এ LaTeX লেখা (যেমন $x^2$) থাকে।', 'Equations are typeset in Word, PDF and HTML. .md / .txt / .json keep the LaTeX source (e.g. $x^2$).')}</small></div>
     <div class="ex-row"><label for="exLayout">${L('Layout', 'Layout')}</label>
       <select id="exLayout">
         <option value="pages">${L('পেজ অনুযায়ী (page-wise)', 'Page-wise')}</option>
@@ -9523,16 +9783,19 @@ function formatBlocks(escText) {
   flush();
   return out.reduce((acc, b, k) => acc + (k && !b.startsWith('<table') && !out[k - 1].startsWith('<table') ? '\n' : '') + b, '');
 }
-function renderReadHtml(src, katex) {
-  const parts = splitMath(src), slots = [];
+function renderReadHtml(src, katex, out) {
+  const parts = splitMath(src), slots = [], shown = new Set();   // shown: slots that are real typeset display equations
   const skeleton = parts.map(p => {
     if (p.k === 't') return esc(p.v);
     let h;
     if (!katex) h = `<span class="rd-err">${esc(p.raw)}</span>`;
-    else { try { h = katex.renderToString(p.v, { displayMode: p.disp, throwOnError: false, strict: 'ignore', trust: false, output: 'htmlAndMathml' }); } catch { h = `<span class="rd-err">${esc(p.raw)}</span>`; } }
+    else { try { h = katex.renderToString(p.v, { displayMode: p.disp, throwOnError: false, strict: 'ignore', trust: false, output: out || 'htmlAndMathml' }); if (p.disp) shown.add(slots.length); } catch { h = `<span class="rd-err">${esc(p.raw)}</span>`; } }
     slots.push(h); return '\u0001' + (slots.length - 1) + '\u0002';
   }).join('');
-  return formatBlocks(skeleton).replace(/\u0001(\d+)\u0002/g, (_, n) => slots[+n]);
+  let html = formatBlocks(skeleton);
+  // PDF / .html output only: a display equation is its own block, so the line breaks typed around it would add empty lines
+  if (out) html = html.replace(/\n?\u0001(\d+)\u0002\n?/g, (m, n) => shown.has(+n) ? '\u0001' + n + '\u0002' : m);
+  return html.replace(/\u0001(\d+)\u0002/g, (_, n) => slots[+n]);
 }
 let readTimer = 0;
 async function refreshRead() {
