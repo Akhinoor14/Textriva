@@ -1537,6 +1537,38 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .action-row .btn { min-height: 38px; }
   .strip-wrap { margin-top: .4rem; }
 }
+
+/* ═══ Compact mobile panes: the must-have buttons stay in front, the rest live in a "⋯" menu ═══ */
+.more-dots { display: none; }
+.panel-hdr { position: relative; }
+.pane-menu { position: absolute; right: .35rem; top: calc(100% + 4px); z-index: 60; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem;
+  padding: .4rem; width: min(94vw, 320px); background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+.txt-nav { min-width: 34px; }
+@media (max-width: 640px) {
+  .more-dots { display: inline-flex; }
+  .workspace:not(.cmp-on) .pane-menu .btn, .workspace:not(.cmp-on) .pane-menu .btn-icon {
+    width: 100% !important; min-width: 0 !important; height: 42px !important; min-height: 42px; padding: 0 .65rem !important; font-size: .8rem !important; gap: .45rem;
+    justify-content: flex-start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: inherit; }
+  .pane-menu .ic-only::after { content: attr(data-mlabel); font-weight: 600; }
+  /* page-meta row is empty once its buttons moved into the menu */
+  .workspace:not(.cmp-on) .page-meta.moved { display: none; }
+  .workspace:not(.cmp-on) #noteBar { flex: 0 0 auto; }
+  /* TEXT pane header: one tidy row  [title] ◀ ▶ Paste Lens ⋯ */
+  .workspace:not(.cmp-on) .text-panel .panel-hdr { flex-wrap: nowrap; align-items: center; justify-content: space-between; padding: .25rem .35rem; gap: .25rem; }
+  .workspace:not(.cmp-on) .text-panel .panel-title { width: auto; flex: 1 1 auto; min-width: 0; font-size: .74rem; }
+  .workspace:not(.cmp-on) .text-panel .panel-hdr > div[style] { width: auto !important; display: flex !important; flex: 0 0 auto; gap: .25rem; grid-template-columns: none; }
+  .workspace:not(.cmp-on) .text-panel .panel-hdr > div[style] .btn, .workspace:not(.cmp-on) .text-panel .panel-hdr > div[style] .btn-icon {
+    width: auto; min-width: 38px; height: 38px; min-height: 38px; padding: 0 .55rem !important; font-size: .78rem !important; flex: none; }
+  .workspace:not(.cmp-on) #quickSaveBtn, .workspace:not(.cmp-on) #cmpBtn, .workspace:not(.cmp-on) #undoPageBtn, .workspace:not(.cmp-on) #redoPageBtn { /* shown only inside the menu (Save & Next sits at the bottom) */ }
+  .workspace:not(.cmp-on) #quickSaveBtn { display: none; }
+  /* IMAGE pane header: ◀ ▶ [go to #] ⋯ */
+  .workspace:not(.cmp-on) .preview-panel .panel-hdr > div[style] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .workspace:not(.cmp-on) #imgMoreBtn { order: 6; }
+  /* bottom bar: stats on the left, the big Save & Next on the right */
+  .workspace:not(.cmp-on) .txt-foot { grid-template-columns: 1fr auto; align-items: center; }
+  .workspace:not(.cmp-on) .txt-foot .txt-stats { grid-column: auto; }
+  .workspace:not(.cmp-on) .txt-foot #saveTxtBtn { min-width: 9.5rem; height: 40px; min-height: 40px; font-size: .84rem !important; padding: 0 1rem !important; }
+}
 </style>
 </head>
 <body>
@@ -1751,7 +1783,9 @@ html, body { max-width: 100%; overflow-x: hidden; }
           <input type="number" id="gotoPage" class="goto-input" min="1" inputmode="numeric" placeholder="Go to #" aria-label="Go to page number">
           <button class="btn-icon" id="prevPage" title="আগের পেজ">◀</button>
           <button class="btn-icon" id="nextPage" title="পরের পেজ">▶</button>
+          <button class="btn btn-secondary more-dots" id="imgMoreBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="আরও">⋯</button>
         </div>
+        <div class="pane-menu hidden" id="imgMenu" role="menu"></div>
       </div>
       <div class="preview-img-wrap" id="previewImgWrap">
         <div class="preview-empty"><div class="big"><svg class="ic ic-xl" aria-hidden="true"><use href="#i-image"/></svg></div><p id="previewEmptyTxt">কোনো পেজ select করুন</p></div>
@@ -1764,13 +1798,17 @@ html, body { max-width: 100%; overflow-x: hidden; }
       <div class="panel-hdr">
         <div class="panel-title"><span id="textTitleTxt">Text — পেজ</span> <b id="textPageNum">1</b></div>
         <div style="display:flex;gap:.4rem;align-items:center">
+          <button class="btn-icon txt-nav" id="txtPrevBtn" type="button" title="আগের পেজ" aria-label="আগের পেজ">◀</button>
+          <button class="btn-icon txt-nav" id="txtNextBtn" type="button" title="পরের পেজ" aria-label="পরের পেজ">▶</button>
           <button class="btn btn-secondary" id="cmpBtn" style="padding:.3rem .6rem;font-size:.72rem" title="Before / after fix — তুলনা" aria-label="Compare before and after fix">⇄ Diff</button>
           <button class="btn btn-secondary" id="undoPageBtn" style="padding:.3rem .6rem;font-size:.72rem" title="Undo (this page)" aria-label="Undo">↶</button>
           <button class="btn btn-secondary" id="redoPageBtn" style="padding:.3rem .6rem;font-size:.72rem" title="Redo (this page)" aria-label="Redo">↷</button>
           <button class="btn btn-secondary" id="pasteClipBtn" style="padding:.3rem .7rem;font-size:.72rem">Paste</button>
           <button class="btn btn-secondary" id="quickSaveBtn" style="padding:.3rem .65rem;font-size:.72rem" title="Save & Next" aria-label="Save & Next"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></button>
           <button class="btn btn-secondary" id="lensCurrentBtn" style="padding:.3rem .7rem;font-size:.72rem">Lens</button>
+          <button class="btn btn-secondary more-dots" id="txtMoreBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="আরও">⋯</button>
         </div>
+        <div class="pane-menu hidden" id="txtMenu" role="menu"></div>
       </div>
       <div id="reviewBar" class="hidden"></div>
       <div id="pageMetaBar" class="page-meta">
@@ -9533,6 +9571,46 @@ $('readFsDown').addEventListener('click', () => setReadFs(readState.fs - .1));
 $('readFsUp').addEventListener('click', () => setReadFs(readState.fs + .1));
 readView.addEventListener('dblclick', () => setReadMode('edit'));
 setReadFs(readState.fs); setReadMode(readState.mode, false);
+
+// ── Page navigation from the TEXT pane + mobile "⋯" menus (secondary buttons move in on phones, back out on desktop) ──
+$('txtPrevBtn').addEventListener('click', () => $('prevPage').click());
+$('txtNextBtn').addEventListener('click', () => $('nextPage').click());
+{
+  const mq = window.matchMedia('(max-width: 640px)');
+  const GROUPS = [
+    { menu: 'txtMenu', btn: 'txtMoreBtn', ids: ['cmpBtn', 'undoPageBtn', 'redoPageBtn', 'bookmarkBtn', 'noteBtn', 'bmListBtn', 'clearTxtBtn', 'cutTxtBtn'] },
+    { menu: 'imgMenu', btn: 'imgMoreBtn', ids: ['cutPageBtn', 'copyClipBtn'] },
+  ];
+  const ICON_ONLY = { undoPageBtn: ['পূর্বাবস্থা', 'Undo'], redoPageBtn: ['আবার করুন', 'Redo'], bookmarkBtn: ['Bookmark', 'Bookmark'], noteBtn: ['নোট', 'Note'], cutPageBtn: ['Page বাদ দিন', 'Remove page'], copyClipBtn: ['Copy', 'Copy'] };
+  const markers = new Map();
+  function place() {
+    const mob = mq.matches;
+    GROUPS.forEach(g => g.ids.forEach(id => {
+      const el = $(id); if (!el) return;
+      if (mob && !markers.has(id)) { const m = document.createComment(id); el.replaceWith(m); markers.set(id, m); $(g.menu).appendChild(el); }
+      else if (!mob && markers.has(id)) { markers.get(id).replaceWith(el); markers.delete(id); el.removeAttribute('data-mlabel'); el.classList.remove('ic-only'); }
+    }));
+    $('pageMetaBar').classList.toggle('moved', mob);
+    if (!mob) closeMenus();
+  }
+  function labelMenu(g) {
+    g.ids.forEach(id => { const el = $(id), l = ICON_ONLY[id]; if (el && l) { el.classList.add('ic-only'); el.setAttribute('data-mlabel', currentLang === 'en' ? l[1] : l[0]); } });
+  }
+  function closeMenus() { GROUPS.forEach(g => { $(g.menu).classList.add('hidden'); $(g.btn).setAttribute('aria-expanded', 'false'); }); }
+  GROUPS.forEach(g => {
+    $(g.btn).addEventListener('click', e => {
+      e.stopPropagation();
+      const open = $(g.menu).classList.contains('hidden');
+      closeMenus();
+      if (open) { labelMenu(g); $(g.menu).classList.remove('hidden'); $(g.btn).setAttribute('aria-expanded', 'true'); }
+    });
+    $(g.menu).addEventListener('click', e => { if (e.target.closest('button')) setTimeout(closeMenus, 0); });
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.pane-menu')) closeMenus(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenus(); });
+  (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
+  place();
+}
 
 textArea.addEventListener('input', () => {
   const pg = state.pages[state.current];

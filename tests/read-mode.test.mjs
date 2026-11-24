@@ -72,3 +72,9 @@ test('aiRepairMath fixes only broken formulas and refuses number changes', async
   const r3 = await kit(katex, () => reply(), Error)(text, { math: 'unicode' }, null, null);
   assert.equal(r3.text, text);
 });
+
+test('text pane has prev/next and mobile ⋯ menus wired', () => {
+  for (const id of ['txtPrevBtn', 'txtNextBtn', 'txtMoreBtn', 'txtMenu', 'imgMoreBtn', 'imgMenu']) assert.ok(html.includes(`id="${id}"`), id);
+  assert.match(src, /\$\('txtNextBtn'\)\.addEventListener\('click', \(\) => \$\('nextPage'\)\.click\(\)\)/);
+  assert.match(html, /ids: \['cmpBtn', 'undoPageBtn', 'redoPageBtn', 'bookmarkBtn', 'noteBtn', 'bmListBtn', 'clearTxtBtn', 'cutTxtBtn'\]/);
+});
