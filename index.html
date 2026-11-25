@@ -4515,6 +4515,46 @@ if (/[?&]shared=/.test(location.search)) {
   consumeSharedFiles().finally(() => { try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ } });
 }
 
+// ── Open from another site (KUETx "Open in Textriva"): ?src=<document url>&title=<name> ──
+// The server (/api/fetch-doc) downloads the file for us — no CORS, nothing saved on the user's disk —
+// and the bytes go through the normal handleFiles() flow (PDF → pages → background upload).
+// Only allow-listed hosts work (see api/_fetchdoc.js). `img=` is the old single-image alias.
+async function consumeRemoteSource() {
+  let src = '', title = '';
+  try {
+    const q = new URLSearchParams(location.search);
+    src = q.get('src') || q.get('img') || '';
+    title = q.get('title') || '';
+  } catch (e) { return 0; }
+  if (!src) return 0;
+  // Drop the params at once so a refresh never re-imports the same file.
+  try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+  try { if (sessionStorage.getItem('tx-remote-src') === src) return 0; sessionStorage.setItem('tx-remote-src', src); } catch (e) { /* ignore */ }
+  toast(L('KUETx থেকে ডকুমেন্ট আনা হচ্ছে…', 'Fetching the document from KUETx…'), '', 20000);
+  try {
+    const res = await fetch('/api/fetch-doc?' + qs({ url: src, title }), { cache: 'no-store' });
+    if (!res.ok) {
+      let why = ''; try { why = (await res.json()).error || ''; } catch (e) { /* not json */ }
+      throw new Error(why || ('HTTP ' + res.status));
+    }
+    const blob = await res.blob();
+    let name = title || 'document';
+    try { name = decodeURIComponent(res.headers.get('x-name') || '') || name; } catch (e) { /* keep */ }
+    const type = (blob.type || res.headers.get('content-type') || '').split(';')[0];
+    const isPdf = /pdf/i.test(type) || /\.pdf$/i.test(name) || /\.pdf(\?|$)/i.test(src);
+    if (isPdf && !/\.pdf$/i.test(name)) name += '.pdf';
+    const file = new File([blob], name, { type: isPdf ? 'application/pdf' : (type || 'application/octet-stream') });
+    toast(L('ডকুমেন্ট পাওয়া গেছে — পেজ তৈরি হচ্ছে', 'Document received — building pages'), 'ok', 2500);
+    await handleFiles([file]);
+    return 1;
+  } catch (err) {
+    try { sessionStorage.removeItem('tx-remote-src'); } catch (e) { /* ignore */ }
+    toast(L('❌ ডকুমেন্ট আনা যায়নি: ', '❌ Could not fetch the document: ') + (err && err.message || err), 'err', 6000);
+    return 0;
+  }
+}
+if (/[?&](src|img)=/.test(location.search) && !/[?&]shared=/.test(location.search)) consumeRemoteSource();
+
 // ── Camera capture: one photo → one page (appended) ──
 function scanName(i) { return 'scan-' + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14) + (i ? '-' + (i + 1) : '') + '.jpg'; }
 $('cameraBtn').onclick = () => $('cameraInput').click();
